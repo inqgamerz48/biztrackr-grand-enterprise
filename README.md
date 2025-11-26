@@ -71,4 +71,12 @@ Please refer to the **GRAND_PROOF.pdf** file for a comprehensive collection of s
 
 ## 📄 Documentation
 
-For detailed development logs, challenges faced, and phase completion reports, please refer to **DEVELOPMENT_LOGS.md**.
+- **[Deployment Guide](docs/DEPLOYMENT.md)**: Instructions for deploying to Cloud/Docker/Neon.
+- **[Development Logs](docs/DEVELOPMENT_LOGS.md)**: Detailed development history and challenges.
+- **[Grand Proofs](docs/GRAND_PROOF.pdf)**: Visual evidence of all features.
+
+---
+
+## ⚖️ License
+
+This project is licensed under the **BizTrackr Enterprise License**. See the **[LICENSE.md](LICENSE.md)** file for details.
