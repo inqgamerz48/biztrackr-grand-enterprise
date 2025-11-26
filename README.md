@@ -36,17 +36,6 @@ This will start:
 
 ---
 
-## 🔑 Demo Credentials
-
-**SaaS Web App**: http://localhost:3000
-
-| Role | Email | Password |
-|------|-------|----------|
-| **Admin** | admin@test.com | password123 |
-| **Manager** | manager@test.com | password123 |
-| **Cashier** | cashier@test.com | password123 |
-
----
 
 ## 🛠 Technology Stack
 
