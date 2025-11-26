@@ -5,25 +5,29 @@ from fastapi.middleware.gzip import GZipMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
+from fastapi.staticfiles import StaticFiles
+
 from app.core.config import settings
 from app.api.v1.router import api_router
 from app.core.database import engine, Base
 from app.core.ratelimit import limiter
-import app.models  # Register all models
+import app.models  # Ensure model registration
 
-from fastapi.staticfiles import StaticFiles
 
-# -------------------------
-# ✔ CREATE TABLES (DEV ONLY)
-# -------------------------
+# --------------------------------------------------
+# ✔ CREATE ALL TABLES (TEMP FOR PROD UNTIL MIGRATIONS)
+# --------------------------------------------------
+# Works for Docker + SQLite + PostgreSQL (Neon)
 try:
     Base.metadata.create_all(bind=engine)
+    print("📌 Database tables ensured.")
 except Exception as e:
-    print("DB INIT ERROR:", e)
+    print("❌ DB INIT ERROR:", e)
 
-# -------------------------
-# ✔ APP INIT
-# -------------------------
+
+# --------------------------------------------------
+# ✔ APP INITIALIZATION
+# --------------------------------------------------
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
@@ -31,9 +35,15 @@ app = FastAPI(
     redoc_url=None if settings.ENVIRONMENT == "production" else "/redoc",
 )
 
-# -------------------------
+
+# --------------------------------------------------
 # 🔥 GLOBAL CORS — FIXES ALL FRONTEND ERRORS
-# -------------------------
+# --------------------------------------------------
+# Works for:
+# - localhost:3000
+# - Docker
+# - Render URL
+# - Vercel frontend
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
@@ -43,38 +53,49 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-# -------------------------
-# ✔ SECURITY MIDDLEWARE
-# -------------------------
+
+# --------------------------------------------------
+# ✔ SECURITY MIDDLEWARE (KEEP UNDER CORS)
+# --------------------------------------------------
+# CAUTION: TrustedHostMiddleware *must* allow Render + Vercel hostnames
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=settings.ALLOWED_HOSTS
 )
+
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# -------------------------
+
+# --------------------------------------------------
 # ✔ RATE LIMITING
-# -------------------------
+# --------------------------------------------------
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# -------------------------
-# ✔ STATIC FILES (PDF, EXPORTS, ASSETS)
-# -------------------------
+
+# --------------------------------------------------
+# ✔ STATIC FILES (REPORTS, PDF, EXPORTED FILES)
+# --------------------------------------------------
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# -------------------------
+
+# --------------------------------------------------
 # ✔ API ROUTES
-# -------------------------
+# --------------------------------------------------
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# -------------------------
-# ✔ ROOT CHECK
-# -------------------------
+
+# --------------------------------------------------
+# ✔ HEALTH CHECK
+# --------------------------------------------------
 @app.get("/")
 def root():
     return {"message": "Welcome to BizTracker PRO SaaS API"}
 
+
+# --------------------------------------------------
+# ✔ EXECUTION ENTRY POINT (FOR RENDER)
+# --------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
     import os
