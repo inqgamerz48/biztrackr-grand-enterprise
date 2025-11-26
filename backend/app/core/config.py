@@ -32,7 +32,17 @@ class Settings(BaseSettings):
     PAYPAL_WEBHOOK_ID: str = ""
 
     # CORS / Hosts
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Any) -> Any:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
+
     ALLOWED_HOSTS: List[str] = ["*"]
 
     model_config = SettingsConfigDict(

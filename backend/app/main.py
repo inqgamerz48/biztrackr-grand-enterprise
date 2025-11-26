@@ -34,13 +34,14 @@ app = FastAPI(
 # -------------------------
 # 🔥 GLOBAL CORS — FIXES ALL FRONTEND ERRORS
 # -------------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],            # 👍 Works with Docker, Localhost, Prod
-    allow_credentials=True,         # Required for tokens
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if settings.BACKEND_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # -------------------------
 # ✔ SECURITY MIDDLEWARE
@@ -73,3 +74,9 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/")
 def root():
     return {"message": "Welcome to BizTracker PRO SaaS API"}
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.getenv("PORT", 10000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=settings.ENVIRONMENT == "development")
