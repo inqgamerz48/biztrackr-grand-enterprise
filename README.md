@@ -61,6 +61,7 @@ Please refer to the **GRAND_PROOF.pdf** file for a comprehensive collection of s
 ## 📄 Documentation
 
 - **[Deployment Guide](docs/DEPLOYMENT.md)**: Instructions for deploying to Cloud/Docker/Neon.
+- **[Hosting Recommendations](docs/HOSTING_RECOMMENDATIONS.md)**: Best platforms for Frontend/Backend.
 - **[Development Logs](docs/DEVELOPMENT_LOGS.md)**: Detailed development history and challenges.
 - **[Grand Proofs](docs/GRAND_PROOF.pdf)**: Visual evidence of all features.
 
