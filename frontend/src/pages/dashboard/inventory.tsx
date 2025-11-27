@@ -21,7 +21,7 @@ export default function InventoryPage() {
     const [bulkImportLoading, setBulkImportLoading] = useState(false);
 
     // Forms
-    const [newItem, setNewItem] = useState({ name: '', quantity: 0, selling_price: 0, category_id: '', image_url: '', min_stock: 5 });
+    const [newItem, setNewItem] = useState({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5 });
     const [editItem, setEditItem] = useState<any>(null);
     const [newCategory, setNewCategory] = useState({ name: '' });
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -74,7 +74,7 @@ export default function InventoryPage() {
             };
             await api.post('/inventory/', payload);
             setShowAddModal(false);
-            setNewItem({ name: '', quantity: 0, selling_price: 0, category_id: '', image_url: '', min_stock: 5 });
+            setNewItem({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5 });
             fetchData();
         } catch (error) {
             alert('Failed to add item');
@@ -183,7 +183,7 @@ export default function InventoryPage() {
     };
 
     const downloadTemplate = () => {
-        const csvContent = 'name,category,quantity,selling_price,min_stock\nLaptop Dell XPS 13,Electronics,10,75000,5\nMouse Logitech,Electronics,50,500,10\nOffice Chair,Furniture,20,5000,3';
+        const csvContent = 'name,category,quantity,purchase_price,selling_price,min_stock\nLaptop Dell XPS 13,Electronics,10,65000,75000,5\nMouse Logitech,Electronics,50,300,500,10\nOffice Chair,Furniture,20,3500,5000,3';
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -282,6 +282,18 @@ export default function InventoryPage() {
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
                                     value={newItem.min_stock}
                                     onChange={(e) => setNewItem({ ...newItem, min_stock: parseInt(e.target.value) })}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Purchase Price (₹)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    step="0.01"
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    value={newItem.purchase_price}
+                                    onChange={(e) => setNewItem({ ...newItem, purchase_price: parseFloat(e.target.value) })}
                                 />
                             </div>
 
@@ -388,6 +400,18 @@ export default function InventoryPage() {
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
                                     value={editItem.min_stock}
                                     onChange={(e) => setEditItem({ ...editItem, min_stock: parseInt(e.target.value) })}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Purchase Price (₹)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    step="0.01"
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    value={editItem.purchase_price}
+                                    onChange={(e) => setEditItem({ ...editItem, purchase_price: parseFloat(e.target.value) })}
                                 />
                             </div>
 

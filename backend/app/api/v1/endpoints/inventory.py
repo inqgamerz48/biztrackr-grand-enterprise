@@ -181,6 +181,7 @@ async def bulk_import_items(
                     'name': str(row['name']).strip(),
                     'quantity': int(row['quantity']),
                     'selling_price': float(row['selling_price']),
+                    'purchase_price': float(row['purchase_price']) if 'purchase_price' in df.columns and pd.notna(row['purchase_price']) else 0.0,
                     'category_id': category_id,
                     'min_stock': int(row['min_stock']) if 'min_stock' in df.columns and pd.notna(row['min_stock']) else 5,
                     'image_url': str(row['image_url']).strip() if 'image_url' in df.columns and pd.notna(row['image_url']) else None
