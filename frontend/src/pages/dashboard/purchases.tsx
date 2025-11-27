@@ -36,7 +36,7 @@ export default function PurchasesPage() {
             setCart([...cart, {
                 item_id: item.id,
                 name: item.name,
-                price: item.purchase_price || 0,
+                price: item.purchase_price || item.selling_price || 0,
                 quantity: 1
             }]);
         }
@@ -222,7 +222,9 @@ export default function PurchasesPage() {
                                 >
                                     <h3 className="font-bold text-gray-900">{item.name}</h3>
                                     <p className="text-sm text-gray-500">Current Stock: {item.quantity}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Last Price: ₹{(item.purchase_price || 0).toLocaleString('en-IN')}</p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        Price: ₹{(item.purchase_price || item.selling_price || 0).toLocaleString('en-IN')}
+                                    </p>
                                 </div>
                             ))}
                         </div>
