@@ -12,7 +12,8 @@ from app.api.v1.endpoints import (
     billing,
     notifications,
     dashboard,
-    payment_requests
+    payment_requests,
+    seed
 )
 
 api_router = APIRouter()
@@ -30,3 +31,4 @@ api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(payment_requests.router, prefix="/payment-requests", tags=["payment-requests"])
+api_router.include_router(seed.router, prefix="/seed", tags=["seed"])
