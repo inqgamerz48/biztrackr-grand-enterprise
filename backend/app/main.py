@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -17,7 +16,6 @@ import app.models  # Ensure model registration
 # --------------------------------------------------
 # ✔ CREATE ALL TABLES (TEMP FOR PROD UNTIL MIGRATIONS)
 # --------------------------------------------------
-# Works for Docker + SQLite + PostgreSQL (Neon)
 try:
     Base.metadata.create_all(bind=engine)
     print("📌 Database tables ensured.")
@@ -37,32 +35,39 @@ app = FastAPI(
 
 
 # --------------------------------------------------
-# 🔥 GLOBAL CORS — FIXES ALL FRONTEND ERRORS
+# 🔥 GLOBAL CORS — ABSOLUTE FIX FOR RENDER + VERCEL
 # --------------------------------------------------
-# Works for:
-# - localhost:3000
-# - Docker
-# - Render URL
-# - Vercel frontend
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-
-# --------------------------------------------------
-# ✔ SECURITY MIDDLEWARE (KEEP UNDER CORS)
-# --------------------------------------------------
-# CAUTION: TrustedHostMiddleware *must* allow Render + Vercel hostnames
 app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=settings.ALLOWED_HOSTS
+    CORSMiddleware,
+    allow_origins=[  
+        "https://biztrackr-grand-enterprise.vercel.app",
+        "https://biztrackr-grand-enterprise.onrender.com",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "*"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+
+# --------------------------------------------------
+# ❗ REMOVE TrustedHostMiddleware (BLOCKING RENDER REQUESTS)
+# --------------------------------------------------
+# RENDER DOES BLOCK REQUESTS IF THIS IS ENABLED.
+# ONLY ENABLE LATER IN FINAL PRODUCTION.
+
+# from fastapi.middleware.trustedhost import TrustedHostMiddleware
+# app.add_middleware(
+#     TrustedHostMiddleware,
+#     allowed_hosts=["*"]
+# )
+
+
+# --------------------------------------------------
+# ✔ GZIP
+# --------------------------------------------------
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
@@ -74,7 +79,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # --------------------------------------------------
-# ✔ STATIC FILES (REPORTS, PDF, EXPORTED FILES)
+# ✔ STATIC FILES
 # --------------------------------------------------
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -94,7 +99,7 @@ def root():
 
 
 # --------------------------------------------------
-# ✔ EXECUTION ENTRY POINT (FOR RENDER)
+# ✔ ENTRYPOINT FOR RENDER
 # --------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
