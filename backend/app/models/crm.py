@@ -15,6 +15,7 @@ class Customer(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id"))
     tenant = relationship("Tenant", back_populates="customers")
     sales = relationship("Sale", back_populates="customer")
+    payments = relationship("Payment", back_populates="customer")
 
 class Supplier(Base):
     __tablename__ = "suppliers"
@@ -30,3 +31,4 @@ class Supplier(Base):
     tenant = relationship("Tenant", back_populates="suppliers")
     items = relationship("InventoryItem", back_populates="supplier")
     purchases = relationship("Purchase", back_populates="supplier")
+    payments = relationship("Payment", back_populates="supplier")

@@ -8,5 +8,6 @@ from .purchase import Purchase, PurchaseItem
 from .notification import Notification
 from .security import SecurityEvent, BlockedIP as IPBlacklist
 from .payment_request import PaymentRequest
+from .payment import Payment
 from .settings import Settings
 

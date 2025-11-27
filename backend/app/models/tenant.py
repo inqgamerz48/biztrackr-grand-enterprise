@@ -18,3 +18,4 @@ class Tenant(Base):
     customers = relationship("Customer", back_populates="tenant")
     suppliers = relationship("Supplier", back_populates="tenant")
     expenses = relationship("Expense", back_populates="tenant")
+    payments = relationship("Payment", back_populates="tenant")

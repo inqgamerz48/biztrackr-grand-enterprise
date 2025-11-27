@@ -15,6 +15,16 @@ export default function CRMPage() {
     const [editingItem, setEditingItem] = useState<any>(null);
     const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '' });
 
+    // Payment Form State
+    const [showPaymentForm, setShowPaymentForm] = useState(false);
+    const [currentLedgerId, setCurrentLedgerId] = useState<number | null>(null);
+    const [paymentData, setPaymentData] = useState({
+        amount: '',
+        payment_method: 'Cash',
+        reference_number: '',
+        notes: ''
+    });
+
     const fetchData = async () => {
         if (activeTab === 'customers') {
             const [res, topRes] = await Promise.all([
@@ -80,14 +90,48 @@ export default function CRMPage() {
     };
 
     const viewLedger = async (id: number, name: string) => {
+        setCurrentLedgerId(id);
         const endpoint = activeTab === 'customers' ? `/crm/customers/${id}/ledger` : `/crm/suppliers/${id}/ledger`;
         try {
             const res = await api.get(endpoint);
             setLedgerData(res.data);
             setLedgerTitle(`${name} - Transaction History`);
             setShowLedgerModal(true);
+            setShowPaymentForm(false); // Reset form visibility
         } catch (error) {
             alert('Failed to load ledger');
+        }
+    };
+
+    const handlePaymentSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!currentLedgerId) return;
+
+        const endpoint = activeTab === 'customers'
+            ? `/crm/customers/${currentLedgerId}/payments`
+            : `/crm/suppliers/${currentLedgerId}/payments`;
+
+        try {
+            await api.post(endpoint, {
+                ...paymentData,
+                amount: parseFloat(paymentData.amount)
+            });
+
+            // Refresh Ledger
+            const ledgerRes = await api.get(activeTab === 'customers' ? `/crm/customers/${currentLedgerId}/ledger` : `/crm/suppliers/${currentLedgerId}/ledger`);
+            setLedgerData(ledgerRes.data);
+
+            // Reset Form
+            setPaymentData({
+                amount: '',
+                payment_method: 'Cash',
+                reference_number: '',
+                notes: ''
+            });
+            setShowPaymentForm(false);
+            fetchData(); // Refresh main list to update balances if shown
+        } catch (error) {
+            alert('Failed to record payment');
         }
     };
 
@@ -154,28 +198,88 @@ export default function CRMPage() {
             {/* Ledger Modal */}
             {showLedgerModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-[700px] max-h-[80vh] overflow-y-auto">
-                        <h2 className="text-xl font-bold mb-4">{ledgerTitle}</h2>
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-[900px] max-h-[80vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">{ledgerTitle}</h2>
+                            <button
+                                onClick={() => setShowPaymentForm(!showPaymentForm)}
+                                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                            >
+                                {showPaymentForm ? 'Cancel Payment' : 'Record Payment'}
+                            </button>
+                        </div>
+
+                        {showPaymentForm && (
+                            <div className="mb-6 bg-gray-50 p-4 rounded border">
+                                <h3 className="text-sm font-semibold mb-2">Record New Payment</h3>
+                                <form onSubmit={handlePaymentSubmit} className="grid grid-cols-2 gap-4">
+                                    <input
+                                        type="number"
+                                        placeholder="Amount"
+                                        required
+                                        className="border p-2 rounded"
+                                        value={paymentData.amount}
+                                        onChange={(e) => setPaymentData({ ...paymentData, amount: e.target.value })}
+                                    />
+                                    <select
+                                        className="border p-2 rounded"
+                                        value={paymentData.payment_method}
+                                        onChange={(e) => setPaymentData({ ...paymentData, payment_method: e.target.value })}
+                                    >
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="Check">Check</option>
+                                        <option value="UPI">UPI</option>
+                                    </select>
+                                    <input
+                                        placeholder="Reference Number"
+                                        className="border p-2 rounded"
+                                        value={paymentData.reference_number}
+                                        onChange={(e) => setPaymentData({ ...paymentData, reference_number: e.target.value })}
+                                    />
+                                    <input
+                                        placeholder="Notes"
+                                        className="border p-2 rounded"
+                                        value={paymentData.notes}
+                                        onChange={(e) => setPaymentData({ ...paymentData, notes: e.target.value })}
+                                    />
+                                    <div className="col-span-2 flex justify-end">
+                                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                                            Save Payment
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+
                         {ledgerData.length === 0 ? (
                             <p className="text-gray-500 text-center py-8">No transactions found</p>
                         ) : (
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
                                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Debit</th>
+                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Credit</th>
+                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Balance</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {ledgerData.map((txn) => (
-                                        <tr key={txn.id}>
-                                            <td className="px-4 py-2 text-sm text-gray-900">{txn.invoice_number}</td>
+                                        <tr key={`${txn.type}-${txn.id}`}>
                                             <td className="px-4 py-2 text-sm text-gray-500">
                                                 {new Date(txn.date).toLocaleDateString('en-IN')}
                                             </td>
-                                            <td className="px-4 py-2 text-sm text-right font-semibold text-gray-900">
-                                                ₹{txn.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                            <td className="px-4 py-2 text-sm text-gray-900">{txn.description}</td>
+                                            <td className="px-4 py-2 text-sm text-right text-red-600">
+                                                {txn.debit > 0 ? `₹${txn.debit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm text-right text-green-600">
+                                                {txn.credit > 0 ? `₹${txn.credit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm text-right font-bold text-gray-900">
+                                                ₹{txn.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                             </td>
                                         </tr>
                                     ))}

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.models import Customer, Supplier, Sale, Purchase
+from app.models import Customer, Supplier, Sale, Purchase, Payment
 from pydantic import BaseModel
 
 class CustomerCreate(BaseModel):
@@ -67,22 +67,55 @@ def delete_customer(db: Session, customer_id: int, tenant_id: int):
     return True
 
 def get_customer_ledger(db: Session, customer_id: int, tenant_id: int):
-    """Get all sales transactions for a customer"""
+    """Get all sales and payments for a customer with running balance"""
     sales = db.query(Sale).filter(
         Sale.customer_id == customer_id,
         Sale.tenant_id == tenant_id
-    ).order_by(Sale.date.desc()).all()
+    ).all()
     
-    return [
-        {
+    payments = db.query(Payment).filter(
+        Payment.customer_id == customer_id,
+        Payment.tenant_id == tenant_id
+    ).all()
+    
+    # Combine and Sort
+    transactions = []
+    for sale in sales:
+        transactions.append({
             "id": sale.id,
-            "invoice_number": sale.invoice_number,
-            "date": sale.date.isoformat(),
-            "total_amount": sale.total_amount,
-            "payment_method": sale.payment_method
-        }
-        for sale in sales
-    ]
+            "type": "SALE",
+            "date": sale.date,
+            "description": f"Invoice #{sale.invoice_number}",
+            "debit": sale.total_amount, # Increase in debt
+            "credit": 0.0,
+            "ref_id": sale.id
+        })
+        
+    for payment in payments:
+        transactions.append({
+            "id": payment.id,
+            "type": "PAYMENT",
+            "date": payment.date,
+            "description": f"Payment ({payment.payment_method})",
+            "debit": 0.0,
+            "credit": payment.amount, # Decrease in debt
+            "ref_id": payment.id
+        })
+        
+    transactions.sort(key=lambda x: x['date'])
+    
+    # Calculate Running Balance
+    balance = 0.0
+    result = []
+    for txn in transactions:
+        balance += txn['debit'] - txn['credit']
+        result.append({
+            **txn,
+            "date": txn['date'].isoformat(),
+            "balance": balance
+        })
+        
+    return result
 
 def get_top_customers(db: Session, tenant_id: int, limit: int = 10):
     """Get top customers by total sales"""
@@ -151,22 +184,55 @@ def delete_supplier(db: Session, supplier_id: int, tenant_id: int):
     return True
 
 def get_supplier_ledger(db: Session, supplier_id: int, tenant_id: int):
-    """Get all purchase transactions from a supplier"""
+    """Get all purchases and payments for a supplier with running balance"""
     purchases = db.query(Purchase).filter(
         Purchase.supplier_id == supplier_id,
         Purchase.tenant_id == tenant_id
-    ).order_by(Purchase.date.desc()).all()
+    ).all()
     
-    return [
-        {
+    payments = db.query(Payment).filter(
+        Payment.supplier_id == supplier_id,
+        Payment.tenant_id == tenant_id
+    ).all()
+    
+    # Combine and Sort
+    transactions = []
+    for purchase in purchases:
+        transactions.append({
             "id": purchase.id,
-            "invoice_number": purchase.invoice_number,
-            "date": purchase.date.isoformat(),
-            "total_amount": purchase.total_amount,
-            "transport_charges": purchase.transport_charges
-        }
-        for purchase in purchases
-    ]
+            "type": "PURCHASE",
+            "date": purchase.date,
+            "description": f"Invoice #{purchase.invoice_number}",
+            "debit": 0.0,
+            "credit": purchase.total_amount, # Increase in debt (payable)
+            "ref_id": purchase.id
+        })
+        
+    for payment in payments:
+        transactions.append({
+            "id": payment.id,
+            "type": "PAYMENT",
+            "date": payment.date,
+            "description": f"Payment ({payment.payment_method})",
+            "debit": payment.amount, # Decrease in debt (payable)
+            "credit": 0.0,
+            "ref_id": payment.id
+        })
+        
+    transactions.sort(key=lambda x: x['date'])
+    
+    # Calculate Running Balance
+    balance = 0.0
+    result = []
+    for txn in transactions:
+        balance += txn['credit'] - txn['debit'] # Credit increases balance (payable), Debit decreases it
+        result.append({
+            **txn,
+            "date": txn['date'].isoformat(),
+            "balance": balance
+        })
+        
+    return result
 
 def get_top_suppliers(db: Session, tenant_id: int, limit: int = 10):
     """Get top suppliers by total purchase volume"""

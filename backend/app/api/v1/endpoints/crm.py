@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core import database
-from app.services import crm_service
+from app.services import crm_service, payment_service
 from app.api.dependencies import require_manager_or_above
 from app.models import User
 
@@ -76,6 +76,17 @@ def get_top_customers(
     """Get top customers by sales volume"""
     return crm_service.get_top_customers(db, current_user.tenant_id, limit)
 
+@router.post("/customers/{customer_id}/payments")
+def create_customer_payment(
+    customer_id: int,
+    payment: payment_service.PaymentCreate,
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(require_manager_or_above),
+):
+    payment.customer_id = customer_id
+    return payment_service.create_payment(db, payment, current_user.tenant_id)
+
+
 # Supplier Endpoints
 @router.post("/suppliers")
 def create_supplier(
@@ -143,3 +154,14 @@ def get_top_suppliers(
 ):
     """Get top suppliers by purchase volume"""
     return crm_service.get_top_suppliers(db, current_user.tenant_id, limit)
+
+@router.post("/suppliers/{supplier_id}/payments")
+def create_supplier_payment(
+    supplier_id: int,
+    payment: payment_service.PaymentCreate,
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(require_manager_or_above),
+):
+    payment.supplier_id = supplier_id
+    return payment_service.create_payment(db, payment, current_user.tenant_id)
+
