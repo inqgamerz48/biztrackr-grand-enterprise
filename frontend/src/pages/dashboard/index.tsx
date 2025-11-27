@@ -65,12 +65,16 @@ export default function DashboardPage() {
                         <p className="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
                     </div>
                     <div className="flex gap-3">
-                        <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium hover:bg-slate-50 transition-colors shadow-sm">
-                            Export Report
-                        </button>
-                        <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
-                            New Sale
-                        </button>
+                        <Link href="/dashboard/reports">
+                            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium hover:bg-slate-50 transition-colors shadow-sm">
+                                Export Report
+                            </button>
+                        </Link>
+                        <Link href="/dashboard/sales">
+                            <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
+                                New Sale
+                            </button>
+                        </Link>
                     </div>
                 </div>
 
@@ -163,9 +167,11 @@ export default function DashboardPage() {
                             <Sparkles className="w-5 h-5 text-indigo-600" />
                             Detailed AI Insights
                         </h2>
-                        <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                            View All
-                        </button>
+                        <Link href="/dashboard/reports">
+                            <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                                View All
+                            </button>
+                        </Link>
                     </div>
                     <div className="divide-y divide-slate-100">
                         {loading ? (
