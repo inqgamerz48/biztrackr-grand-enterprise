@@ -21,6 +21,11 @@ import app.models  # Ensure model registration
 try:
     Base.metadata.create_all(bind=engine)
     print("📌 Database tables ensured.")
+    
+    # Run Social Auth Migration
+    from migrate_social_auth import migrate_social_auth
+    migrate_social_auth()
+    
 except Exception as e:
     print("❌ DB INIT ERROR:", e)
 
