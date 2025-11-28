@@ -5,9 +5,9 @@ import { useRouter } from 'next/router';
 
 interface Tenant {
     id: number;
-    name: str;
-    plan: str;
-    subscription_status: str;
+    name: string;
+    plan: string;
+    subscription_status: string;
     created_at: string;
     user_count: number;
 }
