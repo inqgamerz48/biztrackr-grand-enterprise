@@ -98,7 +98,8 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int):
         supplier_id=purchase_in.supplier_id,
         total_amount=total_amount,
         transport_charges=purchase_in.transport_charges,
-        tenant_id=tenant_id
+        tenant_id=tenant_id,
+        status="Ordered"
     )
     db.add(new_purchase)
     db.flush()
@@ -117,14 +118,32 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int):
         )
         db.add(new_p_item)
         
-        # Increase Stock
-        db_item.quantity += item_data['quantity']
-        db_item.purchase_price = item_data['price']
-
-    supplier = db.query(Supplier).filter(Supplier.id == purchase_in.supplier_id, Supplier.tenant_id == tenant_id).first()
-    if supplier:
-        supplier.outstanding_balance += total_amount
+        # NOTE: Stock is NOT updated here anymore. It happens on "Receive".
 
     db.commit()
     db.refresh(new_purchase)
     return new_purchase
+
+def receive_purchase(db: Session, purchase_id: int, tenant_id: int):
+    purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id).first()
+    if not purchase:
+        return None
+    
+    if purchase.status == "Received":
+        return purchase # Already received
+        
+    # Update Stock
+    for p_item in purchase.items:
+        db_item = db.query(Item).filter(Item.id == p_item.item_id).first()
+        if db_item:
+            db_item.quantity += p_item.quantity
+            db_item.purchase_price = p_item.price
+            
+    # Update Supplier Balance
+    if purchase.supplier:
+        purchase.supplier.outstanding_balance += purchase.total_amount
+        
+    purchase.status = "Received"
+    db.commit()
+    db.refresh(purchase)
+    return purchase

@@ -49,14 +49,7 @@ export default function SettingsPage() {
         }
     };
 
-    const handleSubscribe = async (plan: string) => {
-        try {
-            const res = await api.post(`/billing/create-checkout-session?plan=${plan}`);
-            window.location.href = res.data.url;
-        } catch (error) {
-            alert('Failed to initiate checkout');
-        }
-    };
+
 
     return (
         <DashboardLayout>
@@ -134,61 +127,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Subscription Plans */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">Subscription Plans</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">Upgrade your plan to unlock more features.</p>
-                    </div>
-                    <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 p-6">
-                            {/* Free Plan */}
-                            <div className="border rounded-lg p-6 text-center">
-                                <h4 className="text-xl font-bold">Free</h4>
-                                <p className="text-gray-500 mt-2">$0/mo</p>
-                                <ul className="mt-4 text-sm text-left space-y-2">
-                                    <li>✓ 100 Items</li>
-                                    <li>✓ Basic Reports</li>
-                                </ul>
-                                <button className="mt-6 w-full bg-gray-100 text-gray-800 py-2 rounded" disabled>Current Plan</button>
-                            </div>
 
-                            {/* Starter Plan */}
-                            <div className="border rounded-lg p-6 text-center border-indigo-500 ring-1 ring-indigo-500">
-                                <h4 className="text-xl font-bold">Starter</h4>
-                                <p className="text-gray-500 mt-2">$29/mo</p>
-                                <ul className="mt-4 text-sm text-left space-y-2">
-                                    <li>✓ Unlimited Items</li>
-                                    <li>✓ PDF Invoices</li>
-                                    <li>✓ Email Support</li>
-                                </ul>
-                                <button
-                                    onClick={() => handleSubscribe('starter')}
-                                    className="mt-6 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
-                                >
-                                    Upgrade
-                                </button>
-                            </div>
-
-                            {/* Pro Plan */}
-                            <div className="border rounded-lg p-6 text-center">
-                                <h4 className="text-xl font-bold">Pro</h4>
-                                <p className="text-gray-500 mt-2">$99/mo</p>
-                                <ul className="mt-4 text-sm text-left space-y-2">
-                                    <li>✓ Everything in Starter</li>
-                                    <li>✓ AI Insights</li>
-                                    <li>✓ API Access</li>
-                                </ul>
-                                <button
-                                    onClick={() => handleSubscribe('pro')}
-                                    className="mt-6 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
-                                >
-                                    Upgrade
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </DashboardLayout>
     );

@@ -4,7 +4,9 @@ Handles PayPal checkout, order creation, and webhook processing.
 """
 import os
 import paypalrestsdk
+from sqlalchemy.orm import Session
 from app.core.config import settings
+from app.models.tenant import Tenant
 
 # Configure PayPal SDK
 paypalrestsdk.configure({
@@ -73,11 +75,12 @@ def create_paypal_order(tenant_id: int, plan_type: str, amount: float):
         return None
 
 
-def capture_paypal_payment(payment_id: str, payer_id: str):
+def capture_paypal_payment(db: Session, payment_id: str, payer_id: str):
     """
     Execute a PayPal payment after user approval.
     
     Args:
+        db: Database session
         payment_id: PayPal payment ID
         payer_id: PayPal payer ID from redirect
         
@@ -90,6 +93,19 @@ def capture_paypal_payment(payment_id: str, payer_id: str):
         if payment.execute({"payer_id": payer_id}):
             # Extract tenant_id from custom field
             tenant_id = payment.transactions[0].custom if payment.transactions else None
+            
+            if tenant_id:
+                tenant = db.query(Tenant).filter(Tenant.id == int(tenant_id)).first()
+                if tenant:
+                    # Determine plan from SKU or description
+                    sku = payment.transactions[0].item_list.items[0].sku
+                    plan = sku.replace("plan_", "") if sku else "pro"
+                    
+                    tenant.plan = plan
+                    tenant.subscription_status = "active"
+                    # For PayPal, we might store payer_id as subscription_id or similar
+                    tenant.subscription_id = f"paypal_{payment_id}"
+                    db.commit()
             
             return {
                 "status": "completed",
@@ -107,11 +123,12 @@ def capture_paypal_payment(payment_id: str, payer_id: str):
         return None
 
 
-def handle_paypal_webhook(payload: dict, headers: dict):
+def handle_paypal_webhook(db: Session, payload: dict, headers: dict):
     """
     Handle PayPal webhook events.
     
     Args:
+        db: Database session
         payload: Webhook payload
         headers: Request headers for verification
         
@@ -126,8 +143,12 @@ def handle_paypal_webhook(payload: dict, headers: dict):
             resource = payload.get('resource', {})
             custom_id = resource.get('custom')
             
-            # TODO: Update tenant subscription status in database
-            print(f"Payment completed for tenant: {custom_id}")
+            if custom_id:
+                tenant = db.query(Tenant).filter(Tenant.id == int(custom_id)).first()
+                if tenant:
+                    tenant.subscription_status = "active"
+                    db.commit()
+                    print(f"Payment completed for tenant: {custom_id}")
             return True
             
         elif event_type == 'PAYMENT.SALE.DENIED':

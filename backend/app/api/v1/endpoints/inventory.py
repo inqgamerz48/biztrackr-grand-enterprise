@@ -8,7 +8,8 @@ from app.schemas import category as cat_schemas
 import shutil
 import uuid
 import os
-from app.models import User
+from app.models import User, InventoryItem
+from app.core.rbac import check_plan_limits
 
 # Import centralized auth dependencies
 from app.api.dependencies import get_current_user, require_manager_or_above
@@ -32,6 +33,14 @@ def create_item(
     current_user: User = Depends(require_manager_or_above),  # Manager+ only
 ):
     """Create inventory item - Manager+ access"""
+    # Check Plan Limits
+    current_count = db.query(InventoryItem).filter(InventoryItem.tenant_id == current_user.tenant_id).count()
+    if not check_plan_limits(current_user.tenant.plan, "items", current_count):
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Item limit reached for your '{current_user.tenant.plan}' plan. Please upgrade to add more items."
+        )
+
     return inventory_service.create_item(db, item=item_in, tenant_id=current_user.tenant_id)
 
 @router.put("/{item_id}", response_model=schemas.Item)

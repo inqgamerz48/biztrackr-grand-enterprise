@@ -7,7 +7,9 @@ from slowapi.errors import RateLimitExceeded
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.api.v1.router import api_router
+from app.api.v1.endpoints import (
+    auth, users, inventory, sales, dashboard, reports, crm, expenses, billing, settings as settings_endpoint, super_admin, notifications, ai, aging
+)
 from app.core.database import engine, Base
 from app.core.ratelimit import limiter
 import app.models  # Ensure model registration
@@ -43,7 +45,8 @@ app.add_middleware(
         "https://biztrackr-grand-enterprise.vercel.app",
         "https://biztrackr-grand-enterprise.onrender.com",
         "http://localhost:3000",
-        "http://localhost:3001"
+        "http://localhost:3001",
+        "http://127.0.0.1:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -85,7 +88,21 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # --------------------------------------------------
 # ✔ API ROUTES
 # --------------------------------------------------
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(inventory.router, prefix="/api/v1/inventory", tags=["inventory"])
+app.include_router(sales.router, prefix="/api/v1/sales", tags=["sales"])
+app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["reports"])
+app.include_router(crm.router, prefix="/api/v1/crm", tags=["crm"])
+app.include_router(expenses.router, prefix="/api/v1/expenses", tags=["expenses"])
+app.include_router(billing.router, prefix="/api/v1/billing", tags=["billing"])
+app.include_router(settings_endpoint.router, prefix="/api/v1/settings", tags=["settings"])
+app.include_router(super_admin.router, prefix="/api/v1/admin", tags=["super-admin"])
+app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["notifications"])
+app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
+app.include_router(aging.router, prefix="/api/v1/aging", tags=["aging"])
+
 
 
 # --------------------------------------------------

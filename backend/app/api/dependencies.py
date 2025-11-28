@@ -9,6 +9,7 @@ from jose import jwt, JWTError
 from app.core import database
 from app.core.config import settings
 from app.core import security
+from app.core.rbac import get_role_permissions
 from app.models.user import User
 
 # OAuth2 scheme for token authentication
@@ -88,3 +89,24 @@ def require_role(allowed_roles: List[str]):
 require_admin = require_role(["admin"])
 require_manager_or_above = require_role(["admin", "manager"])
 require_any_role = require_role(["admin", "manager", "cashier"])
+
+def require_permission(permission: str):
+    """
+    Dependency factory to check if user has required permission.
+    
+    Args:
+        permission: Permission string (e.g., 'inventory:read')
+        
+    Returns:
+        Dependency function that validates user permission
+    """
+    def permission_checker(current_user: User = Depends(get_current_user)) -> User:
+        user_permissions = get_role_permissions(current_user.role)
+        if permission not in user_permissions:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required permission: {permission}"
+            )
+        return current_user
+    
+    return permission_checker

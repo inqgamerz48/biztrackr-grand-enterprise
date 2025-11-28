@@ -157,3 +157,31 @@ def get_purchase_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=purchase_{purchase.invoice_number}.pdf"}
     )
+
+@router.get("/purchases", response_model=list)
+def get_purchases(
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from app.models import Purchase
+    purchases = db.query(Purchase).filter(Purchase.tenant_id == current_user.tenant_id).order_by(Purchase.date.desc()).all()
+    return [{
+        "id": p.id,
+        "invoice_number": p.invoice_number,
+        "date": p.date,
+        "supplier_name": p.supplier.name if p.supplier else "Unknown",
+        "total_amount": p.total_amount,
+        "status": p.status,
+        "items_count": len(p.items)
+    } for p in purchases]
+
+@router.post("/purchases/{purchase_id}/receive")
+def receive_purchase(
+    purchase_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(get_current_user),
+):
+    purchase = sales_service.receive_purchase(db, purchase_id, current_user.tenant_id)
+    if not purchase:
+        raise HTTPException(status_code=404, detail="Purchase not found or already received")
+    return {"status": "success", "purchase_status": purchase.status}

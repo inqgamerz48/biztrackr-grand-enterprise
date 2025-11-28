@@ -22,16 +22,46 @@ def create_stripe_checkout_session(
     return {"url": url, "gateway": "stripe"}
 
 @router.post("/stripe/webhook")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(
+    request: Request,
+    db: Session = Depends(database.get_db)
+):
     """Handle Stripe webhook events"""
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
 
-    success = billing_service.handle_webhook(payload, sig_header)
+    success = billing_service.handle_webhook(db, payload, sig_header)
     if not success:
         raise HTTPException(status_code=400, detail="Invalid signature")
     
     return {"status": "success"}
+
+@router.post("/stripe/create-portal-session")
+def create_portal_session(
+    current_user: User = Depends(require_admin),
+):
+    """Create a Stripe customer portal session"""
+    if not current_user.tenant.stripe_customer_id:
+        raise HTTPException(status_code=400, detail="No billing account found")
+        
+    url = billing_service.create_portal_session(current_user.tenant_id, current_user.tenant.stripe_customer_id)
+    if not url:
+        raise HTTPException(status_code=400, detail="Stripe error")
+    return {"url": url}
+
+@router.get("/subscription")
+def get_subscription_details(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(database.get_db)
+):
+    """Get current subscription details"""
+    tenant = current_user.tenant
+    return {
+        "plan": tenant.plan,
+        "status": tenant.subscription_status,
+        "stripe_customer_id": tenant.stripe_customer_id,
+        "subscription_id": tenant.subscription_id
+    }
 
 
 # ==================== PAYPAL ENDPOINTS ====================
@@ -65,9 +95,10 @@ def capture_paypal_payment(
     payment_id: str,
     payer_id: str,
     current_user: User = Depends(require_admin),
+    db: Session = Depends(database.get_db)
 ):
     """Capture a PayPal payment after user approval"""
-    result = paypal_service.capture_paypal_payment(payment_id, payer_id)
+    result = paypal_service.capture_paypal_payment(db, payment_id, payer_id)
     
     if not result or result["status"] != "completed":
         raise HTTPException(status_code=400, detail="Payment capture failed")
@@ -81,12 +112,15 @@ def capture_paypal_payment(
     }
 
 @router.post("/paypal/webhook")
-async def paypal_webhook(request: Request):
+async def paypal_webhook(
+    request: Request,
+    db: Session = Depends(database.get_db)
+):
     """Handle PayPal webhook events"""
     payload = await request.json()
     headers = dict(request.headers)
     
-    success = paypal_service.handle_paypal_webhook(payload, headers)
+    success = paypal_service.handle_paypal_webhook(db, payload, headers)
     if not success:
         raise HTTPException(status_code=400, detail="Webhook processing failed")
     

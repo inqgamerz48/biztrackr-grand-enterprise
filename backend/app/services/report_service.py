@@ -3,7 +3,7 @@ import io
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import Optional
-from app.models import InventoryItem as Item, Sale, Purchase, Expense, SaleItem, PurchaseItem
+from app.models import InventoryItem as Item, Sale, Purchase, Expense, SaleItem, PurchaseItem, Category, ExpenseCategory
 from fastapi import UploadFile, HTTPException
 
 def export_inventory_csv(db: Session, tenant_id: int):
@@ -210,3 +210,50 @@ def get_profit_loss_data(db: Session, tenant_id: int, start_date: Optional[datet
         'start_date': start_date.isoformat(),
         'end_date': end_date.isoformat()
     }
+
+def get_inventory_category_analytics(db: Session, tenant_id: int):
+    """Get inventory distribution by category"""
+    from sqlalchemy import func
+    
+    results = db.query(
+        Category.name,
+        func.count(Item.id).label('count'),
+        func.sum(Item.quantity * Item.selling_price).label('value')
+    ).join(Item, Item.category_id == Category.id)\
+    .filter(Item.tenant_id == tenant_id)\
+    .group_by(Category.name).all()
+    
+    return [
+        {
+            "name": name,
+            "count": count,
+            "value": float(value) if value else 0.0
+        }
+        for name, count, value in results
+    ]
+
+def get_expense_category_analytics(db: Session, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+    """Get expense distribution by category"""
+    from sqlalchemy import func
+    
+    if not start_date:
+        start_date = datetime.now() - timedelta(days=30)
+    if not end_date:
+        end_date = datetime.now()
+        
+    results = db.query(
+        Expense.category,
+        func.sum(Expense.amount).label('total')
+    ).filter(
+        Expense.tenant_id == tenant_id,
+        Expense.date >= start_date,
+        Expense.date <= end_date
+    ).group_by(Expense.category).all()
+    
+    return [
+        {
+            "name": category.value if hasattr(category, 'value') else str(category),
+            "value": float(total) if total else 0.0
+        }
+        for category, total in results
+    ]

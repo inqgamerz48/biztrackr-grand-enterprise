@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Building2, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Building2, ArrowRight, Loader2, Check, X } from 'lucide-react';
 
 export default function RegisterPage() {
     const { register } = useAuth();
@@ -107,6 +107,29 @@ export default function RegisterPage() {
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             />
                         </div>
+                    </div>
+
+                    {/* Password Strength */}
+                    {formData.password && (
+                        <div className="space-y-2">
+                            <div className="flex gap-1 h-1">
+                                <div className={`flex-1 rounded-full ${formData.password.length > 0 ? 'bg-red-500' : 'bg-slate-700'}`} />
+                                <div className={`flex-1 rounded-full ${formData.password.length > 6 ? 'bg-yellow-500' : 'bg-slate-700'}`} />
+                                <div className={`flex-1 rounded-full ${formData.password.length > 10 ? 'bg-green-500' : 'bg-slate-700'}`} />
+                            </div>
+                            <p className="text-xs text-slate-400 text-right">
+                                {formData.password.length < 6 && 'Weak'}
+                                {formData.password.length >= 6 && formData.password.length <= 10 && 'Medium'}
+                                {formData.password.length > 10 && 'Strong'}
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="flex items-start gap-2">
+                        <input type="checkbox" required className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-indigo-500 focus:ring-indigo-500/50 transition-colors" />
+                        <span className="text-sm text-slate-400">
+                            I agree to the <a href="#" className="text-indigo-400 hover:text-indigo-300">Terms of Service</a> and <a href="#" className="text-indigo-400 hover:text-indigo-300">Privacy Policy</a>
+                        </span>
                     </div>
 
                     <button

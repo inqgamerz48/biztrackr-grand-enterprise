@@ -11,6 +11,7 @@ class Purchase(Base):
     date = Column(DateTime(timezone=True), server_default=func.now())
     total_amount = Column(Float, default=0.0)
     transport_charges = Column(Float, default=0.0)
+    status = Column(String, default="Ordered") # Ordered, Received
     
     supplier_id = Column(Integer, ForeignKey("suppliers.id"))
     tenant_id = Column(Integer, ForeignKey("tenants.id"))

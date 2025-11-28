@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 class Settings(Base):
@@ -17,3 +18,6 @@ class Settings(Base):
     # Local Storage Settings
     save_invoices_locally = Column(Boolean, default=True)
     local_invoice_path = Column(String, default="~/Desktop/Invoices")
+
+    tenant_id = Column(Integer, ForeignKey("tenants.id"))
+    tenant = relationship("Tenant")

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Github, Chrome } from 'lucide-react';
 
 export default function LoginPage() {
     const { login } = useAuth();
@@ -79,6 +79,16 @@ export default function LoginPage() {
                         </div>
                     </div>
 
+                    <div className="flex items-center justify-between text-sm">
+                        <label className="flex items-center space-x-2 cursor-pointer group">
+                            <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-indigo-500 focus:ring-indigo-500/50 transition-colors" />
+                            <span className="text-slate-400 group-hover:text-slate-300 transition-colors">Remember me</span>
+                        </label>
+                        <Link href="/forgot-password">
+                            <a className="text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</a>
+                        </Link>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isLoading}
@@ -92,6 +102,26 @@ export default function LoginPage() {
                             </>
                         )}
                     </button>
+
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-700/50"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-4 bg-slate-900 text-slate-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <button type="button" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group">
+                            <Github className="w-5 h-5 group-hover:text-white transition-colors" />
+                            <span className="group-hover:text-white transition-colors">GitHub</span>
+                        </button>
+                        <button type="button" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group">
+                            <Chrome className="w-5 h-5 group-hover:text-white transition-colors" />
+                            <span className="group-hover:text-white transition-colors">Google</span>
+                        </button>
+                    </div>
 
                     <div className="text-center mt-6">
                         <p className="text-slate-400 text-sm">

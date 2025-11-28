@@ -14,6 +14,11 @@ class Sale(Base):
     discount = Column(Float, default=0.0)
     payment_method = Column(String, default="Cash")
     
+    # Aging Report Fields
+    payment_status = Column(String, default="paid")  # paid, partial, pending
+    due_date = Column(DateTime(timezone=True), nullable=True)
+    amount_paid = Column(Float, default=0.0)
+    
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"))
 

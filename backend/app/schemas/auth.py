@@ -28,6 +28,7 @@ class User(UserBase):
     is_active: bool
     is_superuser: bool
     role: str
+    permissions: list[str] = []
     tenant_id: Optional[int] = None
 
     class Config:

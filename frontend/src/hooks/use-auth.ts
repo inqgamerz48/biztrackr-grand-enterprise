@@ -7,6 +7,7 @@ interface User {
     email: string;
     full_name: string | null;
     role: 'admin' | 'manager' | 'cashier';
+    permissions: string[];
     is_active: boolean;
     is_superuser: boolean;
     tenant_id: number | null;
@@ -78,5 +79,11 @@ export function useAuth() {
         router.push('/login');
     };
 
-    return { user, loading, login, register, logout };
+    const hasPermission = (permission: string) => {
+        if (!user) return false;
+        if (user.role === 'admin') return true; // Admin has all permissions implicitly or explicitly
+        return user.permissions?.includes(permission) || false;
+    };
+
+    return { user, loading, login, register, logout, hasPermission };
 }

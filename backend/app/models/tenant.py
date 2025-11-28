@@ -10,6 +10,8 @@ class Tenant(Base):
     name = Column(String, index=True, nullable=False)
     plan = Column(String, default="free") # free, starter, pro
     subscription_status = Column(String, default="active")
+    stripe_customer_id = Column(String, nullable=True)
+    subscription_id = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     users = relationship("User", back_populates="tenant")

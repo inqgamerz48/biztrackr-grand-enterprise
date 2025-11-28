@@ -13,11 +13,11 @@ def get_settings(
     db: Session = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above),  # Manager+ can view
 ):
-    """Get global settings - Manager+ access"""
-    settings = db.query(Settings).first()
+    """Get tenant settings - Manager+ access"""
+    settings = db.query(Settings).filter(Settings.tenant_id == current_user.tenant_id).first()
     if not settings:
-        # Create default settings if none exist
-        settings = Settings()
+        # Create default settings if none exist for this tenant
+        settings = Settings(tenant_id=current_user.tenant_id)
         db.add(settings)
         db.commit()
         db.refresh(settings)
@@ -29,10 +29,10 @@ def update_settings(
     db: Session = Depends(database.get_db),
     current_user: User = Depends(require_admin),  # Admin only
 ):
-    """Update global settings - Admin only"""
-    settings = db.query(Settings).first()
+    """Update tenant settings - Admin only"""
+    settings = db.query(Settings).filter(Settings.tenant_id == current_user.tenant_id).first()
     if not settings:
-        settings = Settings()
+        settings = Settings(tenant_id=current_user.tenant_id)
         db.add(settings)
     
     # Track changes for notification

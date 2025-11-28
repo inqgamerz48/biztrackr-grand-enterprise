@@ -9,6 +9,7 @@ from app.core import database
 from app.api.dependencies import require_admin, get_current_user, require_manager_or_above
 from app.models.user import User
 from app.schemas.auth import User as UserSchema
+from app.core.rbac import check_plan_limits
 
 router = APIRouter()
 
@@ -22,8 +23,15 @@ class ActivationUpdate(BaseModel):
 
 
 @router.get("/me", response_model=UserSchema)
-def get_current_user_info(current_user: User = Depends(get_current_user)):
-    """Get current user information including role"""
+def read_users_me(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get current user.
+    """
+    from app.core.rbac import get_role_permissions
+    # Manually attach permissions to the user object for the schema
+    current_user.permissions = get_role_permissions(current_user.role)
     return current_user
 
 
@@ -35,7 +43,7 @@ def list_users(
     """
     List all users (Manager+ can view, only Admin can modify)
     """
-    users = db.query(User).all()
+    users = db.query(User).filter(User.tenant_id == current_user.tenant_id).all()
     return users
 
 
@@ -57,7 +65,7 @@ def update_user_role(
         )
     
     # Get user
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.tenant_id == current_user.tenant_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -86,7 +94,7 @@ def toggle_user_activation(
     """Activate or deactivate user - Admin only"""
     
     # Get user
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.tenant_id == current_user.tenant_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -127,6 +135,14 @@ def create_user(
     # Ensure tenant_id matches current admin's tenant
     if not current_user.tenant_id:
         raise HTTPException(status_code=400, detail="Admin user must belong to a tenant")
+
+    # Check Plan Limits
+    current_count = db.query(User).filter(User.tenant_id == current_user.tenant_id).count()
+    if not check_plan_limits(current_user.tenant.plan, "users", current_count):
+        raise HTTPException(
+            status_code=403, 
+            detail=f"User limit reached for your '{current_user.tenant.plan}' plan. Please upgrade to add more users."
+        )
 
     # Create user in existing tenant
     user = auth_service.create_tenant_user(db, user=user_in, tenant_id=current_user.tenant_id)
