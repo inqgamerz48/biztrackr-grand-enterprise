@@ -31,7 +31,7 @@ const navigation: NavItem[] = [
     { name: 'CRM', href: '/dashboard/crm', icon: Users, roles: ['admin', 'manager'] },
     { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, roles: ['admin', 'manager'] },
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['admin', 'manager'] },
-    { name: 'Users', href: '/dashboard/users', icon: UserCog, roles: ['admin', 'manager'] },
+    { name: 'Team', href: '/dashboard/users', icon: UserCog, roles: ['admin', 'manager'] },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['admin'] },
 ];
 
@@ -71,8 +71,8 @@ export default function Sidebar() {
                                     href={item.href}
                                 >
                                     <a className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                         }`}>
                                         <Icon className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'
                                             }`} />
