@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import api from '@/lib/axios';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Building2, ArrowRight, Loader2, Check, X } from 'lucide-react';
+import { Mail, Lock, User, Building2, ArrowRight, Loader2, Check, X, Github, Chrome } from 'lucide-react';
 
 export default function RegisterPage() {
     const { register } = useAuth();
@@ -130,6 +131,52 @@ export default function RegisterPage() {
                         <span className="text-sm text-slate-400">
                             I agree to the <a href="#" className="text-indigo-400 hover:text-indigo-300">Terms of Service</a> and <a href="#" className="text-indigo-400 hover:text-indigo-300">Privacy Policy</a>
                         </span>
+                    </div>
+
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-700/50"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-4 bg-slate-900 text-slate-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                // MOCK: Simulate GitHub login
+                                const mockCode = "mock_github_code_testuser";
+                                api.post('/auth/login/github', null, { params: { code: mockCode } })
+                                    .then((res: any) => {
+                                        localStorage.setItem('token', res.data.access_token);
+                                        window.location.href = '/dashboard';
+                                    })
+                                    .catch((err: any) => setError(err.response?.data?.detail || 'GitHub Login Failed'));
+                            }}
+                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
+                        >
+                            <Github className="w-5 h-5 group-hover:text-white transition-colors" />
+                            <span className="group-hover:text-white transition-colors">GitHub</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                // MOCK: Simulate Google login
+                                const mockToken = "mock_google_token_testuser";
+                                api.post('/auth/login/google', null, { params: { token: mockToken } })
+                                    .then((res: any) => {
+                                        localStorage.setItem('token', res.data.access_token);
+                                        window.location.href = '/dashboard';
+                                    })
+                                    .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
+                            }}
+                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
+                        >
+                            <Chrome className="w-5 h-5 group-hover:text-white transition-colors" />
+                            <span className="group-hover:text-white transition-colors">Google</span>
+                        </button>
                     </div>
 
                     <button

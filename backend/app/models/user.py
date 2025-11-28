@@ -11,6 +11,10 @@ class User(Base):
     full_name = Column(String, index=True)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
+
+    # Social Auth
+    social_provider = Column(String, nullable=True)  # e.g., 'google', 'github'
+    social_id = Column(String, nullable=True)  # Provider's unique ID for the user
     
     # RBAC: Role-Based Access Control
     # Roles: 'admin', 'manager', 'cashier'

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
+import api from '@/lib/axios';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2, Github, Chrome } from 'lucide-react';
 
@@ -95,7 +96,10 @@ export default function LoginPage() {
                         className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isLoading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <span>Signing in...</span>
+                            </>
                         ) : (
                             <>
                                 Sign In <ArrowRight className="w-4 h-4" />
@@ -113,11 +117,37 @@ export default function LoginPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <button type="button" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                // MOCK: Simulate GitHub login
+                                const mockCode = "mock_github_code_testuser";
+                                api.post('/auth/login/github', null, { params: { code: mockCode } })
+                                    .then((res: any) => {
+                                        localStorage.setItem('token', res.data.access_token);
+                                        window.location.href = '/dashboard';
+                                    })
+                                    .catch((err: any) => setError(err.response?.data?.detail || 'GitHub Login Failed'));
+                            }}
+                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
+                        >
                             <Github className="w-5 h-5 group-hover:text-white transition-colors" />
                             <span className="group-hover:text-white transition-colors">GitHub</span>
                         </button>
-                        <button type="button" className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                // MOCK: Simulate Google login
+                                const mockToken = "mock_google_token_testuser";
+                                api.post('/auth/login/google', null, { params: { token: mockToken } })
+                                    .then((res: any) => {
+                                        localStorage.setItem('token', res.data.access_token);
+                                        window.location.href = '/dashboard';
+                                    })
+                                    .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
+                            }}
+                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
+                        >
                             <Chrome className="w-5 h-5 group-hover:text-white transition-colors" />
                             <span className="group-hover:text-white transition-colors">Google</span>
                         </button>

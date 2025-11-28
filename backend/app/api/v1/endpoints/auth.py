@@ -58,3 +58,47 @@ def login_access_token(request: Request, db: Session = Depends(database.get_db),
         "access_token": security.create_access_token(user.id, expires_delta=access_token_expires),
         "token_type": "bearer",
     }
+
+@router.post("/login/google", response_model=schemas.Token)
+def login_google(token: str, db: Session = Depends(database.get_db)):
+    from app.services.social_auth import social_auth_service
+    
+    google_data = social_auth_service.verify_google_token(token)
+    if not google_data:
+        raise HTTPException(status_code=400, detail="Invalid Google token")
+        
+    user = social_auth_service.get_or_create_social_user(
+        db, 
+        email=google_data["email"], 
+        social_id=google_data["sub"], 
+        provider="google",
+        full_name=google_data["name"]
+    )
+    
+    access_token_expires = timedelta(minutes=security.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(user.id, expires_delta=access_token_expires),
+        "token_type": "bearer",
+    }
+
+@router.post("/login/github", response_model=schemas.Token)
+def login_github(code: str, db: Session = Depends(database.get_db)):
+    from app.services.social_auth import social_auth_service
+    
+    github_data = social_auth_service.verify_github_token(code)
+    if not github_data:
+        raise HTTPException(status_code=400, detail="Invalid GitHub code")
+        
+    user = social_auth_service.get_or_create_social_user(
+        db, 
+        email=github_data["email"], 
+        social_id=github_data["id"], 
+        provider="github",
+        full_name=github_data["name"]
+    )
+    
+    access_token_expires = timedelta(minutes=security.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(user.id, expires_delta=access_token_expires),
+        "token_type": "bearer",
+    }
