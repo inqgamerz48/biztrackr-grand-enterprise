@@ -64,15 +64,21 @@ def get_role_permissions(role: str) -> List[str]:
 # Plan Limits
 PLAN_LIMITS = {
     "free": {
-        "users": 1,
+        "users": 3, # Admin + 1 Manager + 1 Cashier
+        "managers": 1,
+        "cashiers": 1,
         "items": 100
     },
     "starter": {
         "users": 5,
+        "managers": 5,
+        "cashiers": 5,
         "items": float('inf')
     },
     "pro": {
         "users": float('inf'),
+        "managers": float('inf'),
+        "cashiers": float('inf'),
         "items": float('inf')
     }
 }

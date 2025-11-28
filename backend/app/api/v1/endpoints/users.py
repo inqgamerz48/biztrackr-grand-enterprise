@@ -136,13 +136,26 @@ def create_user(
     if not current_user.tenant_id:
         raise HTTPException(status_code=400, detail="Admin user must belong to a tenant")
 
-    # Check Plan Limits
+    # Check Plan Limits (Total Users)
     current_count = db.query(User).filter(User.tenant_id == current_user.tenant_id).count()
     if not check_plan_limits(current_user.tenant.plan, "users", current_count):
         raise HTTPException(
             status_code=403, 
             detail=f"User limit reached for your '{current_user.tenant.plan}' plan. Please upgrade to add more users."
         )
+        
+    # Check Role-Specific Limits (e.g., Free plan: 1 Manager, 1 Cashier)
+    if user_in.role:
+        current_role_count = db.query(User).filter(
+            User.tenant_id == current_user.tenant_id, 
+            User.role == user_in.role
+        ).count()
+        resource_name = f"{user_in.role}s" # e.g., "managers", "cashiers"
+        if not check_plan_limits(current_user.tenant.plan, resource_name, current_role_count):
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Limit reached for {resource_name} in your '{current_user.tenant.plan}' plan."
+            )
 
     # Create user in existing tenant
     user = auth_service.create_tenant_user(db, user=user_in, tenant_id=current_user.tenant_id)
