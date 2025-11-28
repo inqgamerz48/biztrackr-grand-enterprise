@@ -8,12 +8,27 @@ from app.schemas import auth as schemas
 
 class SocialAuthService:
     def verify_google_token(self, token: str):
-        # MOCK: In production, verify with Google API
-        # https://oauth2.googleapis.com/tokeninfo?id_token={token}
-        if token.startswith("mock_google_token_"):
-            email = token.replace("mock_google_token_", "") + "@gmail.com"
-            return {"email": email, "sub": f"google_id_{email}", "name": "Google User"}
-        return None
+        import httpx
+        try:
+            # Verify token with Google
+            response = httpx.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={token}")
+            if response.status_code != 200:
+                return None
+            
+            data = response.json()
+            
+            # Optional: Verify audience (CLIENT_ID) if configured
+            if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
+                return None
+                
+            return {
+                "email": data["email"], 
+                "sub": data["sub"], 
+                "name": data.get("name", data["email"].split("@")[0])
+            }
+        except Exception as e:
+            print(f"Google Auth Error: {e}")
+            return None
 
     def verify_github_token(self, token: str):
         # MOCK: In production, exchange code for token, then get user info

@@ -6,6 +6,8 @@ import api from '@/lib/axios';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Building2, ArrowRight, Loader2, Check, X, Github, Chrome } from 'lucide-react';
 
+import { useGoogleLogin } from '@react-oauth/google';
+
 export default function RegisterPage() {
     const { register } = useAuth();
     const router = useRouter();
@@ -17,6 +19,19 @@ export default function RegisterPage() {
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    const loginGoogle = useGoogleLogin({
+        onSuccess: (tokenResponse) => {
+            // Send access token to backend
+            api.post('/auth/login/google', null, { params: { token: tokenResponse.access_token } })
+                .then((res: any) => {
+                    localStorage.setItem('token', res.data.access_token);
+                    window.location.href = '/dashboard';
+                })
+                .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
+        },
+        onError: () => setError('Google Login Failed'),
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -162,16 +177,7 @@ export default function RegisterPage() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => {
-                                // MOCK: Simulate Google login
-                                const mockToken = "mock_google_token_testuser";
-                                api.post('/auth/login/google', null, { params: { token: mockToken } })
-                                    .then((res: any) => {
-                                        localStorage.setItem('token', res.data.access_token);
-                                        window.location.href = '/dashboard';
-                                    })
-                                    .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
-                            }}
+                            onClick={() => loginGoogle()}
                             className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
                         >
                             <Chrome className="w-5 h-5 group-hover:text-white transition-colors" />
