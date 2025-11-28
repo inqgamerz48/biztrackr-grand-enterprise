@@ -43,7 +43,8 @@ def list_users(
     """
     List all users (Manager+ can view, only Admin can modify)
     """
-    users = db.query(User).filter(User.tenant_id == current_user.tenant_id).all()
+    from app.api.dependencies import get_tenant_scoped_query
+    users = get_tenant_scoped_query(db, User, current_user).all()
     return users
 
 
@@ -65,7 +66,8 @@ def update_user_role(
         )
     
     # Get user
-    user = db.query(User).filter(User.id == user_id, User.tenant_id == current_user.tenant_id).first()
+    from app.api.dependencies import get_tenant_scoped_query
+    user = get_tenant_scoped_query(db, User, current_user).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -94,7 +96,8 @@ def toggle_user_activation(
     """Activate or deactivate user - Admin only"""
     
     # Get user
-    user = db.query(User).filter(User.id == user_id, User.tenant_id == current_user.tenant_id).first()
+    from app.api.dependencies import get_tenant_scoped_query
+    user = get_tenant_scoped_query(db, User, current_user).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -137,7 +140,8 @@ def create_user(
         raise HTTPException(status_code=400, detail="Admin user must belong to a tenant")
 
     # Check Plan Limits (Total Users)
-    current_count = db.query(User).filter(User.tenant_id == current_user.tenant_id).count()
+    from app.api.dependencies import get_tenant_scoped_query
+    current_count = get_tenant_scoped_query(db, User, current_user).count()
     if not check_plan_limits(current_user.tenant.plan, "users", current_count):
         raise HTTPException(
             status_code=403, 
@@ -146,8 +150,8 @@ def create_user(
         
     # Check Role-Specific Limits (e.g., Free plan: 1 Manager, 1 Cashier)
     if user_in.role:
-        current_role_count = db.query(User).filter(
-            User.tenant_id == current_user.tenant_id, 
+        from app.api.dependencies import get_tenant_scoped_query
+        current_role_count = get_tenant_scoped_query(db, User, current_user).filter(
             User.role == user_in.role
         ).count()
         resource_name = f"{user_in.role}s" # e.g., "managers", "cashiers"

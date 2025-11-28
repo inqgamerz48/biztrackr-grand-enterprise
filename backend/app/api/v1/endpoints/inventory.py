@@ -34,7 +34,9 @@ def create_item(
 ):
     """Create inventory item - Manager+ access"""
     # Check Plan Limits
-    current_count = db.query(InventoryItem).filter(InventoryItem.tenant_id == current_user.tenant_id).count()
+    # Enforce isolation using helper
+    from app.api.dependencies import get_tenant_scoped_query
+    current_count = get_tenant_scoped_query(db, InventoryItem, current_user).count()
     if not check_plan_limits(current_user.tenant.plan, "items", current_count):
         raise HTTPException(
             status_code=403, 

@@ -110,3 +110,15 @@ def require_permission(permission: str):
         return current_user
     
     return permission_checker
+
+def get_tenant_scoped_query(db: Session, model, user: User):
+    """
+    Returns a query filtered by the current user's tenant_id.
+    Enforces strict isolation.
+    """
+    if not user.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="User does not belong to any organization (Tenant ID missing)"
+        )
+    return db.query(model).filter(model.tenant_id == user.tenant_id)

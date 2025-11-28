@@ -36,8 +36,9 @@ def get_sale_pdf(
 ):
     from app.models import Sale, SaleItem
     from app.models.settings import Settings
+    from app.api.dependencies import get_tenant_scoped_query
     
-    sale = db.query(Sale).filter(Sale.id == sale_id, Sale.tenant_id == current_user.tenant_id).first()
+    sale = get_tenant_scoped_query(db, Sale, current_user).filter(Sale.id == sale_id).first()
     if not sale:
         raise HTTPException(status_code=404, detail="Sale not found")
     
@@ -124,7 +125,8 @@ def get_purchase_pdf(
     current_user: User = Depends(get_current_user),
 ):
     from app.models import Purchase, PurchaseItem
-    purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == current_user.tenant_id).first()
+    from app.api.dependencies import get_tenant_scoped_query
+    purchase = get_tenant_scoped_query(db, Purchase, current_user).filter(Purchase.id == purchase_id).first()
     if not purchase:
         raise HTTPException(status_code=404, detail="Purchase not found")
     
@@ -164,7 +166,8 @@ def get_purchases(
     current_user: User = Depends(get_current_user),
 ):
     from app.models import Purchase
-    purchases = db.query(Purchase).filter(Purchase.tenant_id == current_user.tenant_id).order_by(Purchase.date.desc()).all()
+    from app.api.dependencies import get_tenant_scoped_query
+    purchases = get_tenant_scoped_query(db, Purchase, current_user).order_by(Purchase.date.desc()).all()
     return [{
         "id": p.id,
         "invoice_number": p.invoice_number,
