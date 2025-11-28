@@ -57,31 +57,27 @@ class SocialAuthService:
         # Create new user
         # Generate a random password for social users
         import secrets
+        from app.models.tenant import Tenant
         random_password = secrets.token_urlsafe(16)
         
-        user_in = schemas.UserCreate(
-            email=email,
-            password=random_password,
-            full_name=full_name,
-            role="manager" # Default role for social signup? Or maybe just user? Let's say manager for now as they are likely signing up for a new tenant
-        )
+        # 1. Create a default tenant for this user
+        # Use their name or email to name the tenant
+        tenant_name = f"{full_name}'s Organization"
+        new_tenant = Tenant(name=tenant_name)
+        db.add(new_tenant)
+        db.flush() # Get ID
         
-        # We need to handle tenant creation or assignment here. 
-        # For now, let's assume they are creating a new tenant implicitly or we leave it null and force them to create one later.
-        # But UserCreate requires tenant logic in auth_service.create_user usually.
-        # Let's use auth_service.create_user but we might need to adjust it to handle social fields.
-        
-        # Actually, let's just create the user directly here to control the fields
         from app.core.security import get_password_hash
         
         db_user = User(
             email=email,
             hashed_password=get_password_hash(random_password),
             full_name=full_name,
-            role="manager", # Default to manager
+            role="admin", # Make them Admin of their own new tenant
             is_active=True,
             social_provider=provider,
-            social_id=social_id
+            social_id=social_id,
+            tenant_id=new_tenant.id # Assign to new tenant
         )
         db.add(db_user)
         db.commit()
