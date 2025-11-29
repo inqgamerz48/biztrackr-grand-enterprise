@@ -13,7 +13,7 @@ def create_sale(
     db: Session = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    sale = sales_service.create_sale(db, sale_in, current_user.tenant_id)
+    sale = sales_service.create_sale(db, sale_in, current_user.tenant_id, current_user.id)
     return {"id": sale.id, "invoice_number": sale.invoice_number, "total": sale.total_amount}
 
 @router.post("/purchases", response_model=dict)
@@ -22,7 +22,7 @@ def create_purchase(
     db: Session = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    purchase = sales_service.create_purchase(db, purchase_in, current_user.tenant_id)
+    purchase = sales_service.create_purchase(db, purchase_in, current_user.tenant_id, current_user.id)
     return {"id": purchase.id, "invoice_number": purchase.invoice_number, "total": purchase.total_amount}
 
 from fastapi.responses import StreamingResponse
@@ -184,7 +184,7 @@ def receive_purchase(
     db: Session = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    purchase = sales_service.receive_purchase(db, purchase_id, current_user.tenant_id)
+    purchase = sales_service.receive_purchase(db, purchase_id, current_user.tenant_id, current_user.id)
     if not purchase:
         raise HTTPException(status_code=404, detail="Purchase not found or already received")
     return {"status": "success", "purchase_status": purchase.status}

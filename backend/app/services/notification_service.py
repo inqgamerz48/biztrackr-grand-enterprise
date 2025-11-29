@@ -1,40 +1,58 @@
 from sqlalchemy.orm import Session
 from app.models.notification import Notification
-from app.schemas import notification as schemas
-from typing import List
+from typing import List, Optional
 
 class NotificationService:
-    def create_notification(self, db: Session, notification: schemas.NotificationCreate) -> Notification:
-        db_notification = Notification(**notification.dict())
-        db.add(db_notification)
+    def create_notification(
+        self, 
+        db: Session, 
+        tenant_id: int, 
+        title: str, 
+        message: str, 
+        type: str = "info", 
+        user_id: Optional[int] = None
+    ) -> Notification:
+        notification = Notification(
+            tenant_id=tenant_id,
+            user_id=user_id,
+            title=title,
+            message=message,
+            type=type,
+            is_read=False
+        )
+        db.add(notification)
         db.commit()
-        db.refresh(db_notification)
-        return db_notification
+        db.refresh(notification)
+        return notification
 
-    def get_user_notifications(self, db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[Notification]:
+    def get_unread_notifications(self, db: Session, tenant_id: int, user_id: int) -> List[Notification]:
         return db.query(Notification).filter(
-            (Notification.user_id == user_id) | (Notification.user_id == None)
-        ).order_by(Notification.created_at.desc()).offset(skip).limit(limit).all()
-
-    def get_unread_count(self, db: Session, user_id: int) -> int:
-        return db.query(Notification).filter(
-            (Notification.user_id == user_id) | (Notification.user_id == None),
+            Notification.tenant_id == tenant_id,
+            Notification.user_id == user_id,
             Notification.is_read == False
-        ).count()
+        ).order_by(Notification.created_at.desc()).all()
 
-    def mark_as_read(self, db: Session, notification_id: int) -> Notification:
-        notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    def mark_as_read(self, db: Session, notification_id: int, tenant_id: int, user_id: int) -> bool:
+        notification = db.query(Notification).filter(
+            Notification.id == notification_id,
+            Notification.tenant_id == tenant_id,
+            Notification.user_id == user_id
+        ).first()
+        
         if notification:
             notification.is_read = True
             db.commit()
-            db.refresh(notification)
-        return notification
+            return True
+        return False
 
-    def mark_all_as_read(self, db: Session, user_id: int):
-        db.query(Notification).filter(
-            (Notification.user_id == user_id) | (Notification.user_id == None),
+    def mark_all_as_read(self, db: Session, tenant_id: int, user_id: int) -> int:
+        result = db.query(Notification).filter(
+            Notification.tenant_id == tenant_id,
+            Notification.user_id == user_id,
             Notification.is_read == False
         ).update({Notification.is_read: True}, synchronize_session=False)
+        
         db.commit()
+        return result
 
 notification_service = NotificationService()

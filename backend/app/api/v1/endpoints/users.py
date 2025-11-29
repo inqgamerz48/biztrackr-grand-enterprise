@@ -24,14 +24,19 @@ class ActivationUpdate(BaseModel):
 
 @router.get("/me", response_model=UserSchema)
 def read_users_me(
+    db: Session = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     Get current user.
     """
-    from app.core.rbac import get_role_permissions
-    # Manually attach permissions to the user object for the schema
-    current_user.permissions = get_role_permissions(current_user.role)
+    """
+    Get current user.
+    """
+    from app.services.permission_service import permission_service
+    # Fetch permissions from database
+    perms = permission_service.get_user_permissions(db, current_user.id)
+    current_user.permissions = list(perms)
     return current_user
 
 

@@ -13,37 +13,43 @@ import {
     BarChart3,
     UserCog,
     Settings,
-    LogOut
+    FileText,
+    LogOut,
+    Bell,
+    TrendingUp
 } from 'lucide-react';
 
 interface NavItem {
     name: string;
     href: string;
     icon: any;
-    roles: ('admin' | 'manager' | 'cashier')[];
+    permission: string; // Required permission code
 }
 
 const navigation: NavItem[] = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'cashier'] },
-    { name: 'Sales', href: '/dashboard/sales', icon: ShoppingCart, roles: ['admin', 'manager', 'cashier'] },
-    { name: 'Inventory', href: '/dashboard/inventory', icon: Package, roles: ['admin', 'manager', 'cashier'] },
-    { name: 'Purchases', href: '/dashboard/purchases', icon: ShoppingBag, roles: ['admin', 'manager'] },
-    { name: 'CRM', href: '/dashboard/crm', icon: Users, roles: ['admin', 'manager'] },
-    { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, roles: ['admin', 'manager'] },
-    { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['admin', 'manager'] },
-    { name: 'Team', href: '/dashboard/users', icon: UserCog, roles: ['admin', 'manager'] },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['admin'] },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: 'view_dashboard' },
+    { name: 'Sales', href: '/dashboard/sales', icon: ShoppingCart, permission: 'view_sales' },
+    { name: 'Inventory', href: '/dashboard/inventory', icon: Package, permission: 'view_inventory' },
+    { name: 'Purchases', href: '/dashboard/purchases', icon: ShoppingBag, permission: 'view_inventory' }, // Assuming inventory permission covers purchases for now, or add 'view_purchases'
+    { name: 'CRM', href: '/dashboard/crm', icon: Users, permission: 'view_sales' }, // CRM usually linked to sales
+    { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, permission: 'view_reports' }, // Expenses often with reports
+    { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, permission: 'view_reports' },
+    { name: 'Analytics', href: '/dashboard/reports/analytics', icon: TrendingUp, permission: 'view_reports' },
+    { name: 'Team', href: '/dashboard/users', icon: UserCog, permission: 'manage_users' },
+    { name: 'Activity Logs', href: '/dashboard/activity-logs', icon: FileText, permission: 'view_activity_logs' },
+    { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, permission: 'view_dashboard' }, // Everyone with dashboard access
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings, permission: 'manage_settings' },
 ];
 
 export default function Sidebar() {
     const router = useRouter();
     const pathname = router.pathname;
-    const { user, logout } = useAuth();
+    const { user, logout, hasPermission } = useAuth();
 
-    // Filter navigation based on user role
+    // Filter navigation based on user permissions
     const filteredNavigation = navigation.filter(item => {
         if (!user) return false;
-        return item.roles.includes(user.role);
+        return hasPermission(item.permission);
     });
 
     return (

@@ -1,6 +1,8 @@
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+# Note: Role is imported as string "Role" in relationship to avoid circular imports
+
 
 class User(Base):
     __tablename__ = "users"
@@ -18,8 +20,17 @@ class User(Base):
     
     # RBAC: Role-Based Access Control
     # Roles: 'admin', 'manager', 'cashier'
+    # RBAC: Role-Based Access Control
+    # Roles: 'admin', 'manager', 'cashier' (Legacy string role, kept for backward compatibility during migration)
     role = Column(String, default="cashier", nullable=False)
+    
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
+    role_obj = relationship("Role", back_populates="users")
     
     # Multi-tenancy
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True)
     tenant = relationship("Tenant", back_populates="users")
+    
+    # Branch
+    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
+    branch = relationship("Branch")

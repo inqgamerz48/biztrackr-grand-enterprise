@@ -15,8 +15,10 @@ class Purchase(Base):
     
     supplier_id = Column(Integer, ForeignKey("suppliers.id"))
     tenant_id = Column(Integer, ForeignKey("tenants.id"))
+    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
 
     supplier = relationship("Supplier", back_populates="purchases")
+    branch = relationship("Branch")
     items = relationship("PurchaseItem", back_populates="purchase")
 
 class PurchaseItem(Base):

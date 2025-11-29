@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import api from '@/lib/axios';
-import { CheckCircle, MailOpen } from 'lucide-react';
+import { format } from 'date-fns';
+import { Bell, Check, Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 interface Notification {
     id: number;
     title: string;
     message: string;
-    type: string;
+    type: 'info' | 'warning' | 'success' | 'error';
     is_read: boolean;
     created_at: string;
 }
@@ -22,7 +23,7 @@ export default function NotificationsPage() {
 
     const fetchNotifications = async () => {
         try {
-            const res = await api.get('/notifications/?limit=50');
+            const res = await api.get('/notifications/');
             setNotifications(res.data);
         } catch (error) {
             console.error('Failed to fetch notifications', error);
@@ -34,7 +35,7 @@ export default function NotificationsPage() {
     const markAsRead = async (id: number) => {
         try {
             await api.put(`/notifications/${id}/read`);
-            setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n));
+            setNotifications(notifications.filter(n => n.id !== id));
         } catch (error) {
             console.error('Failed to mark as read', error);
         }
@@ -42,70 +43,76 @@ export default function NotificationsPage() {
 
     const markAllAsRead = async () => {
         try {
-            await api.put('/notifications/mark-all-read');
-            setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+            await api.put('/notifications/read-all');
+            setNotifications([]);
         } catch (error) {
             console.error('Failed to mark all as read', error);
         }
     };
 
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'warning': return <AlertTriangle className="h-6 w-6 text-yellow-500" />;
+            case 'success': return <CheckCircle className="h-6 w-6 text-green-500" />;
+            case 'error': return <XCircle className="h-6 w-6 text-red-500" />;
+            default: return <Info className="h-6 w-6 text-blue-500" />;
+        }
+    };
+
     return (
         <DashboardLayout>
-            <div className="max-w-4xl mx-auto py-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-                    <button
-                        onClick={markAllAsRead}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        <CheckCircle className="h-5 w-5 mr-2" />
-                        Mark all as read
-                    </button>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
+                    {notifications.length > 0 && (
+                        <button
+                            onClick={markAllAsRead}
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            <Check className="mr-2 h-4 w-4" />
+                            Mark all as read
+                        </button>
+                    )}
                 </div>
 
-                <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                     {loading ? (
-                        <div className="p-4 text-center text-gray-500">Loading...</div>
+                        <div className="p-6 text-center text-gray-500">Loading notifications...</div>
                     ) : notifications.length === 0 ? (
-                        <div className="p-12 text-center text-gray-500">
-                            <MailOpen className="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 className="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
-                            <p className="mt-1 text-sm text-gray-500">You're all caught up!</p>
+                        <div className="p-12 text-center flex flex-col items-center">
+                            <div className="p-3 bg-gray-100 rounded-full mb-4">
+                                <Bell className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900">No new notifications</h3>
+                            <p className="mt-1 text-gray-500">You're all caught up!</p>
                         </div>
                     ) : (
                         <ul className="divide-y divide-gray-200">
                             {notifications.map((notification) => (
-                                <li key={notification.id} className={`hover:bg-gray-50 transition duration-150 ease-in-out ${!notification.is_read ? 'bg-blue-50' : ''}`}>
-                                    <div className="px-4 py-4 sm:px-6">
-                                        <div className="flex items-center justify-between">
-                                            <p className={`text-sm font-medium truncate ${!notification.is_read ? 'text-indigo-600' : 'text-gray-900'}`}>
+                                <li key={notification.id} className="p-6 hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-start space-x-4">
+                                        <div className="flex-shrink-0">
+                                            {getIcon(notification.type)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900">
                                                 {notification.title}
                                             </p>
-                                            <div className="ml-2 flex-shrink-0 flex">
-                                                <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                    {notification.type}
-                                                </p>
-                                            </div>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {notification.message}
+                                            </p>
+                                            <p className="text-xs text-gray-400 mt-2">
+                                                {format(new Date(notification.created_at), 'MMM d, yyyy HH:mm')}
+                                            </p>
                                         </div>
-                                        <div className="mt-2 sm:flex sm:justify-between">
-                                            <div className="sm:flex">
-                                                <p className="flex items-center text-sm text-gray-500">
-                                                    {notification.message}
-                                                </p>
-                                            </div>
-                                            <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                                <p>
-                                                    {new Date(notification.created_at).toLocaleString()}
-                                                </p>
-                                                {!notification.is_read && (
-                                                    <button
-                                                        onClick={() => markAsRead(notification.id)}
-                                                        className="ml-4 text-xs text-indigo-600 hover:text-indigo-900"
-                                                    >
-                                                        Mark as read
-                                                    </button>
-                                                )}
-                                            </div>
+                                        <div>
+                                            <button
+                                                onClick={() => markAsRead(notification.id)}
+                                                className="text-gray-400 hover:text-gray-500"
+                                                title="Mark as read"
+                                            >
+                                                <Check className="h-5 w-5" />
+                                            </button>
                                         </div>
                                     </div>
                                 </li>

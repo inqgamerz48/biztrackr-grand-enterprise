@@ -24,9 +24,33 @@ def migrate():
                 # But to be safe and simple for this task, we just add the column.
                 
                 connection.commit()
-                print("Column added successfully.")
+                print("Column 'tenant_id' added successfully.")
         except Exception as e:
-            print(f"Migration failed: {e}")
+            print(f"Migration for tenant_id failed: {e}")
+
+        # Migrate new company details columns
+        new_columns = [
+            ("company_address", "VARCHAR"),
+            ("company_phone", "VARCHAR"),
+            ("company_email", "VARCHAR"),
+            ("company_website", "VARCHAR"),
+            ("footer_text", "VARCHAR DEFAULT 'Thank you for your business!'")
+        ]
+
+        for col_name, col_type in new_columns:
+            try:
+                result = connection.execute(text(f"SELECT column_name FROM information_schema.columns WHERE table_name='settings' AND column_name='{col_name}'"))
+                if result.fetchone():
+                    print(f"Column '{col_name}' already exists.")
+                else:
+                    print(f"Adding '{col_name}' column...")
+                    connection.execute(text(f"ALTER TABLE settings ADD COLUMN {col_name} {col_type}"))
+                    connection.commit()
+                    print(f"Column '{col_name}' added successfully.")
+            except Exception as e:
+                print(f"Migration for {col_name} failed: {e}")
+            except Exception as e:
+                print(f"Migration for {col_name} failed: {e}")
 
 if __name__ == "__main__":
     migrate()

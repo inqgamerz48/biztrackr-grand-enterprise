@@ -12,3 +12,5 @@ class Notification(Base):
     type = Column(String, default="info") # info, warning, success, error
     is_read = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)

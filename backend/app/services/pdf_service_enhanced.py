@@ -79,6 +79,11 @@ def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
     # Fetch company info from settings if available
     company_name = "BizTracker PRO"
     company_tagline = "Your Complete Business Management Solution"
+    company_address = "123 Business Street, Mumbai, Maharashtra 400001"
+    company_phone = "+91 98765 43210"
+    company_email = "support@biztrackerpro.com"
+    company_website = "www.biztrackerpro.com"
+    footer_text = "Thank you for your business!"
     terms = None
     
     if db_session:
@@ -87,6 +92,11 @@ def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
             settings = db_session.query(Settings).first()
             if settings:
                 company_name = settings.company_name or company_name
+                company_address = settings.company_address or company_address
+                company_phone = settings.company_phone or company_phone
+                company_email = settings.company_email or company_email
+                company_website = settings.company_website or company_website
+                footer_text = settings.footer_text or footer_text
                 terms = settings.terms_and_conditions
         except Exception:
             pass  # Use defaults if settings not available
@@ -187,11 +197,11 @@ def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
     elements.append(Spacer(1, 0.05*inch))
     
     # Contact info
-    contact_info = """
+    contact_info = f"""
     <para align=center>
     <font size=8 color=#6b7280>
-    📍 123 Business Street, Mumbai, Maharashtra 400001<br/>
-    📞 +91 98765 43210 | ✉ support@biztrackerpro.com | 🌐 www.biztrackerpro.com
+    📍 {company_address}<br/>
+    📞 {company_phone} | ✉ {company_email} | 🌐 {company_website}
     </font>
     </para>
     """
@@ -352,7 +362,7 @@ def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
     
     elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#e5e7eb')))
     elements.append(Spacer(1, 0.15*inch))
-    elements.append(Paragraph("Thank You for Your Business!", footer_style))
+    elements.append(Paragraph(footer_text, footer_style))
     elements.append(Paragraph(f"We appreciate your trust in {company_name}", footer_note_style))
     elements.append(Spacer(1, 0.1*inch))
     

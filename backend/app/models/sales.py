@@ -21,9 +21,11 @@ class Sale(Base):
     
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"))
+    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
 
     customer = relationship("Customer", back_populates="sales")
     tenant = relationship("Tenant", back_populates="sales")
+    branch = relationship("Branch")
     items = relationship("SaleItem", back_populates="sale")
 
 class SaleItem(Base):

@@ -43,7 +43,7 @@ def create_item(
             detail=f"Item limit reached for your '{current_user.tenant.plan}' plan. Please upgrade to add more items."
         )
 
-    return inventory_service.create_item(db, item=item_in, tenant_id=current_user.tenant_id)
+    return inventory_service.create_item(db, item=item_in, tenant_id=current_user.tenant_id, user_id=current_user.id)
 
 @router.put("/{item_id}", response_model=schemas.Item)
 def update_item(
@@ -53,7 +53,7 @@ def update_item(
     current_user: User = Depends(require_manager_or_above),  # Manager+ only
 ):
     """Update inventory item - Manager+ access"""
-    item = inventory_service.update_item(db, item_id=item_id, item_in=item_in, tenant_id=current_user.tenant_id)
+    item = inventory_service.update_item(db, item_id=item_id, item_in=item_in, tenant_id=current_user.tenant_id, user_id=current_user.id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
@@ -65,7 +65,7 @@ def delete_item(
     current_user: User = Depends(require_manager_or_above),  # Manager+ only
 ):
     """Delete inventory item - Manager+ access"""
-    success = inventory_service.delete_item(db, item_id=item_id, tenant_id=current_user.tenant_id)
+    success = inventory_service.delete_item(db, item_id=item_id, tenant_id=current_user.tenant_id, user_id=current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"message": "Item deleted successfully"}

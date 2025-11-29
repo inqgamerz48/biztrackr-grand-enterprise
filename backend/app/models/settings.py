@@ -12,6 +12,13 @@ class Settings(Base):
     logo_url = Column(String, nullable=True)
     terms_and_conditions = Column(String, nullable=True)
     
+    # Company Details for Invoices
+    company_address = Column(String, nullable=True)
+    company_phone = Column(String, nullable=True)
+    company_email = Column(String, nullable=True)
+    company_website = Column(String, nullable=True)
+    footer_text = Column(String, default="Thank you for your business!")
+    
     # Feature flags or other global configs can go here
     enable_notifications = Column(Boolean, default=True)
     

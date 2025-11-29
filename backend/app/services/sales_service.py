@@ -15,7 +15,10 @@ class PurchaseCreate(BaseModel):
     items: List[dict] # item_id, quantity, price
     transport_charges: float = 0.0
 
-def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int):
+from app.services.activity_log_service import activity_log_service
+from app.services import inventory_service
+
+def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optional[int] = None):
     # Fetch global settings for tax rate
     from app.models.settings import Settings
     settings = db.query(Settings).first()
@@ -79,6 +82,7 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int):
         
         # Reduce Stock
         data['db_item'].quantity -= data['quantity']
+        inventory_service.check_low_stock(db, data['db_item'].id, tenant_id)
 
     # Update Customer Balance
     if sale_in.customer_id:
@@ -88,9 +92,16 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int):
 
     db.commit()
     db.refresh(new_sale)
+    
+    if user_id:
+        activity_log_service.log_action(
+            db, tenant_id, user_id, "CREATE_SALE", "sale", new_sale.id, 
+            {"invoice": new_sale.invoice_number, "total": new_sale.total_amount}
+        )
+        
     return new_sale
 
-def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int):
+def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, user_id: Optional[int] = None):
     total_amount = sum([item['quantity'] * item['price'] for item in purchase_in.items]) + purchase_in.transport_charges
     
     new_purchase = Purchase(
@@ -122,9 +133,16 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int):
 
     db.commit()
     db.refresh(new_purchase)
+    
+    if user_id:
+        activity_log_service.log_action(
+            db, tenant_id, user_id, "CREATE_PURCHASE", "purchase", new_purchase.id, 
+            {"invoice": new_purchase.invoice_number, "total": new_purchase.total_amount}
+        )
+        
     return new_purchase
 
-def receive_purchase(db: Session, purchase_id: int, tenant_id: int):
+def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Optional[int] = None):
     purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id).first()
     if not purchase:
         return None
@@ -146,4 +164,11 @@ def receive_purchase(db: Session, purchase_id: int, tenant_id: int):
     purchase.status = "Received"
     db.commit()
     db.refresh(purchase)
+    
+    if user_id:
+        activity_log_service.log_action(
+            db, tenant_id, user_id, "RECEIVE_PURCHASE", "purchase", purchase.id, 
+            {"invoice": purchase.invoice_number, "status": "Received"}
+        )
+        
     return purchase

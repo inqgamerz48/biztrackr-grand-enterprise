@@ -28,10 +28,12 @@ class InventoryItem(Base):
     
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"))
+    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
     supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=True)
 
     category = relationship("Category", back_populates="items")
     tenant = relationship("Tenant", back_populates="items")
+    branch = relationship("Branch")
     supplier = relationship("Supplier", back_populates="items")
     sale_items = relationship("SaleItem", back_populates="item")
     purchase_items = relationship("PurchaseItem", back_populates="item")
