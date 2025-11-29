@@ -9,5 +9,6 @@ from .notification import Notification
 from .security import SecurityEvent, BlockedIP as IPBlacklist
 from .payment_request import PaymentRequest
 from .payment import Payment
+from .payment_account import PaymentAccount
 from .settings import Settings
 

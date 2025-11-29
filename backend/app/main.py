@@ -40,6 +40,12 @@ try:
     
     from migrate_purchases import migrate_purchases
     migrate_purchases()
+
+    from migrate_banking import migrate_banking
+    migrate_banking()
+
+    from migrate_purchase_tax import migrate_purchase_tax
+    migrate_purchase_tax()
     
 except Exception as e:
     print("❌ DB INIT ERROR:", e)
