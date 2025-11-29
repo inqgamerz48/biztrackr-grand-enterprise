@@ -9,7 +9,6 @@ export default function SalesPage() {
     const [cart, setCart] = useState<any[]>([]);
     const [search, setSearch] = useState('');
     const [totalDiscount, setTotalDiscount] = useState(0);
-    const [totalDiscount, setTotalDiscount] = useState(0);
     const [showCheckoutModal, setShowCheckoutModal] = useState(false);
     const [showScanModal, setShowScanModal] = useState(false);
 
