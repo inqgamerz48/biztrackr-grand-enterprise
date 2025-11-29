@@ -102,18 +102,24 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
         
     return new_sale
 
-def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, user_id: Optional[int] = None):
+def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, user_id: Optional[int] = None, invoice_number: Optional[str] = None):
     # Fetch global settings for tax rate
     from app.models.settings import Settings
     settings = db.query(Settings).first()
     tax_rate = settings.tax_rate if settings else 0.0
 
-    subtotal = sum([item['quantity'] * item['price'] for item in purchase_in.items])
+    # Handle Pydantic model access (dot notation)
+    subtotal = sum([item.quantity * item.price for item in purchase_in.items])
     tax_amount = subtotal * tax_rate
     total_amount = subtotal + tax_amount + purchase_in.transport_charges
     
+    # Generate invoice number if not provided
+    if not invoice_number:
+        import datetime
+        invoice_number = f"PO-{int(datetime.datetime.utcnow().timestamp())}"
+
     new_purchase = Purchase(
-        invoice_number=purchase_in.invoice_number,
+        invoice_number=invoice_number,
         supplier_id=purchase_in.supplier_id,
         total_amount=total_amount,
         tax_amount=tax_amount,
@@ -125,16 +131,16 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, us
     db.flush()
 
     for item_data in purchase_in.items:
-        db_item = db.query(Item).filter(Item.id == item_data['item_id'], Item.tenant_id == tenant_id).first()
+        db_item = db.query(Item).filter(Item.id == item_data.item_id, Item.tenant_id == tenant_id).first()
         if not db_item:
             continue
         
         new_p_item = PurchaseItem(
             purchase_id=new_purchase.id,
-            item_id=item_data['item_id'],
-            quantity=item_data['quantity'],
-            price=item_data['price'],
-            total=item_data['quantity'] * item_data['price']
+            item_id=item_data.item_id,
+            quantity=item_data.quantity,
+            price=item_data.price,
+            total=item_data.quantity * item_data.price
         )
         db.add(new_p_item)
         

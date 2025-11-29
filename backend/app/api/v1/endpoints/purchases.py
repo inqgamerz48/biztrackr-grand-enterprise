@@ -32,19 +32,19 @@ def create_purchase(
     # The service expects a Pydantic model from sales_service, let's adapt
     from app.services.sales_service import PurchaseCreate as ServicePurchaseCreate
     
-    service_in = ServicePurchaseCreate(
-        supplier_id=purchase_in.supplier_id,
-        invoice_number=f"PO-{datetime.now().year}-{datetime.now().timestamp()}", # Service expects this or generates it? Service doesn't generate it.
-        items=[{"item_id": i.item_id, "quantity": i.quantity, "price": i.price} for i in purchase_in.items],
-        transport_charges=purchase_in.transport_charges
-    )
-    
     # Override invoice number generation to be consistent
     count = db.query(Purchase).filter(Purchase.tenant_id == current_user.tenant_id).count()
-    service_in.invoice_number = f"PO-{datetime.now().year}-{count + 1:04d}"
+    invoice_number = f"PO-{datetime.now().year}-{count + 1:04d}"
+
+    service_in = ServicePurchaseCreate(
+        supplier_id=purchase_in.supplier_id,
+        # invoice_number is passed separately now
+        items=[{"item_id": i.item_id, "quantity": i.quantity, "price": i.price, "total": i.quantity * i.price} for i in purchase_in.items],
+        transport_charges=purchase_in.transport_charges
+    )
 
     from app.services import sales_service
-    return sales_service.create_purchase(db, service_in, current_user.tenant_id, current_user.id)
+    return sales_service.create_purchase(db, service_in, current_user.tenant_id, current_user.id, invoice_number=invoice_number)
 
 class PaymentRequest(BaseModel):
     amount: float
