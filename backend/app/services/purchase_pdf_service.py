@@ -45,18 +45,45 @@ class NumberedCanvas(canvas.Canvas):
         self.drawCentredString(A4[0] / 2, 15*mm, page_num)
         self.restoreState()
 
-def generate_purchase_receipt_pdf(purchase_data: Dict) -> BytesIO:
+def generate_purchase_receipt_pdf(purchase_data: Dict, db_session=None) -> BytesIO:
     """
     Generate a professional PDF receipt for a purchase.
     
     Args:
         purchase_data: Dictionary containing purchase information
+        db_session: Optional database session to fetch settings
     
     Returns:
         BytesIO: PDF file in memory
     """
     buffer = BytesIO()
     
+    # Fetch company info from settings if available
+    company_name = "BizTracker PRO"
+    company_tagline = "Your Complete Business Management Solution"
+    company_address = "123 Business Street, Mumbai, Maharashtra 400001"
+    company_phone = "+91 98765 43210"
+    company_email = "support@biztrackerpro.com"
+    company_website = "www.biztrackerpro.com"
+    footer_text = "Purchase Order Confirmed"
+    
+    if db_session:
+        try:
+            from app.models.settings import Settings
+            query = db_session.query(Settings)
+            if 'tenant_id' in purchase_data:
+                query = query.filter(Settings.tenant_id == purchase_data['tenant_id'])
+            settings = query.first()
+            if settings:
+                company_name = settings.company_name or company_name
+                company_address = settings.company_address or company_address
+                company_phone = settings.company_phone or company_phone
+                company_email = settings.company_email or company_email
+                company_website = settings.company_website or company_website
+                # footer_text = settings.footer_text or footer_text # Keep specific PO footer or append?
+        except Exception:
+            pass
+
     # Create PDF document with custom canvas
     doc = SimpleDocTemplate(
         buffer,
@@ -127,17 +154,17 @@ def generate_purchase_receipt_pdf(purchase_data: Dict) -> BytesIO:
     )
     
     # Company Header
-    elements.append(Paragraph("BizTracker PRO", company_style))
-    elements.append(Paragraph("Your Complete Business Management Solution", tagline_style))
+    elements.append(Paragraph(company_name, company_style))
+    elements.append(Paragraph(company_tagline, tagline_style))
     elements.append(Spacer(1, 0.1*inch))
     
     # Company contact info
-    contact_info = """
+    contact_info = f"""
     <para align=center>
     <font size=9 color=#6b7280>
-    📍 123 Business Street, Mumbai, Maharashtra 400001<br/>
-    📞 +91 98765 43210 | ✉ support@biztrackerpro.com<br/>
-    🌐 www.biztrackerpro.com
+    📍 {company_address}<br/>
+    📞 {company_phone} | ✉ {company_email}<br/>
+    🌐 {company_website}
     </font>
     </para>
     """

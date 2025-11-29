@@ -71,7 +71,8 @@ def get_sale_pdf(
         'tax_rate': tax_rate,  # Add tax rate for percentage display
         'total_amount': sale.total_amount,
         'payment_method': sale.payment_method,
-        'customer_name': sale.customer.name if sale.customer else None
+        'customer_name': sale.customer.name if sale.customer else None,
+        'tenant_id': sale.tenant_id
     }
     
     # Pass db_session to enable Settings-based branding
@@ -149,10 +150,12 @@ def get_purchase_pdf(
         'subtotal': subtotal,
         'transport_charges': purchase.transport_charges,
         'total_amount': purchase.total_amount,
-        'supplier_name': purchase.supplier.name if purchase.supplier else None
+        'total_amount': purchase.total_amount,
+        'supplier_name': purchase.supplier.name if purchase.supplier else None,
+        'tenant_id': purchase.tenant_id
     }
     
-    pdf_buffer = generate_purchase_receipt_pdf(purchase_data)
+    pdf_buffer = generate_purchase_receipt_pdf(purchase_data, db_session=db)
     
     return StreamingResponse(
         pdf_buffer,

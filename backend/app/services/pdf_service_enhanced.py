@@ -89,7 +89,10 @@ def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
     if db_session:
         try:
             from app.models.settings import Settings
-            settings = db_session.query(Settings).first()
+            query = db_session.query(Settings)
+            if 'tenant_id' in sale_data:
+                query = query.filter(Settings.tenant_id == sale_data['tenant_id'])
+            settings = query.first()
             if settings:
                 company_name = settings.company_name or company_name
                 company_address = settings.company_address or company_address
