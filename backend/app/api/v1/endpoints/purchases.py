@@ -28,23 +28,12 @@ def create_purchase(
     db: Session = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above),
 ):
-    # Convert schema to service schema if needed, or just pass dict
-    # The service expects a Pydantic model from sales_service, let's adapt
-    from app.services.sales_service import PurchaseCreate as ServicePurchaseCreate
-    
     # Override invoice number generation to be consistent
     count = db.query(Purchase).filter(Purchase.tenant_id == current_user.tenant_id).count()
     invoice_number = f"PO-{datetime.now().year}-{count + 1:04d}"
 
-    service_in = ServicePurchaseCreate(
-        supplier_id=purchase_in.supplier_id,
-        # invoice_number is passed separately now
-        items=[{"item_id": i.item_id, "quantity": i.quantity, "price": i.price, "total": i.quantity * i.price} for i in purchase_in.items],
-        transport_charges=purchase_in.transport_charges
-    )
-
     from app.services import sales_service
-    return sales_service.create_purchase(db, service_in, current_user.tenant_id, current_user.id, invoice_number=invoice_number)
+    return sales_service.create_purchase(db, purchase_in, current_user.tenant_id, current_user.id, invoice_number=invoice_number)
 
 class PaymentRequest(BaseModel):
     amount: float
