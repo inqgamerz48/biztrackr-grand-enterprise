@@ -8,7 +8,7 @@ try:
     from migrate_branches import migrate_branches
     from migrate_roles import migrate_roles
     from migrate_purchases import migrate_purchases
-    from migrate_banking import migrate_banking
+    from migrate_banking import migrate_payment_accounts
     from migrate_purchase_tax import migrate_purchase_tax
 except ImportError:
     # Fallback for when running from different context, though in prod it should work
@@ -21,7 +21,7 @@ except ImportError:
     from migrate_branches import migrate_branches
     from migrate_roles import migrate_roles
     from migrate_purchases import migrate_purchases
-    from migrate_banking import migrate_banking
+    from migrate_banking import migrate_payment_accounts
     from migrate_purchase_tax import migrate_purchase_tax
 
 def init_db():
@@ -36,7 +36,7 @@ def init_db():
         migrate_branches()
         migrate_roles()
         migrate_purchases()
-        migrate_banking()
+        migrate_payment_accounts()
         migrate_purchase_tax()
         
         print("✅ Database initialization completed.")
