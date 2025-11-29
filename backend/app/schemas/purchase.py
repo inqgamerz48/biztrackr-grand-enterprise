@@ -6,7 +6,7 @@ class PurchaseItemBase(BaseModel):
     item_id: int
     quantity: int
     price: float
-    total: float
+    total: float = 0.0
 
 class PurchaseItemCreate(PurchaseItemBase):
     pass
@@ -20,7 +20,7 @@ class PurchaseItem(PurchaseItemBase):
 
 class PurchaseBase(BaseModel):
     supplier_id: int
-    total_amount: float
+    total_amount: float = 0.0
     transport_charges: float = 0.0
     status: str = "Ordered"
     payment_status: str = "pending"
