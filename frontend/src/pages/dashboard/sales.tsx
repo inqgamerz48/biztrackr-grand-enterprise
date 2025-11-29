@@ -19,12 +19,17 @@ export default function SalesPage() {
     const barcodeBuffer = useRef('');
     const lastKeyTime = useRef(0);
 
+    // Banking State
+    const [accounts, setAccounts] = useState<any[]>([]);
+    const [selectedAccount, setSelectedAccount] = useState('');
+
     useEffect(() => {
         const fetchItems = async () => {
             const res = await api.get('/inventory/');
             setItems(res.data);
         };
         fetchItems();
+        fetchAccounts();
 
         // Load held carts from local storage
         const savedCarts = localStorage.getItem('biztrackr_held_carts');
@@ -55,7 +60,19 @@ export default function SalesPage() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [items]); // Re-bind if items change (though handleBarcodeScan uses current items state if passed or we can use a ref)
+    }, [items]); // Re-bind if items change
+
+    const fetchAccounts = async () => {
+        try {
+            const res = await api.get('/banking/');
+            setAccounts(res.data);
+            if (res.data.length > 0) {
+                setSelectedAccount(res.data[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching accounts:', error);
+        }
+    };
 
     // We need items in the scanner handler, but useEffect closure might be stale. 
     // Better to search in the handler using the current items state.
@@ -164,7 +181,8 @@ export default function SalesPage() {
             const payload = {
                 items: cart.map((c) => ({ item_id: c.item_id, quantity: c.quantity, discount: c.discount || 0 })),
                 payment_method: "Cash",
-                discount: totalDiscount
+                discount: totalDiscount,
+                account_id: selectedAccount ? parseInt(selectedAccount) : null
             };
             const res = await api.post('/sales/sales', payload);
 
@@ -371,7 +389,7 @@ export default function SalesPage() {
                         <div className="mt-4 border-t pt-4 space-y-2 bg-gray-50 -mx-4 -mb-4 p-4 rounded-b">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Subtotal</span>
-                                <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                                <span className="text-gray-600">₹{subtotal.toLocaleString('en-IN')}</span>
                             </div>
                             {itemDiscounts > 0 && (
                                 <div className="flex justify-between text-sm text-green-600">
@@ -481,6 +499,20 @@ export default function SalesPage() {
                                 </div>
                             </div>
 
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Deposit To Account</label>
+                                <select
+                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                    value={selectedAccount}
+                                    onChange={(e) => setSelectedAccount(e.target.value)}
+                                >
+                                    <option value="">Select Account</option>
+                                    {accounts.map((acc) => (
+                                        <option key={acc.id} value={acc.id}>{acc.name} ({acc.currency} {acc.balance})</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowCheckoutModal(false)}
@@ -492,7 +524,7 @@ export default function SalesPage() {
                                     onClick={confirmCheckout}
                                     className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 shadow-lg shadow-green-200"
                                 >
-                                    Confirm Cash Payment
+                                    Confirm Payment
                                 </button>
                             </div>
                         </div>

@@ -19,6 +19,8 @@ class Sale(Base):
     due_date = Column(DateTime(timezone=True), nullable=True)
     amount_paid = Column(Float, default=0.0)
     
+    payment_account_id = Column(Integer, ForeignKey("payment_accounts.id"), nullable=True)
+    
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id"))
     branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)

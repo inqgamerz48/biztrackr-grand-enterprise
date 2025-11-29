@@ -10,8 +10,17 @@ class Purchase(Base):
     invoice_number = Column(String, index=True)
     date = Column(DateTime(timezone=True), server_default=func.now())
     total_amount = Column(Float, default=0.0)
+    tax_amount = Column(Float, default=0.0)
     transport_charges = Column(Float, default=0.0)
     status = Column(String, default="Ordered") # Ordered, Received
+    
+    # Accounts Payable Fields
+    payment_status = Column(String, default="pending") # pending, partial, paid
+    amount_paid = Column(Float, default=0.0)
+    due_date = Column(DateTime(timezone=True), nullable=True)
+    payment_method = Column(String, nullable=True)
+    
+    payment_account_id = Column(Integer, ForeignKey("payment_accounts.id"), nullable=True)
     
     supplier_id = Column(Integer, ForeignKey("suppliers.id"))
     tenant_id = Column(Integer, ForeignKey("tenants.id"))

@@ -20,6 +20,7 @@ export default function ReportsPage() {
     const [inventoryData, setInventoryData] = useState<any>(null);
     const [expenseData, setExpenseData] = useState<any>(null);
     const [profitLossData, setProfitLossData] = useState<any>(null);
+    const [taxData, setTaxData] = useState<any>(null);
     const [chartsLoading, setChartsLoading] = useState(true);
 
     useEffect(() => {
@@ -33,17 +34,19 @@ export default function ReportsPage() {
             if (dateRange.start) params.start_date = new Date(dateRange.start).toISOString();
             if (dateRange.end) params.end_date = new Date(dateRange.end).toISOString();
 
-            const [salesRes, invRes, expRes, plRes] = await Promise.all([
+            const [salesRes, invRes, expRes, plRes, taxRes] = await Promise.all([
                 api.get('/reports/analytics/sales', { params: { days: 30 } }),
                 api.get('/reports/analytics/inventory-by-category'),
                 api.get('/reports/analytics/expenses-by-category', { params }),
-                api.get('/reports/analytics/profit-loss', { params })
+                api.get('/reports/analytics/profit-loss', { params }),
+                api.get('/tax/tax', { params: { start_date: dateRange.start, end_date: dateRange.end } })
             ]);
 
             setSalesData(salesRes.data);
             setInventoryData(invRes.data);
             setExpenseData(expRes.data);
             setProfitLossData(plRes.data);
+            setTaxData(taxRes.data);
         } catch (error) {
             console.error('Failed to fetch analytics:', error);
         } finally {
@@ -158,6 +161,46 @@ export default function ReportsPage() {
                                                         <Cell key={`cell-${index}`} fill={entry.value >= 0 ? COLORS[index % COLORS.length] : '#FF0000'} />
                                                     ))
                                                 }
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Tax Report */}
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-lg font-semibold mb-4">Tax Report</h3>
+                            {taxData && (
+                                <div className="h-64 flex flex-col justify-center">
+                                    <div className="grid grid-cols-3 gap-4 text-center mb-6">
+                                        <div className="p-3 bg-red-50 rounded">
+                                            <p className="text-sm text-gray-500">Input Tax (Purchases)</p>
+                                            <p className="text-xl font-bold text-red-600">₹{taxData.input_tax.toLocaleString('en-IN')}</p>
+                                        </div>
+                                        <div className="p-3 bg-green-50 rounded">
+                                            <p className="text-sm text-gray-500">Output Tax (Sales)</p>
+                                            <p className="text-xl font-bold text-green-600">₹{taxData.output_tax.toLocaleString('en-IN')}</p>
+                                        </div>
+                                        <div className="p-3 bg-blue-50 rounded">
+                                            <p className="text-sm text-gray-500">Net Payable</p>
+                                            <p className={`text-xl font-bold ${taxData.net_tax_payable >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                                                ₹{taxData.net_tax_payable.toLocaleString('en-IN')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <ResponsiveContainer width="100%" height="50%">
+                                        <BarChart layout="vertical" data={[
+                                            { name: 'Input Tax', value: taxData.input_tax },
+                                            { name: 'Output Tax', value: taxData.output_tax }
+                                        ]}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis type="number" />
+                                            <YAxis dataKey="name" type="category" width={100} />
+                                            <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
+                                            <Bar dataKey="value" fill="#8884d8">
+                                                <Cell fill="#EF4444" /> {/* Red for Input */}
+                                                <Cell fill="#10B981" /> {/* Green for Output */}
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>

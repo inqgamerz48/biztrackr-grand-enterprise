@@ -11,15 +11,34 @@ export default function PurchasesPage() {
     const [selectedSupplier, setSelectedSupplier] = useState('');
     const [transportCharges, setTransportCharges] = useState(0);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [paymentAmount, setPaymentAmount] = useState(0);
+    const [paymentMethod, setPaymentMethod] = useState('Cash');
     const [showReceiveModal, setShowReceiveModal] = useState(false);
     const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
     const [search, setSearch] = useState('');
     const [purchases, setPurchases] = useState<any[]>([]);
 
+    const [accounts, setAccounts] = useState<any[]>([]);
+    const [selectedAccount, setSelectedAccount] = useState('');
+
     useEffect(() => {
         fetchData();
         fetchHistory();
+        fetchAccounts();
     }, []);
+
+    const fetchAccounts = async () => {
+        try {
+            const res = await api.get('/banking/');
+            setAccounts(res.data);
+            if (res.data.length > 0) {
+                setSelectedAccount(res.data[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching accounts:', error);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -36,7 +55,7 @@ export default function PurchasesPage() {
 
     const fetchHistory = async () => {
         try {
-            const res = await api.get('/sales/purchases');
+            const res = await api.get('/purchases/');
             setPurchases(res.data);
         } catch (error) {
             console.error('Error fetching history:', error);
@@ -95,9 +114,8 @@ export default function PurchasesPage() {
                 items: cart.map((c) => ({ item_id: c.item_id, quantity: c.quantity, price: c.price })),
                 transport_charges: transportCharges
             };
-            const res = await api.post('/sales/purchases', payload);
+            const res = await api.post('/purchases/', payload);
 
-            // Download PDF receipt
             try {
                 const pdfRes = await api.get(`/sales/purchases/${res.data.id}/pdf`, { responseType: 'blob' });
                 const url = window.URL.createObjectURL(new Blob([pdfRes.data]));
@@ -116,8 +134,8 @@ export default function PurchasesPage() {
             setCart([]);
             setTransportCharges(0);
             setSelectedSupplier('');
-            fetchHistory(); // Refresh history
-            setActiveTab('history'); // Switch to history tab
+            fetchHistory();
+            setActiveTab('history');
         } catch (error) {
             alert('Purchase failed');
         }
@@ -131,14 +149,38 @@ export default function PurchasesPage() {
     const confirmReceive = async () => {
         if (!selectedPurchaseId) return;
         try {
-            await api.post(`/sales/purchases/${selectedPurchaseId}/receive`);
+            await api.post(`/purchases/${selectedPurchaseId}/receive`);
             alert('Goods Received! Inventory updated.');
             setShowReceiveModal(false);
             setSelectedPurchaseId(null);
             fetchHistory();
-            fetchData(); // Refresh inventory items
+            fetchData();
         } catch (error) {
             alert('Failed to receive order');
+        }
+    };
+
+    const handlePaymentClick = (purchase: any) => {
+        setSelectedPurchaseId(purchase.id);
+        const remaining = purchase.total_amount - (purchase.amount_paid || 0);
+        setPaymentAmount(remaining);
+        setShowPaymentModal(true);
+    };
+
+    const confirmPayment = async () => {
+        if (!selectedPurchaseId) return;
+        try {
+            await api.post(`/purchases/${selectedPurchaseId}/pay`, {
+                amount: paymentAmount,
+                payment_method: paymentMethod,
+                account_id: selectedAccount ? parseInt(selectedAccount) : null
+            });
+            alert('Payment Recorded!');
+            setShowPaymentModal(false);
+            setSelectedPurchaseId(null);
+            fetchHistory();
+        } catch (error) {
+            alert('Failed to record payment');
         }
     };
 
@@ -149,100 +191,195 @@ export default function PurchasesPage() {
 
     return (
         <DashboardLayout>
-            {/* Receive Confirmation Modal */}
-            {showReceiveModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
-                        <h2 className="text-xl font-bold mb-4 text-gray-900">Confirm Receipt</h2>
-                        <p className="text-gray-600 mb-6">
-                            Are you sure you want to mark this order as Received? This will update your inventory stock.
-                        </p>
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                onClick={() => setShowReceiveModal(false)}
-                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmReceive}
-                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold"
-                            >
-                                Confirm Receive
-                            </button>
+
+            {/* Payment Modal */}
+            {
+                showPaymentModal && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
+                            <h2 className="text-xl font-bold mb-4 text-gray-900">Record Payment</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Amount</label>
+                                    <input
+                                        type="number"
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        value={paymentAmount}
+                                        onChange={(e) => setPaymentAmount(parseFloat(e.target.value))}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                                    <select
+                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        value={paymentMethod}
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                    >
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="Cheque">Cheque</option>
+                                        <option value="UPI">UPI</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Payment Account</label>
+                                    <select
+                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        value={selectedAccount}
+                                        onChange={(e) => setSelectedAccount(e.target.value)}
+                                    >
+                                        <option value="">Select Account</option>
+                                        {accounts.map((acc) => (
+                                            <option key={acc.id} value={acc.id}>{acc.name} ({acc.currency} {acc.balance})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex justify-end space-x-3">
+                                <button
+                                    onClick={() => setShowPaymentModal(false)}
+                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmPayment}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold"
+                                >
+                                    Save Payment
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* Receive Confirmation Modal */}
+            {
+                showReceiveModal && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
+                            <h2 className="text-xl font-bold mb-4 text-gray-900">Confirm Receipt</h2>
+                            <p className="text-gray-600 mb-6">
+                                Are you sure you want to mark this order as Received? This will update your inventory stock.
+                            </p>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => setShowReceiveModal(false)}
+                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmReceive}
+                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold"
+                                >
+                                    Confirm Receive
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Receive Confirmation Modal */}
+            {
+                showReceiveModal && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
+                            <h2 className="text-xl font-bold mb-4 text-gray-900">Confirm Receipt</h2>
+                            <p className="text-gray-600 mb-6">
+                                Are you sure you want to mark this order as Received? This will update your inventory stock.
+                            </p>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => setShowReceiveModal(false)}
+                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmReceive}
+                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold"
+                                >
+                                    Confirm Receive
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Purchase Confirmation Modal */}
-            {showConfirmModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-[600px] max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-2xl font-bold mb-4 text-gray-900">Confirm Purchase Order</h2>
+            {
+                showConfirmModal && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-xl w-[600px] max-h-[90vh] overflow-y-auto">
+                            <h2 className="text-2xl font-bold mb-4 text-gray-900">Confirm Purchase Order</h2>
 
-                        {/* Supplier Info */}
-                        <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
-                            <p className="text-sm font-semibold text-gray-700">Supplier:</p>
-                            <p className="text-lg font-bold text-blue-700">{selectedSupplierData?.name}</p>
-                        </div>
-
-                        {/* Items */}
-                        <div className="mb-6">
-                            <h3 className="font-semibold text-lg mb-3">Items to Purchase</h3>
-                            <div className="space-y-3">
-                                {cart.map((item) => (
-                                    <div key={item.item_id} className="flex justify-between items-start border-b pb-2">
-                                        <div className="flex-1">
-                                            <p className="font-medium">{item.name}</p>
-                                            <p className="text-sm text-gray-600">
-                                                {item.quantity} × ₹{item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-semibold">₹{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                            {/* Supplier Info */}
+                            <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+                                <p className="text-sm font-semibold text-gray-700">Supplier:</p>
+                                <p className="text-lg font-bold text-blue-700">{selectedSupplierData?.name}</p>
                             </div>
-                        </div>
 
-                        {/* Totals */}
-                        <div className="border-t pt-4 space-y-2 mb-6">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Subtotal:</span>
-                                <span>₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </div>
-                            {transportCharges > 0 && (
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Transport Charges:</span>
-                                    <span>₹{transportCharges.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            {/* Items */}
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-lg mb-3">Items to Purchase</h3>
+                                <div className="space-y-3">
+                                    {cart.map((item) => (
+                                        <div key={item.item_id} className="flex justify-between items-start border-b pb-2">
+                                            <div className="flex-1">
+                                                <p className="font-medium">{item.name}</p>
+                                                <p className="text-sm text-gray-600">
+                                                    {item.quantity} × ₹{item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-semibold">₹{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
-                            <div className="flex justify-between text-xl font-bold pt-2 border-t">
-                                <span>Total Amount:</span>
-                                <span className="text-blue-600">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
-                        </div>
 
-                        {/* Buttons */}
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                onClick={() => setShowConfirmModal(false)}
-                                className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmPurchase}
-                                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold"
-                            >
-                                Create PO
-                            </button>
+                            {/* Totals */}
+                            <div className="border-t pt-4 space-y-2 mb-6">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Subtotal:</span>
+                                    <span>₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                                {transportCharges > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Transport Charges:</span>
+                                        <span>₹{transportCharges.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-xl font-bold pt-2 border-t">
+                                    <span>Total Amount:</span>
+                                    <span className="text-blue-600">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => setShowConfirmModal(false)}
+                                    className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmPurchase}
+                                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold"
+                                >
+                                    Create PO
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
@@ -401,9 +538,9 @@ export default function PurchasesPage() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
@@ -419,9 +556,6 @@ export default function PurchasesPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {p.supplier_name}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {p.items_count}
-                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                                             ₹{p.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                         </td>
@@ -430,19 +564,32 @@ export default function PurchasesPage() {
                                                 {p.status || 'Ordered'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit ${p.payment_status === 'paid' ? 'bg-green-100 text-green-800' : p.payment_status === 'partial' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {p.payment_status ? p.payment_status.toUpperCase() : 'PENDING'}
+                                                </span>
+                                                <span className="text-xs text-gray-500 mt-1">
+                                                    Paid: ₹{(p.amount_paid || 0).toLocaleString('en-IN')}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                             {p.status !== 'Received' && (
                                                 <button
                                                     onClick={() => handleReceiveClick(p.id)}
-                                                    className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1"
+                                                    className="text-indigo-600 hover:text-indigo-900 inline-flex items-center gap-1"
                                                 >
                                                     <Truck size={16} /> Receive
                                                 </button>
                                             )}
-                                            {p.status === 'Received' && (
-                                                <span className="text-green-600 flex items-center gap-1">
-                                                    <CheckCircle size={16} /> Done
-                                                </span>
+                                            {p.payment_status !== 'paid' && (
+                                                <button
+                                                    onClick={() => handlePaymentClick(p)}
+                                                    className="text-green-600 hover:text-green-900 inline-flex items-center gap-1"
+                                                >
+                                                    <ShoppingCart size={16} /> Pay
+                                                </button>
                                             )}
                                         </td>
                                     </tr>
@@ -459,6 +606,6 @@ export default function PurchasesPage() {
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 }
