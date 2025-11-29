@@ -11,4 +11,6 @@ from .payment_request import PaymentRequest
 from .payment import Payment
 from .payment_account import PaymentAccount
 from .settings import Settings
+from .role import Role, Permission
+from .branch import Branch
 

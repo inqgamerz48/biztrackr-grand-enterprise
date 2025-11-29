@@ -188,7 +188,8 @@ def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Opt
         
     return purchase
 
-from app.services import inventory_service, activity_log_service
+from app.services import inventory_service
+from app.services.activity_log_service import activity_log_service
 from app.models.payment_account import PaymentAccount
 
 def record_payment(db: Session, purchase_id: int, amount: float, payment_method: str, tenant_id: int, user_id: Optional[int] = None, account_id: Optional[int] = None):
