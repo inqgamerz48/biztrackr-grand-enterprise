@@ -498,34 +498,30 @@ export default function SalesPage() {
                         </div>
                     </div>
                 </div>
-                </div>
-    )
-}
+            )}
 
-{/* Scanner Modal */ }
-{
-    showScanModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-md relative">
-                <button
-                    onClick={() => setShowScanModal(false)}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
-                >
-                    ×
-                </button>
-                <h2 className="text-lg font-bold mb-4 text-center">Scan Item</h2>
-                <div className="aspect-square bg-black rounded overflow-hidden">
-                    <QrReader
-                        onResult={handleCameraScan}
-                        constraints={{ facingMode: 'environment' }}
-                        className="w-full h-full"
-                    />
+            {/* Scanner Modal */}
+            {showScanModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-md relative">
+                        <button
+                            onClick={() => setShowScanModal(false)}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
+                        >
+                            ×
+                        </button>
+                        <h2 className="text-lg font-bold mb-4 text-center">Scan Item</h2>
+                        <div className="aspect-square bg-black rounded overflow-hidden">
+                            <QrReader
+                                onResult={handleCameraScan}
+                                constraints={{ facingMode: 'environment' }}
+                                className="w-full h-full"
+                            />
+                        </div>
+                        <p className="text-center text-sm text-gray-500 mt-4">Point camera at item barcode</p>
+                    </div>
                 </div>
-                <p className="text-center text-sm text-gray-500 mt-4">Point camera at item barcode</p>
-            </div>
-        </div>
-    )
-}
-        </DashboardLayout >
+            )}
+        </DashboardLayout>
     );
 }
