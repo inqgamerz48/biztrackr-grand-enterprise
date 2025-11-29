@@ -1,7 +1,7 @@
 import csv
 import io
 from sqlalchemy.orm import Session
-from app.models import Item, Sale, Customer, User
+from app.models import InventoryItem, Sale, Customer, User
 from typing import List
 
 class BackupService:
@@ -13,7 +13,7 @@ class BackupService:
         writer.writerow(['ID', 'Name', 'Category', 'Quantity', 'Unit', 'Purchase Price', 'Selling Price', 'Min Stock Level', 'Location'])
         
         # Data
-        items = db.query(Item).filter(Item.tenant_id == tenant_id).all()
+        items = db.query(InventoryItem).filter(InventoryItem.tenant_id == tenant_id).all()
         for item in items:
             writer.writerow([
                 item.id,
