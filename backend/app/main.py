@@ -25,6 +25,18 @@ try:
     # Run Social Auth Migration
     from migrate_social_auth import migrate_social_auth
     migrate_social_auth()
+
+    from migrate_notifications import migrate_notifications
+    migrate_notifications()
+
+    from migrate_settings import migrate_settings
+    migrate_settings()
+
+    from migrate_branches import migrate_branches
+    migrate_branches()
+
+    from migrate_roles import migrate_roles
+    migrate_roles()
     
 except Exception as e:
     print("❌ DB INIT ERROR:", e)
