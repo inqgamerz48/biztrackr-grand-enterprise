@@ -188,9 +188,10 @@ def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Opt
         
     return purchase
 
+from app.services import inventory_service, activity_log_service
 from app.models.payment_account import PaymentAccount
 
-def record_payment(db: Session, purchase_id: int, amount: float, payment_method: str, tenant_id: int, account_id: Optional[int] = None):
+def record_payment(db: Session, purchase_id: int, amount: float, payment_method: str, tenant_id: int, user_id: Optional[int] = None, account_id: Optional[int] = None):
     purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id).first()
     if not purchase:
         raise HTTPException(status_code=404, detail="Purchase not found")
