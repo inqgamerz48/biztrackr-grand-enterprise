@@ -18,7 +18,7 @@ def check_low_stock(db: Session, item_id: int, tenant_id: int):
     if not item:
         return
 
-    if item.quantity <= item.min_stock_level:
+    if item.quantity <= item.min_stock:
         # Check if notification already exists to avoid spamming (optional, but good practice)
         # For now, we'll just create it. A more robust system would check for recent unread notifications.
         
@@ -31,7 +31,7 @@ def check_low_stock(db: Session, item_id: int, tenant_id: int):
                 db, 
                 tenant_id, 
                 "Low Stock Alert", 
-                f"Item '{item.name}' is low on stock. Current quantity: {item.quantity} (Min: {item.min_stock_level})",
+                f"Item '{item.name}' is low on stock. Current quantity: {item.quantity} (Min: {item.min_stock})",
                 "warning",
                 user_id=admin.id
             )
