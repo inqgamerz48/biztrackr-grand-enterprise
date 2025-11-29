@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
+import QRCode from 'react-qr-code';
+import { QrReader } from 'react-qr-reader';
+import { Scan, QrCode } from 'lucide-react';
 
 export default function InventoryPage() {
     const [items, setItems] = useState<any[]>([]);
@@ -14,14 +17,19 @@ export default function InventoryPage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
     const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+    const [showScanModal, setShowScanModal] = useState(false);
+    const [showQRModal, setShowQRModal] = useState(false);
+
     const [itemToDelete, setItemToDelete] = useState<number | null>(null);
     const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
+    const [selectedQRItem, setSelectedQRItem] = useState<any>(null);
+
     const [bulkImportFile, setBulkImportFile] = useState<File | null>(null);
     const [bulkImportResults, setBulkImportResults] = useState<any>(null);
     const [bulkImportLoading, setBulkImportLoading] = useState(false);
 
     // Forms
-    const [newItem, setNewItem] = useState({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5 });
+    const [newItem, setNewItem] = useState({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5, barcode: '' });
     const [editItem, setEditItem] = useState<any>(null);
     const [newCategory, setNewCategory] = useState({ name: '' });
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -65,6 +73,28 @@ export default function InventoryPage() {
         }
     };
 
+    const handleScan = (result: any, error: any) => {
+        if (result) {
+            const code = result?.text;
+            if (code) {
+                // Check if item exists
+                const item = items.find(i => i.barcode === code || i.id.toString() === code);
+                if (item) {
+                    // Highlight or filter item
+                    alert(`Found item: ${item.name}`);
+                    // Optional: Set search filter if we had one, or scroll to item
+                } else {
+                    // Ask to add new item
+                    if (confirm(`Item with code ${code} not found. Add new item?`)) {
+                        setNewItem({ ...newItem, barcode: code });
+                        setShowScanModal(false);
+                        setShowAddModal(true);
+                    }
+                }
+            }
+        }
+    };
+
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -74,7 +104,7 @@ export default function InventoryPage() {
             };
             await api.post('/inventory/', payload);
             setShowAddModal(false);
-            setNewItem({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5 });
+            setNewItem({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5, barcode: '' });
             fetchData();
         } catch (error) {
             alert('Failed to add item');
@@ -205,6 +235,12 @@ export default function InventoryPage() {
                         Manage Categories
                     </button>
                     <button
+                        onClick={() => setShowScanModal(true)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
+                    >
+                        <Scan size={18} /> Scan
+                    </button>
+                    <button
                         onClick={() => setShowBulkImportModal(true)}
                         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     >
@@ -234,6 +270,28 @@ export default function InventoryPage() {
                                     value={newItem.name}
                                     onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                                 />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Barcode (Optional)</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                        value={newItem.barcode || ''}
+                                        onChange={(e) => setNewItem({ ...newItem, barcode: e.target.value })}
+                                        placeholder="Scan or enter code"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowScanModal(true)}
+                                        className="mt-1 bg-gray-100 border border-gray-300 rounded px-3 hover:bg-gray-200"
+                                        title="Scan Barcode"
+                                    >
+                                        <Scan size={18} />
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Leave empty to auto-generate</p>
                             </div>
 
                             <div className="mb-4">
@@ -342,6 +400,16 @@ export default function InventoryPage() {
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
                                     value={editItem.name}
                                     onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700">Barcode</label>
+                                <input
+                                    type="text"
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    value={editItem.barcode || ''}
+                                    onChange={(e) => setEditItem({ ...editItem, barcode: e.target.value })}
                                 />
                             </div>
 
@@ -536,6 +604,48 @@ export default function InventoryPage() {
                 </div>
             )}
 
+            {/* Scanner Modal */}
+            {showScanModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-md relative">
+                        <button
+                            onClick={() => setShowScanModal(false)}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
+                        >
+                            ×
+                        </button>
+                        <h2 className="text-lg font-bold mb-4 text-center">Scan Barcode/QR</h2>
+                        <div className="aspect-square bg-black rounded overflow-hidden">
+                            <QrReader
+                                onResult={handleScan}
+                                constraints={{ facingMode: 'environment' }}
+                                className="w-full h-full"
+                            />
+                        </div>
+                        <p className="text-center text-sm text-gray-500 mt-4">Point camera at a barcode or QR code</p>
+                    </div>
+                </div>
+            )}
+
+            {/* QR Code Modal */}
+            {showQRModal && selectedQRItem && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+                        <h2 className="text-lg font-bold mb-4">{selectedQRItem.name}</h2>
+                        <div className="bg-white p-4 rounded border">
+                            <QRCode value={selectedQRItem.barcode || selectedQRItem.id.toString()} size={200} />
+                        </div>
+                        <p className="mt-4 text-sm text-gray-500 font-mono">{selectedQRItem.barcode || `ID: ${selectedQRItem.id}`}</p>
+                        <button
+                            onClick={() => setShowQRModal(false)}
+                            className="mt-6 bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 w-full"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Bulk Import Modal */}
             {showBulkImportModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -702,6 +812,7 @@ export default function InventoryPage() {
                                                     ₹{item.selling_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                                    <button onClick={() => { setSelectedQRItem(item); setShowQRModal(true); }} className="text-gray-600 hover:text-gray-900"><QrCode size={18} /></button>
                                                     <button onClick={() => openEditModal(item)} className="text-indigo-600 hover:text-indigo-900">Edit</button>
                                                     <button onClick={() => handleDeleteItem(item.id)} className="text-red-600 hover:text-red-900">Delete</button>
                                                 </td>

@@ -36,8 +36,18 @@ def check_low_stock(db: Session, item_id: int, tenant_id: int):
                 user_id=admin.id
             )
 
+import time
+import random
+
 def create_item(db: Session, item: schemas.ItemCreate, tenant_id: int, user_id: Optional[int] = None) -> Item:
-    db_item = Item(**item.dict(), tenant_id=tenant_id)
+    item_data = item.dict()
+    if not item_data.get("barcode"):
+        # Generate a unique barcode: ITM-{timestamp}-{random_4_digits}
+        timestamp = int(time.time())
+        rand_suffix = random.randint(1000, 9999)
+        item_data["barcode"] = f"ITM-{timestamp}-{rand_suffix}"
+    
+    db_item = Item(**item_data, tenant_id=tenant_id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)

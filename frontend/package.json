@@ -19,6 +19,8 @@
         "next": "12.3.4",
         "react": "17.0.2",
         "react-dom": "17.0.2",
+        "react-qr-code": "^2.0.18",
+        "react-qr-reader": "^3.0.0-beta-1",
         "recharts": "^2.9.3",
         "tailwind-merge": "^1.14.0"
     },

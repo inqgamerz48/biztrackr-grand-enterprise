@@ -26,6 +26,34 @@ def read_items(
     items = inventory_service.get_items(db, tenant_id=current_user.tenant_id, skip=skip, limit=limit)
     return items
 
+@router.get("/scan/{barcode}", response_model=schemas.Item)
+def scan_item(
+    barcode: str,
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Scan an item by barcode or QR code.
+    """
+    # First try exact barcode match
+    item = db.query(InventoryItem).filter(
+        InventoryItem.tenant_id == current_user.tenant_id,
+        InventoryItem.barcode == barcode
+    ).first()
+    
+    if not item:
+        # Fallback: Try ID match if barcode is numeric (for legacy support or direct ID scanning)
+        if barcode.isdigit():
+            item = db.query(InventoryItem).filter(
+                InventoryItem.tenant_id == current_user.tenant_id,
+                InventoryItem.id == int(barcode)
+            ).first()
+            
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    return item
+
 @router.post("/", response_model=schemas.Item)
 def create_item(
     item_in: schemas.ItemCreate,

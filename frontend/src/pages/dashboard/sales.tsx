@@ -1,14 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { Search, ShoppingCart, Save, RotateCcw, Barcode, Trash2, Plus, Minus, CreditCard } from 'lucide-react';
+import { QrReader } from 'react-qr-reader';
+import { Search, ShoppingCart, Save, RotateCcw, Barcode, Trash2, Plus, Minus, CreditCard, Scan } from 'lucide-react';
 
 export default function SalesPage() {
     const [items, setItems] = useState<any[]>([]);
     const [cart, setCart] = useState<any[]>([]);
     const [search, setSearch] = useState('');
     const [totalDiscount, setTotalDiscount] = useState(0);
+    const [totalDiscount, setTotalDiscount] = useState(0);
     const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+    const [showScanModal, setShowScanModal] = useState(false);
 
     // New Features State
     const [heldCarts, setHeldCarts] = useState<any[]>([]);
@@ -75,6 +78,17 @@ export default function SalesPage() {
             // setActiveTab('cart'); 
         } else {
             console.log('Item not found for barcode:', code);
+        }
+    };
+
+    const handleCameraScan = (result: any, error: any) => {
+        if (result) {
+            const code = result?.text;
+            if (code) {
+                handleBarcodeScan(code);
+                // Optional: Close modal after successful scan or keep open for multiple
+                // setShowScanModal(false); 
+            }
         }
     };
 
@@ -198,6 +212,13 @@ export default function SalesPage() {
                         </span>
                     </div>
                     <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowScanModal(true)}
+                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        >
+                            <Scan size={18} />
+                            <span className="hidden sm:inline">Camera Scan</span>
+                        </button>
                         <button
                             onClick={() => setShowRecallModal(true)}
                             className="flex items-center gap-2 px-3 py-2 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors"
@@ -478,7 +499,34 @@ export default function SalesPage() {
                         </div>
                     </div>
                 </div>
-            )}
-        </DashboardLayout>
+                </div>
+    )
+}
+
+{/* Scanner Modal */ }
+{
+    showScanModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-md relative">
+                <button
+                    onClick={() => setShowScanModal(false)}
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
+                >
+                    ×
+                </button>
+                <h2 className="text-lg font-bold mb-4 text-center">Scan Item</h2>
+                <div className="aspect-square bg-black rounded overflow-hidden">
+                    <QrReader
+                        onResult={handleCameraScan}
+                        constraints={{ facingMode: 'environment' }}
+                        className="w-full h-full"
+                    />
+                </div>
+                <p className="text-center text-sm text-gray-500 mt-4">Point camera at item barcode</p>
+            </div>
+        </div>
+    )
+}
+        </DashboardLayout >
     );
 }
