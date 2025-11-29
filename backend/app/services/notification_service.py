@@ -32,6 +32,13 @@ class NotificationService:
             Notification.is_read == False
         ).order_by(Notification.created_at.desc()).all()
 
+    def get_unread_count(self, db: Session, tenant_id: int, user_id: int) -> int:
+        return db.query(Notification).filter(
+            Notification.tenant_id == tenant_id,
+            Notification.user_id == user_id,
+            Notification.is_read == False
+        ).count()
+
     def mark_as_read(self, db: Session, notification_id: int, tenant_id: int, user_id: int) -> bool:
         notification = db.query(Notification).filter(
             Notification.id == notification_id,

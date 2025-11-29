@@ -28,6 +28,14 @@ def get_notifications(
 ):
     return notification_service.get_unread_notifications(db, current_user.tenant_id, current_user.id)
 
+@router.get("/unread-count")
+def get_unread_count(
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(get_current_user),
+):
+    count = notification_service.get_unread_count(db, current_user.tenant_id, current_user.id)
+    return {"count": count}
+
 @router.put("/{notification_id}/read")
 def mark_as_read(
     notification_id: int,

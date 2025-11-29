@@ -7,7 +7,7 @@ load_dotenv()
 from app.core.database import SessionLocal, engine
 from sqlalchemy import text
 
-def migrate():
+def migrate_branches():
     with engine.connect() as connection:
         try:
             # 1. Create branches table
@@ -78,4 +78,4 @@ def migrate():
             print(f"Migration failed: {e}")
 
 if __name__ == "__main__":
-    migrate()
+    migrate_branches()

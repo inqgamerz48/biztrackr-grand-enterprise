@@ -7,7 +7,7 @@ load_dotenv()
 from app.core.database import SessionLocal, engine
 from sqlalchemy import text
 
-def migrate():
+def migrate_notifications():
     with engine.connect() as connection:
         try:
             # Check if column exists
@@ -25,4 +25,4 @@ def migrate():
             print(f"Migration failed: {e}")
 
 if __name__ == "__main__":
-    migrate()
+    migrate_notifications()
