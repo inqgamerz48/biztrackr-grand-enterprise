@@ -16,39 +16,10 @@ import app.models  # Ensure model registration
 
 
 # --------------------------------------------------
-# ✔ CREATE ALL TABLES (TEMP FOR PROD UNTIL MIGRATIONS)
+# ✔ CREATE ALL TABLES & RUN MIGRATIONS
 # --------------------------------------------------
-try:
-    Base.metadata.create_all(bind=engine)
-    print("📌 Database tables ensured.")
-    
-    # Run Social Auth Migration
-    from migrate_social_auth import migrate_social_auth
-    migrate_social_auth()
-
-    from migrate_notifications import migrate_notifications
-    migrate_notifications()
-
-    from migrate_settings import migrate_settings
-    migrate_settings()
-
-    from migrate_branches import migrate_branches
-    migrate_branches()
-
-    from migrate_roles import migrate_roles
-    migrate_roles()
-    
-    from migrate_purchases import migrate_purchases
-    migrate_purchases()
-
-    from migrate_banking import migrate_banking
-    migrate_banking()
-
-    from migrate_purchase_tax import migrate_purchase_tax
-    migrate_purchase_tax()
-    
-except Exception as e:
-    print("❌ DB INIT ERROR:", e)
+from app.core.db_init import init_db
+init_db()
 
 
 # --------------------------------------------------

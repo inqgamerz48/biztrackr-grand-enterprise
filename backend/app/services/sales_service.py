@@ -10,13 +10,7 @@ class SaleCreate(BaseModel):
     discount: float = 0.0
     account_id: Optional[int] = None
 
-# ... (imports)
-
-class PurchaseCreate(BaseModel):
-    supplier_id: int
-    invoice_number: str
-    items: List[dict] # item_id, quantity, price
-    transport_charges: float = 0.0
+from app.schemas.purchase import PurchaseCreate
 
 def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optional[int] = None):
     # Fetch global settings for tax rate
