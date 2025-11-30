@@ -19,8 +19,9 @@ def run_auto_migrations():
     if backend_root not in sys.path:
         sys.path.append(backend_root)
         
-    # Find all migrate_*.py files in the backend root
-    migration_files = glob.glob(os.path.join(backend_root, "migrate_*.py"))
+    # Find all migrate_*.py files in the backend/migrations directory
+    migrations_dir = os.path.join(backend_root, "migrations")
+    migration_files = glob.glob(os.path.join(migrations_dir, "migrate_*.py"))
     
     print(f"📂 Found {len(migration_files)} migration scripts.")
     
