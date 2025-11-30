@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 
 const ArcReactorLoader = () => {
     const reactorRef = useRef<SVGSVGElement>(null);
