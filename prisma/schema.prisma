@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  CASHIER
+  USER
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  hashed_password String
+  full_name       String?
+  role            Role      @default(USER)
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  // Relations
+  subscription    Subscription?
+  settings        Settings?
+  invoices        Invoice[]
+  expenses        Expense[]
+  activity_logs   ActivityLog[]
+  export_logs     ExportLog[]
+  
+  @@index([email])
+}
+
+model Subscription {
+  id                   Int                @id @default(autoincrement())
+  user_id              Int                @unique
+  user                 User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  stripe_customer_id   String?            @unique
+  stripe_subscription_id String?          @unique
+  plan_type            PlanType           @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  current_period_start DateTime?
+  current_period_end   DateTime?
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @updatedAt
+
+  @@index([stripe_customer_id])
+}
+
+model Settings {
+  id                   Int     @id @default(autoincrement())
+  user_id              Int     @unique
+  user                 User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  company_name         String?
+  currency_symbol      String  @default("$")
+  tax_rate             Float   @default(0.0)
+  enable_notifications Boolean @default(true)
+  dark_mode            Boolean @default(false)
+  updated_at           DateTime @updatedAt
+}
+
+model Invoice {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+  customer_name String?
+  total_amount Float
+  status      String   @default("PAID") // PAID, PENDING, CANCELED
+  items       Json?    // Store line items as JSON
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([created_at])
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+  category    String
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([category])
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+  action      String   // LOGIN, EXPORT, CREATE_INVOICE, etc.
+  entity_type String?  // INVOICE, EXPENSE, SETTINGS
+  entity_id   Int?
+  details     Json?
+  ip_address  String?
+  created_at  DateTime @default(now())
+
+  @@index([user_id])
+  @@index([action])
+}
+
+model ExportLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+  export_type String   // PDF, CSV
+  resource    String   // INVOICES, EXPENSES
+  created_at  DateTime @default(now())
+
+  @@index([user_id])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  name        String   // PAGE_VIEW, BUTTON_CLICK
+  path        String?
+  metadata    Json?
+  created_at  DateTime @default(now())
+}

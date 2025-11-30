@@ -1,25 +1,42 @@
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
-import BizBot from '@/components/BizBot';
+import { useRouter } from 'next/router';
+import PageTransition from '@/components/ui/PageTransition';
+import { motion } from 'framer-motion';
 
-export default function DashboardLayout({
-    children,
-}: {
+interface DashboardLayoutProps {
     children: React.ReactNode;
-}) {
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const router = useRouter();
+
+    // Close sidebar on route change (mobile)
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [router.asPath]);
+
     return (
-        <div className="h-screen flex overflow-hidden bg-slate-50">
-            <Sidebar />
-            <div className="flex flex-col min-w-0 flex-1 overflow-hidden md:ml-72 transition-all duration-300">
-                <Header />
-                <main className="flex-1 relative overflow-y-auto focus:outline-none scrollbar-hide">
-                    <div className="py-8 px-6">
-                        <div className="max-w-7xl mx-auto">
+        <div className="flex h-screen bg-gray-100">
+            <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <Header setSidebarOpen={setSidebarOpen} />
+
+                <motion.main
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100"
+                >
+                    <div className="container mx-auto px-6 py-8">
+                        <PageTransition>
                             {children}
-                        </div>
+                        </PageTransition>
                     </div>
-                </main>
-                <BizBot />
+                </motion.main>
             </div>
         </div>
     );

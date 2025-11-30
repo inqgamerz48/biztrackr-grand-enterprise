@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
+import { motion } from 'framer-motion';
 
 interface Settings {
     company_name: string;
@@ -61,13 +62,26 @@ export default function SettingsPage() {
 
 
 
+
+    // ... (imports remain same)
+
     return (
         <DashboardLayout>
-            <div className="space-y-8">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-8"
+            >
                 <h1 className="text-2xl font-semibold text-gray-900">Settings & Billing</h1>
 
                 {/* General Settings */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="bg-white shadow overflow-hidden sm:rounded-lg"
+                >
+                    {/* ... (content remains same) */}
                     <div className="px-4 py-5 sm:px-6">
                         <h3 className="text-lg leading-6 font-medium text-gray-900">General Configuration</h3>
                         <p className="mt-1 max-w-2xl text-sm text-gray-500">Manage your global application settings.</p>
@@ -77,7 +91,9 @@ export default function SettingsPage() {
                             <p>Loading settings...</p>
                         ) : (
                             <form onSubmit={handleSave} className="space-y-6">
+                                {/* ... (form fields remain same) */}
                                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                    {/* ... (fields) */}
                                     <div className="sm:col-span-3">
                                         <label className="block text-sm font-medium text-gray-700">Company Name</label>
                                         <input
@@ -174,21 +190,81 @@ export default function SettingsPage() {
                                 </div>
 
                                 <div className="flex justify-end">
-                                    <button
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                         type="submit"
                                         disabled={saving}
                                         className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                                     >
                                         {saving ? 'Saving...' : 'Save Settings'}
-                                    </button>
+                                    </motion.button>
                                 </div>
                             </form>
                         )}
                     </div>
-                </div>
+                </motion.div>
+
+                {/* Subscription Management */}
+                <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="bg-white shadow overflow-hidden sm:rounded-lg"
+                >
+                    {/* ... (content remains same) */}
+                    <div className="px-4 py-5 sm:px-6">
+                        <h3 className="text-lg leading-6 font-medium text-gray-900">Subscription & Billing</h3>
+                        <p className="mt-1 max-w-2xl text-sm text-gray-500">Manage your plan and billing details.</p>
+                    </div>
+                    <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-900">Current Plan: <span className="text-indigo-600 font-bold">Free Tier</span></h4>
+                                <p className="text-sm text-gray-500">Upgrade to Pro for unlimited invoices and advanced analytics.</p>
+                            </div>
+                            <div className="flex space-x-3">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={async () => {
+                                        try {
+                                            const res = await api.post('/subscription/checkout', null, { params: { plan: 'pro' } });
+                                            window.location.href = res.data.url;
+                                        } catch (e) {
+                                            alert('Failed to start checkout');
+                                        }
+                                    }}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    Upgrade to Pro
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={async () => {
+                                        try {
+                                            const res = await api.post('/subscription/portal');
+                                            window.location.href = res.data.url;
+                                        } catch (e) {
+                                            alert('Failed to open billing portal');
+                                        }
+                                    }}
+                                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    Manage Billing
+                                </motion.button>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
 
                 {/* Data Management */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="bg-white shadow overflow-hidden sm:rounded-lg"
+                >
+                    {/* ... (content remains same) */}
                     <div className="px-4 py-5 sm:px-6">
                         <h3 className="text-lg leading-6 font-medium text-gray-900">Data Management</h3>
                         <p className="mt-1 max-w-2xl text-sm text-gray-500">Export your data and manage backups.</p>
@@ -233,10 +309,8 @@ export default function SettingsPage() {
                             </a>
                         </div>
                     </div>
-                </div>
-
-
-            </div>
+                </motion.div>
+            </motion.div>
         </DashboardLayout>
     );
 }

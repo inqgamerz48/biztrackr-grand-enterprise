@@ -1,17 +1,20 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { motion, HTMLMotionProps } from "framer-motion"
 
 const Card = React.forwardRef<
     HTMLDivElement,
-    React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-    <div
+    React.HTMLAttributes<HTMLDivElement> & { hoverEffect?: boolean }
+>(({ className, hoverEffect = false, ...props }, ref) => (
+    <motion.div
         ref={ref}
         className={cn(
-            "rounded-xl border bg-card text-card-foreground shadow",
+            "rounded-lg border bg-card text-card-foreground shadow-sm",
             className
         )}
-        {...props}
+        whileHover={hoverEffect ? { y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.2)" } : {}}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        {...(props as HTMLMotionProps<"div">)}
     />
 ))
 Card.displayName = "Card"
@@ -34,7 +37,10 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <h3
         ref={ref}
-        className={cn("font-semibold leading-none tracking-tight", className)}
+        className={cn(
+            "text-2xl font-semibold leading-none tracking-tight",
+            className
+        )}
         {...props}
     />
 ))
