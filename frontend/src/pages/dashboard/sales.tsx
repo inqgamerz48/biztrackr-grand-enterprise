@@ -22,6 +22,7 @@ export default function SalesPage() {
     // Banking State
     const [accounts, setAccounts] = useState<any[]>([]);
     const [selectedAccount, setSelectedAccount] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('Cash');
 
     useEffect(() => {
         const fetchItems = async () => {
@@ -180,7 +181,7 @@ export default function SalesPage() {
         try {
             const payload = {
                 items: cart.map((c) => ({ item_id: c.item_id, quantity: c.quantity, discount: c.discount || 0 })),
-                payment_method: "Cash",
+                payment_method: paymentMethod,
                 discount: totalDiscount,
                 account_id: selectedAccount ? parseInt(selectedAccount) : null
             };
@@ -499,8 +500,23 @@ export default function SalesPage() {
                                 </div>
                             </div>
 
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                                <select
+                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                    value={paymentMethod}
+                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                >
+                                    <option value="Cash">Cash</option>
+                                    <option value="Card">Card</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Credit">Credit (Pay Later)</option>
+                                </select>
+                            </div>
+
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Deposit To Account</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Deposit To Account (Optional)</label>
                                 <select
                                     className="w-full border border-gray-300 rounded px-3 py-2"
                                     value={selectedAccount}

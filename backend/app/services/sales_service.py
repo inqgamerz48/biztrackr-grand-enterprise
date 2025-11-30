@@ -1,7 +1,13 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.models import Sale, SaleItem, Purchase, PurchaseItem, InventoryItem as Item, Customer, Supplier
+import datetime
 from pydantic import BaseModel
+from app.models import Sale, SaleItem, Purchase, PurchaseItem, InventoryItem as Item, Customer, Supplier, User
+from app.models.settings import Settings
+from app.models.payment_account import PaymentAccount
+from app.services import inventory_service
+from app.services.activity_log_service import activity_log_service
+from app.schemas.purchase import PurchaseCreate
 
 class SaleCreate(BaseModel):
     customer_id: Optional[int] = None
@@ -10,11 +16,8 @@ class SaleCreate(BaseModel):
     discount: float = 0.0
     account_id: Optional[int] = None
 
-from app.schemas.purchase import PurchaseCreate
-
 def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optional[int] = None):
     # Fetch global settings for tax rate
-    from app.models.settings import Settings
     settings = db.query(Settings).first()
     tax_rate = settings.tax_rate if settings else 0.0
     
@@ -45,8 +48,15 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
     tax_amount = total_after_discount * tax_rate
     final_total = total_after_discount + tax_amount
 
+    # Determine payment status and amount paid
+    if sale_in.payment_method == "Credit":
+        payment_status = "pending"
+        amount_paid = 0.0
+    else:
+        payment_status = "paid"
+        amount_paid = final_total
+
     # 2. Create Sale
-    import datetime
     invoice_number = f"INV-{int(datetime.datetime.utcnow().timestamp())}"
     
     new_sale = Sale(
@@ -57,6 +67,8 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
         discount=sale_in.discount,
         payment_method=sale_in.payment_method,
         payment_account_id=sale_in.account_id,
+        payment_status=payment_status,
+        amount_paid=amount_paid,
         tenant_id=tenant_id
     )
     db.add(new_sale)
@@ -86,7 +98,7 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
             customer.outstanding_balance += new_sale.total_amount
 
     # Update Payment Account Balance
-    if sale_in.account_id:
+    if sale_in.account_id and sale_in.payment_method != "Credit":
         payment_account = db.query(PaymentAccount).filter(PaymentAccount.id == sale_in.account_id, PaymentAccount.tenant_id == tenant_id).first()
         if payment_account:
             payment_account.balance += new_sale.total_amount
@@ -104,7 +116,6 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
 
 def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, user_id: Optional[int] = None, invoice_number: Optional[str] = None):
     # Fetch global settings for tax rate
-    from app.models.settings import Settings
     settings = db.query(Settings).first()
     tax_rate = settings.tax_rate if settings else 0.0
 
@@ -115,7 +126,6 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, us
     
     # Generate invoice number if not provided
     if not invoice_number:
-        import datetime
         invoice_number = f"PO-{int(datetime.datetime.utcnow().timestamp())}"
 
     new_purchase = Purchase(
@@ -188,14 +198,11 @@ def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Opt
         
     return purchase
 
-from app.services import inventory_service
-from app.services.activity_log_service import activity_log_service
-from app.models.payment_account import PaymentAccount
-
 def record_payment(db: Session, purchase_id: int, amount: float, payment_method: str, tenant_id: int, user_id: Optional[int] = None, account_id: Optional[int] = None):
     purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id).first()
     if not purchase:
-        raise HTTPException(status_code=404, detail="Purchase not found")
+        # Raise exception or return None
+        return None
         
     purchase.amount_paid += amount
     purchase.payment_method = payment_method
