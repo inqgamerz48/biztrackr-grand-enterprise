@@ -9,6 +9,7 @@ export default function InventoryPage() {
     const [items, setItems] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     // Modals
     const [showAddModal, setShowAddModal] = useState(false);
@@ -36,14 +37,16 @@ export default function InventoryPage() {
 
     const fetchData = async () => {
         try {
+            setError(null);
             const [itemsRes, catsRes] = await Promise.all([
                 api.get('/inventory/'),
                 api.get('/inventory/categories')
             ]);
             setItems(itemsRes.data);
             setCategories(catsRes.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            setError(error.response?.data?.detail || error.message || "Failed to load inventory");
         } finally {
             setLoading(false);
         }
@@ -255,10 +258,17 @@ export default function InventoryPage() {
                 </div>
             </div>
 
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            )}
+
             {/* Add Item Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-lg font-bold mb-4">Add New Item</h2>
                         <form onSubmit={handleAddItem}>
                             <div className="mb-4">
@@ -389,7 +399,7 @@ export default function InventoryPage() {
             {/* Edit Item Modal */}
             {showEditModal && editItem && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-lg font-bold mb-4">Edit Item</h2>
                         <form onSubmit={handleEditItem}>
                             <div className="mb-4">
@@ -517,7 +527,7 @@ export default function InventoryPage() {
             {/* Category Modal */}
             {showCategoryModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
                         <h2 className="text-lg font-bold mb-4">Manage Categories</h2>
                         <form onSubmit={handleAddCategory} className="mb-4 flex gap-2">
                             <input
@@ -553,7 +563,7 @@ export default function InventoryPage() {
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
                         <h2 className="text-lg font-bold mb-4 text-gray-900">Confirm Delete</h2>
                         <p className="text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
                         <div className="flex justify-end space-x-2">
@@ -580,7 +590,7 @@ export default function InventoryPage() {
             {/* Delete Category Confirmation Modal */}
             {showDeleteCategoryModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
                         <h2 className="text-lg font-bold mb-4 text-gray-900">Confirm Delete Category</h2>
                         <p className="text-gray-600 mb-6">Are you sure you want to delete this category? This action cannot be undone.</p>
                         <div className="flex justify-end space-x-2">
@@ -649,7 +659,7 @@ export default function InventoryPage() {
             {/* Bulk Import Modal */}
             {showBulkImportModal && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-[500px] max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-lg font-bold mb-4 text-gray-900">Bulk Import Inventory</h2>
 
                         {!bulkImportResults ? (
@@ -751,7 +761,8 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            <div className="mt-8 flex flex-col">
+            {/* Desktop Table View */}
+            <div className="hidden md:flex mt-8 flex-col">
                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
                         <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -824,6 +835,67 @@ export default function InventoryPage() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden mt-6 space-y-4 pb-20">
+                {items.map((item) => {
+                    const category = categories.find(c => c.id === item.category_id);
+                    const isLowStock = item.quantity < item.min_stock;
+                    return (
+                        <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center space-x-3">
+                                    {item.image_url ? (
+                                        <img className="h-12 w-12 rounded-lg object-cover" src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${item.image_url}`} alt="" />
+                                    ) : (
+                                        <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                                    )}
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
+                                        <p className="text-xs text-gray-500">{category?.name || 'Uncategorized'}</p>
+                                    </div>
+                                </div>
+                                {isLowStock && (
+                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Low Stock</span>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-3 rounded-lg">
+                                <div>
+                                    <p className="text-gray-500 text-xs uppercase tracking-wider">Price</p>
+                                    <p className="font-semibold text-gray-900">₹{item.selling_price.toLocaleString('en-IN')}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500 text-xs uppercase tracking-wider">Stock</p>
+                                    <p className={`font-semibold ${isLowStock ? 'text-red-600' : 'text-gray-900'}`}>{item.quantity}</p>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-end space-x-2">
+                                <button
+                                    onClick={() => { setSelectedQRItem(item); setShowQRModal(true); }}
+                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    title="View QR"
+                                >
+                                    <QrCode size={18} />
+                                </button>
+                                <button
+                                    onClick={() => openEditModal(item)}
+                                    className="flex-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-lg text-sm font-medium text-center"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-medium text-center"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </DashboardLayout>
     );

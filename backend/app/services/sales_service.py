@@ -30,6 +30,9 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
         if not db_item:
             continue # Or raise error
         
+        if db_item.quantity < item_data['quantity']:
+            raise ValueError(f"Insufficient stock for item: {db_item.name}. Available: {db_item.quantity}")
+
         item_total = (db_item.selling_price * item_data['quantity']) - item_data.get('discount', 0)
         total_amount += item_total
         

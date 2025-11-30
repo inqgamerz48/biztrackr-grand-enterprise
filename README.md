@@ -1,78 +1,91 @@
-# BizTrackr - Enterprise SaaS Solution
+# 🚀 BizTrackr - The Ultimate Enterprise SaaS Solution
 
-![BizTrackr Banner](https://via.placeholder.com/1200x400?text=BizTrackr+Enterprise+Dashboard)
+![BizTrackr Banner](docs/images/banner.png)
 
-BizTrackr is a comprehensive, enterprise-grade SaaS application designed to streamline business operations. It integrates Inventory Management, Point of Sale (POS), CRM, Analytics, and Subscription Billing into a single, powerful platform. Built with modern technologies, it offers scalability, security, and a premium user experience.
+> **Empower your business with an all-in-one platform for Inventory, Sales, CRM, and Analytics.**
 
-## 🚀 Key Features
+BizTrackr is a cutting-edge, enterprise-grade SaaS application designed to streamline business operations. Built with a robust **FastAPI** backend and a dynamic **Next.js** frontend, it offers a seamless experience for managing multi-branch retail, wholesale, and service businesses.
 
-### 📊 Core Modules
-- **Inventory Management**: Real-time tracking, low stock alerts, and barcode/QR code support.
-- **Sales (POS)**: Fast and efficient Point of Sale system with receipt generation.
-- **Purchases**: Manage supplier orders, receive goods, and track costs.
-- **CRM**: Customer Relationship Management to track interactions and history.
-- **Expenses & Billing**: Track business expenses and manage billing.
+---
 
-### 🏢 Enterprise Features
-- **Multi-Branch Support**: Manage multiple physical store locations from a central dashboard.
-- **Role-Based Access Control (RBAC)**: Granular permissions for Admins, Managers, and Cashiers.
-- **Advanced Analytics**: Interactive dashboards with sales trends, top items, and category distribution.
-- **Subscription Billing**: Integrated Stripe/Razorpay billing with Free, Pro, and Enterprise tiers.
-- **Notifications**: Real-time alerts for low stock and system events.
+## ✨ Key Features
 
-### 🔐 Security & Compliance
-- **Authentication**: Secure JWT & Google OAuth login.
-- **Rate Limiting**: API protection against abuse.
-- **Audit Logs**: Comprehensive activity tracking for all user actions.
-- **Data Export**: Full CSV/PDF export capabilities for data portability.
+### 📊 **Dashboard & Analytics**
+Visualize your business performance with interactive charts and real-time data.
+- **Sales Trends**: Track daily, weekly, and monthly revenue.
+- **Top Products**: Identify your best-selling items.
+- **Category Distribution**: Understand your inventory mix.
+- **AI Forecasting**: Predict future sales trends using Prophet.
+
+![Dashboard Screenshot](docs/images/dashboard.png)
+
+### 📦 **Inventory Management**
+Complete control over your stock across multiple locations.
+- **Real-time Tracking**: Monitor stock levels instantly.
+- **Barcode & QR Support**: Scan items for quick lookup and sales.
+- **Low Stock Alerts**: Get notified before you run out.
+- **Multi-Branch Support**: Manage inventory for different stores.
+
+### 💰 **Sales & POS**
+A fast and efficient Point of Sale system for modern businesses.
+- **Quick Checkout**: Streamlined process for cashiers.
+- **Receipt Generation**: Auto-generate professional PDF receipts.
+- **Discount Management**: Apply coupons and discounts easily.
+- **Payment Integration**: Support for **Stripe**, **Razorpay**, and **PayPal**.
+
+### 🤝 **CRM & Customer Loyalty**
+Build lasting relationships with your customers.
+- **Customer Profiles**: Track purchase history and preferences.
+- **Loyalty Programs**: Reward repeat customers.
+- **Interaction Logs**: Keep a record of all communications.
+
+### 📉 **Purchases & Expenses**
+Keep your finances in check.
+- **Supplier Management**: Track orders and payments to suppliers.
+- **Expense Tracking**: Categorize and monitor operational costs.
+- **Tax Reports**: Generate automated tax reports for compliance.
+
+### 🔐 **Security & Administration**
+Enterprise-grade security and control.
+- **RBAC**: Role-Based Access Control (Admin, Manager, Cashier).
+- **Audit Logs**: Track every action taken within the system.
+- **Secure Auth**: JWT and Google OAuth authentication.
+- **Data Backup**: Automated backup solutions.
+
+---
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
-- **Database**: PostgreSQL with SQLAlchemy ORM (Prisma schema available for reference)
-- **Authentication**: JWT & Google OAuth
-- **Payments**: Stripe / Razorpay
-- **Documentation**: OpenAPI (Swagger UI)
-
-### Frontend
+### **Frontend**
 - **Framework**: [Next.js](https://nextjs.org/) (React)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS + Shadcn/UI (inspired)
-- **UI Components**: Framer Motion, Lucide React
+- **Styling**: Tailwind CSS, Shadcn/UI (inspired)
+- **Animations**: Framer Motion, AnimeJS
+- **State Management**: React Hooks
 - **Charts**: Recharts
 
-## 📂 Folder Structure
+### **Backend**
+- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
+- **Database**: PostgreSQL / SQLite (with SQLAlchemy ORM)
+- **Authentication**: JWT (OAuth2), Google OAuth
+- **Payments**: Stripe, Razorpay, PayPal
+- **PDF Generation**: ReportLab
+- **AI/ML**: Prophet (Sales Forecasting)
 
-```
-biztrackr/
-├── backend/
-│   ├── app/
-│   │   ├── api/            # API Endpoints
-│   │   ├── core/           # Config & Security
-│   │   ├── models/         # SQLAlchemy Models
-│   │   ├── schemas/        # Pydantic Schemas
-│   │   ├── services/       # Business Logic (Stripe, Export, etc.)
-│   │   └── main.py         # App Entrypoint
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # Reusable UI Components
-│   │   ├── pages/          # Next.js Pages
-│   │   ├── lib/            # Utilities (Axios, etc.)
-│   │   └── styles/         # Global Styles
-│   └── package.json
-├── prisma/
-│   └── schema.prisma       # Prisma Schema Definition
-└── docker-compose.yml
-```
+### **DevOps & Tools**
+- **Containerization**: Docker & Docker Compose
+- **Linting**: Flake8, Black, ESLint
+- **Package Managers**: pip, npm
 
-## 📦 Installation & Setup
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- Docker & Docker Compose
-- Node.js (v16+)
-- Python (v3.9+)
+Ensure you have the following installed:
+- **Docker** & **Docker Compose**
+- **Node.js** (v16+)
+- **Python** (v3.9+)
 
 ### 1. Clone the Repository
 ```bash
@@ -81,28 +94,39 @@ cd biztrackr
 ```
 
 ### 2. Environment Setup
-Create a `.env` file in `backend/` and `frontend/` based on the examples.
+Create `.env` files for both backend and frontend.
 
-**Backend `.env`**:
+**Backend (`backend/.env`)**:
 ```env
 DATABASE_URL=postgresql://user:password@localhost/biztrackr
-SECRET_KEY=your_secret_key
+SECRET_KEY=your_super_secret_key
 STRIPE_SECRET_KEY=sk_test_...
+RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=...
+```
+
+**Frontend (`frontend/.env.local`)**:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_...
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_...
 ```
 
 ### 3. Run with Docker (Recommended)
-Run the entire stack using Docker Compose:
+Launch the entire stack with a single command:
 ```bash
 docker-compose up --build
 ```
+The app will be available at:
+- **Frontend**: `http://localhost:3000`
+- **Backend API**: `http://localhost:8000/docs`
 
 ### 4. Manual Setup
-
 **Backend**:
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
@@ -114,12 +138,26 @@ npm install
 npm run dev
 ```
 
+---
+
+## 📚 API Documentation
+Explore the interactive API documentation via Swagger UI:
+👉 **[http://localhost:8000/docs](http://localhost:8000/docs)**
+
+---
+
 ## 🗺️ Roadmap
-- [x] Core Inventory & POS
-- [x] Analytics Dashboard
-- [x] Subscription Billing
-- [ ] Mobile App (React Native)
-- [ ] AI Forecasting
+- [x] **Core Modules**: Inventory, POS, CRM, Expenses
+- [x] **Payments**: Stripe & Razorpay Integration
+- [x] **Advanced Features**: Barcode Scanning, AI Forecasting
+- [ ] **Mobile App**: React Native implementation
+- [ ] **E-commerce Storefront**: Customer-facing online store
+
+---
 
 ## 📄 License
 This project is licensed under the MIT License.
+
+---
+
+Made with ❤️ by the **BizTrackr Team**.

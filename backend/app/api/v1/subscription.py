@@ -15,11 +15,36 @@ PRICES = {
     "enterprise": "price_H5ggYJDqQJ8"
 }
 
+from app.services.razorpay_service import RazorpayService
+
 @router.post("/checkout")
-def create_checkout_session(plan: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_checkout_session(plan: str, provider: str = "stripe", db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if plan not in PRICES:
         raise HTTPException(status_code=400, detail="Invalid plan")
     
+    if provider == "razorpay":
+        razorpay_service = RazorpayService()
+        # amount in INR, assuming Pro plan is 999 INR
+        amount = 999 
+        order = razorpay_service.create_order(amount=amount, notes={"user_id": current_user.id, "plan": plan})
+        if not order:
+            raise HTTPException(status_code=500, detail="Failed to create Razorpay order")
+        
+        return {
+            "provider": "razorpay",
+            "order_id": order['id'],
+            "key_id": razorpay_service.key_id,
+            "amount": order['amount'],
+            "currency": order['currency'],
+            "name": "BizTrackr Pro",
+            "description": "Upgrade to Pro Plan",
+            "prefill": {
+                "name": current_user.full_name,
+                "email": current_user.email,
+                "contact": "" # Add phone if available
+            }
+        }
+
     # In a real app, you'd check if user already has a stripe_customer_id in DB
     # For this demo, we'll assume we create/retrieve it
     customer_id = getattr(current_user, "stripe_customer_id", None)
@@ -43,7 +68,7 @@ def create_checkout_session(plan: str, db: Session = Depends(get_db), current_us
     if not session:
         raise HTTPException(status_code=500, detail="Failed to create checkout session")
 
-    return {"url": session.url}
+    return {"provider": "stripe", "url": session.url}
 
 @router.post("/portal")
 def create_portal_session(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

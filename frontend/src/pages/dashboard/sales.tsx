@@ -110,9 +110,18 @@ export default function SalesPage() {
     };
 
     const addToCart = (item: any) => {
+        if (item.quantity <= 0) {
+            alert(`Item "${item.name}" is out of stock!`);
+            return;
+        }
+
         setCart(prevCart => {
             const existing = prevCart.find((c) => c.item_id === item.id);
             if (existing) {
+                if (existing.quantity + 1 > item.quantity) {
+                    alert(`Cannot add more. Only ${item.quantity} in stock.`);
+                    return prevCart;
+                }
                 return prevCart.map((c) => c.item_id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
             } else {
                 return [...prevCart, { item_id: item.id, name: item.name, price: item.selling_price, quantity: 1, discount: 0 }];
@@ -121,10 +130,17 @@ export default function SalesPage() {
     };
 
     const updateQuantity = (itemId: number, delta: number) => {
+        const item = items.find(i => i.id === itemId);
+        if (!item) return;
+
         setCart(cart.map((c) => {
             if (c.item_id === itemId) {
-                const newQty = Math.max(1, c.quantity + delta);
-                return { ...c, quantity: newQty };
+                const newQty = c.quantity + delta;
+                if (newQty > item.quantity) {
+                    alert(`Cannot add more. Only ${item.quantity} in stock.`);
+                    return c;
+                }
+                return { ...c, quantity: Math.max(1, newQty) };
             }
             return c;
         }));

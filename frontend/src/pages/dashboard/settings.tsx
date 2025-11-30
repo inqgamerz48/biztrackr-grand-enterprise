@@ -31,6 +31,7 @@ export default function SettingsPage() {
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'razorpay'>('stripe');
 
     useEffect(() => {
         fetchSettings();
@@ -60,8 +61,53 @@ export default function SettingsPage() {
         }
     };
 
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
 
+    const handleUpgrade = async () => {
+        try {
+            const res = await api.post('/subscription/checkout', null, { params: { plan: 'pro', provider: paymentProvider } });
 
+            if (res.data.provider === 'stripe') {
+                window.location.href = res.data.url;
+            } else if (res.data.provider === 'razorpay') {
+                const isLoaded = await loadRazorpay();
+                if (!isLoaded) {
+                    alert('Razorpay SDK failed to load');
+                    return;
+                }
+
+                const options = {
+                    key: res.data.key_id,
+                    amount: res.data.amount,
+                    currency: res.data.currency,
+                    name: res.data.name,
+                    description: res.data.description,
+                    order_id: res.data.order_id,
+                    handler: function (response: any) {
+                        alert("Payment Successful: " + response.razorpay_payment_id);
+                        // In a real app, verify payment on backend here
+                    },
+                    prefill: res.data.prefill,
+                    theme: {
+                        color: "#4F46E5"
+                    }
+                };
+                const rzp1 = new (window as any).Razorpay(options);
+                rzp1.open();
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Failed to start checkout');
+        }
+    };
 
     // ... (imports remain same)
 
@@ -221,19 +267,37 @@ export default function SettingsPage() {
                             <div>
                                 <h4 className="text-sm font-medium text-gray-900">Current Plan: <span className="text-indigo-600 font-bold">Free Tier</span></h4>
                                 <p className="text-sm text-gray-500">Upgrade to Pro for unlimited invoices and advanced analytics.</p>
+
+                                <div className="mt-4 flex items-center space-x-4">
+                                    <label className="inline-flex items-center">
+                                        <input
+                                            type="radio"
+                                            className="form-radio text-indigo-600"
+                                            name="provider"
+                                            value="stripe"
+                                            checked={paymentProvider === 'stripe'}
+                                            onChange={() => setPaymentProvider('stripe')}
+                                        />
+                                        <span className="ml-2">Stripe</span>
+                                    </label>
+                                    <label className="inline-flex items-center">
+                                        <input
+                                            type="radio"
+                                            className="form-radio text-indigo-600"
+                                            name="provider"
+                                            value="razorpay"
+                                            checked={paymentProvider === 'razorpay'}
+                                            onChange={() => setPaymentProvider('razorpay')}
+                                        />
+                                        <span className="ml-2">Razorpay</span>
+                                    </label>
+                                </div>
                             </div>
                             <div className="flex space-x-3">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    onClick={async () => {
-                                        try {
-                                            const res = await api.post('/subscription/checkout', null, { params: { plan: 'pro' } });
-                                            window.location.href = res.data.url;
-                                        } catch (e) {
-                                            alert('Failed to start checkout');
-                                        }
-                                    }}
+                                    onClick={handleUpgrade}
                                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                 >
                                     Upgrade to Pro
