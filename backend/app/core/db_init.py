@@ -10,6 +10,7 @@ try:
     from migrate_purchases import migrate_purchases
     from migrate_banking import migrate_payment_accounts
     from migrate_purchase_tax import migrate_purchase_tax
+    from migrate_sales_aging import migrate as migrate_sales_aging
 except ImportError:
     # Fallback for when running from different context, though in prod it should work
     import sys
@@ -23,6 +24,7 @@ except ImportError:
     from migrate_purchases import migrate_purchases
     from migrate_banking import migrate_payment_accounts
     from migrate_purchase_tax import migrate_purchase_tax
+    from migrate_sales_aging import migrate as migrate_sales_aging
 
 def init_db():
     try:
@@ -38,6 +40,7 @@ def init_db():
         migrate_purchases()
         migrate_payment_accounts()
         migrate_purchase_tax()
+        migrate_sales_aging()
         
         print("✅ Database initialization completed.")
     except Exception as e:
