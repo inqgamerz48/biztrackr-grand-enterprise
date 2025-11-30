@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
 import { useRouter } from 'next/router';
-import PageTransition from '@/components/ui/PageTransition';
+
 import { motion } from 'framer-motion';
 
 interface DashboardLayoutProps {
@@ -32,9 +32,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100"
                 >
                     <div className="container mx-auto px-6 py-8">
-                        <PageTransition>
-                            {children}
-                        </PageTransition>
+                        {children}
                     </div>
                 </motion.main>
             </div>

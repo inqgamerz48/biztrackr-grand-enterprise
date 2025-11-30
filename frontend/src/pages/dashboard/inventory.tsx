@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/layout/dashboard-layout';
 import QRCode from 'react-qr-code';
 import { QrReader } from 'react-qr-reader';
 import { Scan, QrCode } from 'lucide-react';
+import { AnimeButton } from '@/components/ui/AnimeButton';
 
 export default function InventoryPage() {
     const [items, setItems] = useState<any[]>([]);
@@ -230,31 +231,35 @@ export default function InventoryPage() {
         <DashboardLayout>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
-                <div className="space-x-2">
-                    <button
+                <div className="space-x-2 flex">
+                    <AnimeButton
                         onClick={() => setShowCategoryModal(true)}
-                        className="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50"
+                        variant="ghost"
+                        className="text-gray-700 border border-gray-300 hover:bg-gray-50"
                     >
                         Manage Categories
-                    </button>
-                    <button
+                    </AnimeButton>
+                    <AnimeButton
                         onClick={() => setShowScanModal(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
+                        variant="secondary"
+                        className="flex items-center gap-2"
                     >
                         <Scan size={18} /> Scan
-                    </button>
-                    <button
+                    </AnimeButton>
+                    <AnimeButton
                         onClick={() => setShowBulkImportModal(true)}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                        variant="primary"
+                        className="bg-green-600 hover:bg-green-700 border-green-500"
                     >
                         Bulk Import
-                    </button>
-                    <button
+                    </AnimeButton>
+                    <AnimeButton
                         onClick={() => setShowAddModal(true)}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                        variant="primary"
+                        className="bg-indigo-600 hover:bg-indigo-700 border-indigo-500"
                     >
                         Add Item
-                    </button>
+                    </AnimeButton>
                 </div>
             </div>
 

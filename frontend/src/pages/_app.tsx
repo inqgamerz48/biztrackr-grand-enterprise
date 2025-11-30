@@ -3,7 +3,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { AnimatePresence } from 'framer-motion';
-import PageTransition from '../components/ui/PageTransition';
+import { PageTransition } from '../components/ui/PageTransition';
 import ArcReactorLoader from '../components/ui/ArcReactorLoader';
 import { useState, useEffect } from 'react';
 
