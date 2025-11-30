@@ -2,7 +2,11 @@ import os
 import sys
 import importlib.util
 import glob
+import warnings
 from app.core.database import engine, Base
+
+# Suppress Pydantic V2 migration warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 
 def run_auto_migrations():
     """

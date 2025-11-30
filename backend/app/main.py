@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+import warnings
+
+# Suppress Pydantic V2 migration warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 
 from fastapi.staticfiles import StaticFiles
 

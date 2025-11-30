@@ -18,6 +18,7 @@ def migrate():
             conn.execute(text("ALTER TABLE sales ADD COLUMN payment_status VARCHAR DEFAULT 'paid'"))
             print("Added payment_status column")
         except Exception as e:
+            conn.rollback()
             print(f"payment_status column might already exist: {e}")
 
         # Add due_date
@@ -25,6 +26,7 @@ def migrate():
             conn.execute(text("ALTER TABLE sales ADD COLUMN due_date TIMESTAMP WITH TIME ZONE"))
             print("Added due_date column")
         except Exception as e:
+            conn.rollback()
             print(f"due_date column might already exist: {e}")
 
         # Add amount_paid
@@ -32,6 +34,7 @@ def migrate():
             conn.execute(text("ALTER TABLE sales ADD COLUMN amount_paid FLOAT DEFAULT 0.0"))
             print("Added amount_paid column")
         except Exception as e:
+            conn.rollback()
             print(f"amount_paid column might already exist: {e}")
             
         # Update existing records
