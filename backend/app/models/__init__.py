@@ -14,4 +14,5 @@ from .settings import Settings
 from .role import Role, Permission
 from .branch import Branch
 from .export_log import ExportLog
+from .upgrade_request import UpgradeRequest
 
