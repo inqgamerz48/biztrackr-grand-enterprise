@@ -75,7 +75,7 @@ export default function UpgradePage() {
                         <div className="flex justify-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                             {/* Placeholder for Owner QR - In real app fetch from settings */}
                             <div className="text-center">
-                                <img src="/static/owner_qr_placeholder.png" alt="Owner QR" className="w-48 h-48 mx-auto mb-2" />
+                                <img src="/payment-qr.png" alt="Scan to Pay" className="w-64 h-auto mx-auto mb-4 rounded-lg shadow-sm" />
                                 <p className="text-sm text-gray-500">Scan this QR code to pay via UPI/Bank App</p>
                             </div>
                         </div>
