@@ -16,7 +16,8 @@ import {
     FileText,
     LogOut,
     Bell,
-    Shield
+    Shield,
+    TrendingUp
 } from 'lucide-react';
 
 interface NavItem {
