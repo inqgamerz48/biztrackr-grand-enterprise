@@ -6,7 +6,7 @@ interface User {
     id: number;
     email: string;
     full_name: string | null;
-    role: 'admin' | 'manager' | 'cashier';
+    role: 'admin' | 'manager' | 'cashier' | 'super_admin';
     permissions: string[];
     is_active: boolean;
     is_superuser: boolean;
