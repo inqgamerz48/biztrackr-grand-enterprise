@@ -58,16 +58,12 @@ model Subscription {
   id                   Int                @id @default(autoincrement())
   user_id              Int                @unique
   user                 User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  stripe_customer_id   String?            @unique
-  stripe_subscription_id String?          @unique
   plan_type            PlanType           @default(FREE)
   status               SubscriptionStatus @default(ACTIVE)
   current_period_start DateTime?
   current_period_end   DateTime?
   created_at           DateTime           @default(now())
   updated_at           DateTime           @updatedAt
-
-  @@index([stripe_customer_id])
 }
 
 model Settings {
@@ -147,22 +143,6 @@ model Event {
   created_at  DateTime @default(now())
 }
 
-model Transaction {
-  id              Int      @id @default(autoincrement())
-  user_id         Int
-  user            User     @relation(fields: [user_id], references: [id])
-  order_id        String   @unique
-  payment_id      String?
-  amount          Float
-  currency        String   @default("INR")
-  status          String   @default("PENDING") // PENDING, PAID, FAILED
-  plan            String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-
-  @@index([user_id])
-  @@index([order_id])
-}
 
 model UpgradeRequest {
   id              Int      @id @default(autoincrement())

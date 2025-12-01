@@ -31,7 +31,6 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
     role_obj = relationship("Role", back_populates="users")
     export_logs = relationship("ExportLog", back_populates="user")
-    transactions = relationship("Transaction", back_populates="user")
     upgrade_requests = relationship("UpgradeRequest", back_populates="user")
     
     # Multi-tenancy

@@ -15,11 +15,3 @@ prophet
 httpx
 email-validator
 python-dotenv
-stripe
-paypalrestsdk
-slowapi
-qrcode
-pillow
-bcrypt==4.0.1
-passlib[bcrypt]==1.7.4
-razorpay

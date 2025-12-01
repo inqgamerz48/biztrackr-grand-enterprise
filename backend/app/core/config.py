@@ -21,10 +21,6 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: Optional[str] = None
     POSTGRES_DB: Optional[str] = None
 
-    # Integrations
-    STRIPE_API_KEY: str = ""
-    STRIPE_WEBHOOK_SECRET: str = ""
-    
     # PayPal
     PAYPAL_CLIENT_ID: str = ""
     PAYPAL_CLIENT_SECRET: str = ""
