@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 
-from app.core import database
-from app.api.dependencies import get_db, get_current_user
+from app.core.database import get_db
+from app.api.dependencies import get_current_user
 from app.models.user import User
 from app.models.tenant import Tenant
 from app.models.upgrade_request import UpgradeRequest
