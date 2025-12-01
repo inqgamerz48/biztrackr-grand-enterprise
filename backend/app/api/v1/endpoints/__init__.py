@@ -21,4 +21,5 @@ from . import (
     settings,
     super_admin,
     users,
+    upgrade,
 )
