@@ -16,7 +16,7 @@ import {
     FileText,
     LogOut,
     Bell,
-    TrendingUp
+    Shield
 } from 'lucide-react';
 
 interface NavItem {
@@ -24,10 +24,12 @@ interface NavItem {
     href: string;
     icon: any;
     permission: string; // Required permission code
+    superAdminOnly?: boolean;
 }
 
 const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: 'view_dashboard' },
+    { name: 'Super Admin', href: '/dashboard/super-admin', icon: Shield, permission: '', superAdminOnly: true },
     { name: 'Sales', href: '/dashboard/sales', icon: ShoppingCart, permission: 'view_sales' },
     { name: 'Inventory', href: '/dashboard/inventory', icon: Package, permission: 'view_inventory' },
     { name: 'Purchases', href: '/dashboard/purchases', icon: ShoppingBag, permission: 'view_inventory' }, // Assuming inventory permission covers purchases for now, or add 'view_purchases'
@@ -54,6 +56,9 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
     // Filter navigation based on user permissions
     const filteredNavigation = navigation.filter(item => {
         if (!user) return false;
+        if (item.superAdminOnly) {
+            return user.is_superuser || user.role === 'super_admin';
+        }
         return hasPermission(item.permission);
     });
 
