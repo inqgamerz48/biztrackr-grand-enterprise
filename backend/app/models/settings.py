@@ -11,6 +11,7 @@ class Settings(Base):
     tax_rate = Column(Float, default=0.10) # 10% default
     logo_url = Column(String, nullable=True)
     terms_and_conditions = Column(String, nullable=True)
+    owner_qr = Column(String, nullable=True) # URL or Base64 string
     
     # Company Details for Invoices
     company_address = Column(String, nullable=True)

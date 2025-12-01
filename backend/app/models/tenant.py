@@ -21,3 +21,4 @@ class Tenant(Base):
     suppliers = relationship("Supplier", back_populates="tenant")
     expenses = relationship("Expense", back_populates="tenant")
     payments = relationship("Payment", back_populates="tenant")
+    upgrade_requests = relationship("UpgradeRequest", back_populates="company")

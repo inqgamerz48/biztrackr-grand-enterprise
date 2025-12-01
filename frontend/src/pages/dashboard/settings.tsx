@@ -32,6 +32,9 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'razorpay'>('stripe');
+    const [qrCode, setQrCode] = useState<string | null>(null);
+    const [orderId, setOrderId] = useState<string | null>(null);
+    const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
 
     useEffect(() => {
         fetchSettings();
@@ -73,38 +76,63 @@ export default function SettingsPage() {
 
     const handleUpgrade = async () => {
         try {
+            setLoading(true);
             const res = await api.post('/subscription/checkout', null, { params: { plan: 'pro', provider: paymentProvider } });
+            setLoading(false);
 
             if (res.data.provider === 'stripe') {
                 window.location.href = res.data.url;
             } else if (res.data.provider === 'razorpay') {
-                const isLoaded = await loadRazorpay();
-                if (!isLoaded) {
-                    alert('Razorpay SDK failed to load');
-                    return;
-                }
-
-                const options = {
-                    key: res.data.key_id,
-                    amount: res.data.amount,
-                    currency: res.data.currency,
-                    name: res.data.name,
-                    description: res.data.description,
-                    order_id: res.data.order_id,
-                    handler: function (response: any) {
-                        alert("Payment Successful: " + response.razorpay_payment_id);
-                        // In a real app, verify payment on backend here
-                    },
-                    prefill: res.data.prefill,
-                    theme: {
-                        color: "#4F46E5"
+                if (res.data.qr_code) {
+                    setQrCode(res.data.qr_code);
+                    setOrderId(res.data.order_id);
+                    setPaymentStatus('PENDING');
+                    // Start polling
+                    const pollInterval = setInterval(async () => {
+                        try {
+                            const statusRes = await api.get(`/subscription/status/${res.data.order_id}`);
+                            if (statusRes.data.status === 'PAID') {
+                                clearInterval(pollInterval);
+                                setPaymentStatus('PAID');
+                                setQrCode(null);
+                                alert('Plan upgraded successfully!');
+                                window.location.reload();
+                            }
+                        } catch (e) {
+                            console.error("Polling error", e);
+                        }
+                    }, 3000);
+                } else {
+                    // Fallback to standard checkout if no QR (should not happen with our backend change)
+                    const isLoaded = await loadRazorpay();
+                    if (!isLoaded) {
+                        alert('Razorpay SDK failed to load');
+                        return;
                     }
-                };
-                const rzp1 = new (window as any).Razorpay(options);
-                rzp1.open();
+
+                    const options = {
+                        key: res.data.key_id,
+                        amount: res.data.amount,
+                        currency: res.data.currency,
+                        name: res.data.name,
+                        description: res.data.description,
+                        order_id: res.data.order_id,
+                        handler: function (response: any) {
+                            alert("Payment Successful: " + response.razorpay_payment_id);
+                            // In a real app, verify payment on backend here
+                        },
+                        prefill: res.data.prefill,
+                        theme: {
+                            color: "#4F46E5"
+                        }
+                    };
+                    const rzp1 = new (window as any).Razorpay(options);
+                    rzp1.open();
+                }
             }
         } catch (e) {
             console.error(e);
+            setLoading(false);
             alert('Failed to start checkout');
         }
     };
@@ -289,7 +317,7 @@ export default function SettingsPage() {
                                             checked={paymentProvider === 'razorpay'}
                                             onChange={() => setPaymentProvider('razorpay')}
                                         />
-                                        <span className="ml-2">Razorpay</span>
+                                        <span className="ml-2">Razorpay (UPI QR)</span>
                                     </label>
                                 </div>
                             </div>
@@ -298,9 +326,10 @@ export default function SettingsPage() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleUpgrade}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    disabled={loading || (qrCode !== null && paymentStatus === 'PENDING')}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                                 >
-                                    Upgrade to Pro
+                                    {loading ? 'Processing...' : 'Upgrade to Pro'}
                                 </motion.button>
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
@@ -319,6 +348,16 @@ export default function SettingsPage() {
                                 </motion.button>
                             </div>
                         </div>
+
+                        {/* QR Code Display */}
+                        {qrCode && paymentStatus === 'PENDING' && (
+                            <div className="mt-6 flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50">
+                                <h3 className="text-lg font-medium text-indigo-900 mb-4">Scan to Pay</h3>
+                                <img src={qrCode} alt="Payment QR Code" className="w-64 h-64 border-4 border-white shadow-lg rounded-lg" />
+                                <p className="mt-4 text-sm text-indigo-700 animate-pulse">Waiting for payment confirmation...</p>
+                                <p className="text-xs text-indigo-500 mt-2">Order ID: {orderId}</p>
+                            </div>
+                        )}
                     </div>
                 </motion.div>
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 # Note: Role is imported as string "Role" in relationship to avoid circular imports
@@ -21,11 +21,18 @@ class User(Base):
     # RBAC: Role-Based Access Control
     # Roles: 'admin', 'manager', 'cashier'
     # RBAC: Role-Based Access Control
-    # Roles: 'admin', 'manager', 'cashier' (Legacy string role, kept for backward compatibility during migration)
-    role = Column(String, default="cashier", nullable=False)
+    # Roles: 'super_admin', 'company_admin', 'tenant_user'
+    role = Column(String, default="tenant_user", nullable=False)
+    
+    # Plan
+    plan = Column(String, default="free") # free, basic, pro
+    plan_expiry = Column(DateTime, nullable=True)
     
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
     role_obj = relationship("Role", back_populates="users")
+    export_logs = relationship("ExportLog", back_populates="user")
+    transactions = relationship("Transaction", back_populates="user")
+    upgrade_requests = relationship("UpgradeRequest", back_populates="user")
     
     # Multi-tenancy
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True)

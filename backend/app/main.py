@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.api.v1.endpoints import (
-    auth, users, inventory, sales, dashboard, reports, crm, expenses, billing, settings as settings_endpoint, super_admin, notifications, ai, aging, activity_logs, backup, branches, analytics, roles, purchases, tax_report, banking
+    auth, users, inventory, sales, dashboard, reports, crm, expenses, billing, settings as settings_endpoint, super_admin, notifications, ai, aging, activity_logs, backup, branches, analytics, roles, purchases, tax_report, banking, upgrade
 )
 from app.core.database import engine, Base
 from app.core.ratelimit import limiter
@@ -100,7 +100,8 @@ app.include_router(crm.router, prefix="/api/v1/crm", tags=["crm"])
 app.include_router(expenses.router, prefix="/api/v1/expenses", tags=["expenses"])
 app.include_router(billing.router, prefix="/api/v1/billing", tags=["billing"])
 app.include_router(settings_endpoint.router, prefix="/api/v1/settings", tags=["settings"])
-app.include_router(super_admin.router, prefix="/api/v1/admin", tags=["super-admin"])
+app.include_router(super_admin.router, prefix="/api/v1/super-admin", tags=["super-admin"])
+app.include_router(upgrade.router, prefix="/api/v1/upgrade", tags=["upgrade"])
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["notifications"])
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
 app.include_router(aging.router, prefix="/api/v1/aging", tags=["aging"])
