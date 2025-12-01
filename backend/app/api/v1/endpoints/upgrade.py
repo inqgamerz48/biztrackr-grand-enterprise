@@ -55,6 +55,6 @@ async def request_upgrade(
     
     # Trigger Email Notification to Super Admin
     # Assuming super admin email is fixed or fetched from DB
-    send_upgrade_request_notification("admin@biztrackr.com", current_user.email, "My Company", plan, upgrade_request.id)
+    send_upgrade_request_notification("biztrackrsuperadmin@gmail.com", current_user.email, "My Company", plan, upgrade_request.id)
     
     return {"status": "success", "message": "Upgrade request submitted", "request_id": upgrade_request.id}
