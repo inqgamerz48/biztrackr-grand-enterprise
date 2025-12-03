@@ -75,8 +75,8 @@ export default function BankingPage() {
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">Banking & Cash Flow</h1>
-                        <p className="mt-1 text-sm text-gray-600">Manage payment accounts and track balances</p>
+                        <h1 className="text-2xl font-semibold text-white">Banking & Cash Flow</h1>
+                        <p className="mt-1 text-sm text-gray-400">Manage payment accounts and track balances</p>
                     </div>
                     <button
                         onClick={() => {
@@ -84,7 +84,7 @@ export default function BankingPage() {
                             setFormData({ name: '', type: 'Cash', initial_balance: 0, currency: 'INR' });
                             setShowModal(true);
                         }}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
+                        className="bg-white text-black border border-white px-4 py-2 rounded-md hover:bg-gray-200 flex items-center gap-2 font-medium"
                     >
                         <Plus size={20} />
                         Add Account
@@ -96,29 +96,29 @@ export default function BankingPage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {accounts.map((account) => (
-                            <div key={account.id} className="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
+                            <div key={account.id} className="bg-black border border-white/20 rounded-lg shadow-none p-6">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-3 rounded-full ${account.type === 'Cash' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                                        <div className={`p-3 rounded-full ${account.type === 'Cash' ? 'bg-white/10 text-white border border-white/20' : 'bg-white/10 text-white border border-white/20'}`}>
                                             {account.type === 'Cash' ? <DollarSign size={24} /> : <CreditCard size={24} />}
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-lg text-gray-900">{account.name}</h3>
-                                            <p className="text-sm text-gray-500">{account.type}</p>
+                                            <h3 className="font-semibold text-lg text-white">{account.name}</h3>
+                                            <p className="text-sm text-gray-400">{account.type}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <button onClick={() => openEdit(account)} className="text-gray-400 hover:text-indigo-600">
+                                        <button onClick={() => openEdit(account)} className="text-gray-400 hover:text-white">
                                             <Edit2 size={18} />
                                         </button>
-                                        <button onClick={() => handleDelete(account.id)} className="text-gray-400 hover:text-red-600">
+                                        <button onClick={() => handleDelete(account.id)} className="text-gray-400 hover:text-white">
                                             <Trash2 size={18} />
                                         </button>
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <p className="text-sm text-gray-500 mb-1">Current Balance</p>
-                                    <p className="text-2xl font-bold text-gray-900">
+                                    <p className="text-sm text-gray-400 mb-1">Current Balance</p>
+                                    <p className="text-2xl font-bold text-white">
                                         {account.currency === 'INR' ? '₹' : account.currency} {account.balance.toLocaleString('en-IN')}
                                     </p>
                                 </div>
@@ -129,25 +129,25 @@ export default function BankingPage() {
 
                 {/* Modal */}
                 {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                            <h2 className="text-xl font-bold mb-4">{editingAccount ? 'Edit Account' : 'New Account'}</h2>
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-black border border-white/20 rounded-lg p-6 w-full max-w-md">
+                            <h2 className="text-xl font-bold mb-4 text-white">{editingAccount ? 'Edit Account' : 'New Account'}</h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Account Name</label>
                                     <input
                                         type="text"
                                         required
-                                        className="w-full border border-gray-300 rounded px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded px-3 py-2 focus:ring-white focus:border-white"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder="e.g., Main Cash Drawer"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Account Type</label>
                                     <select
-                                        className="w-full border border-gray-300 rounded px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded px-3 py-2 focus:ring-white focus:border-white"
                                         value={formData.type}
                                         onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                                     >
@@ -157,13 +157,13 @@ export default function BankingPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
                                         {editingAccount ? 'Current Balance' : 'Initial Balance'}
                                     </label>
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className="w-full border border-gray-300 rounded px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded px-3 py-2 focus:ring-white focus:border-white"
                                         value={formData.initial_balance}
                                         onChange={(e) => setFormData({ ...formData, initial_balance: parseFloat(e.target.value) })}
                                     />
@@ -172,13 +172,13 @@ export default function BankingPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                        className="px-4 py-2 text-gray-400 hover:text-white"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                                        className="px-4 py-2 bg-white text-black border border-white rounded hover:bg-gray-200 font-medium"
                                     >
                                         Save Account
                                     </button>

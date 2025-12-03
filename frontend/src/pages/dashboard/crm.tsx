@@ -139,9 +139,9 @@ export default function CRMPage() {
         <DashboardLayout>
             {/* Add/Edit Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                        <h2 className="text-lg font-bold mb-4">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-96">
+                        <h2 className="text-lg font-bold mb-4 text-white">
                             {editingItem ? 'Edit' : 'Add New'} {activeTab === 'customers' ? 'Customer' : 'Supplier'}
                         </h2>
                         <form onSubmit={handleSubmit}>
@@ -149,27 +149,27 @@ export default function CRMPage() {
                                 <input
                                     placeholder="Name"
                                     required
-                                    className="w-full border p-2 rounded"
+                                    className="w-full bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 />
                                 <input
                                     placeholder="Phone"
-                                    className="w-full border p-2 rounded"
+                                    className="w-full bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 />
                                 <input
                                     placeholder="Email"
                                     type="email"
-                                    className="w-full border p-2 rounded"
+                                    className="w-full bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 />
                                 <textarea
                                     placeholder="Address"
                                     rows={2}
-                                    className="w-full border p-2 rounded"
+                                    className="w-full bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                     value={formData.address}
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 />
@@ -182,11 +182,11 @@ export default function CRMPage() {
                                         setEditingItem(null);
                                         setFormData({ name: '', phone: '', email: '', address: '' });
                                     }}
-                                    className="bg-gray-200 px-4 py-2 rounded"
+                                    className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">
+                                <button type="submit" className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 font-medium">
                                     {editingItem ? 'Update' : 'Save'}
                                 </button>
                             </div>
@@ -197,32 +197,32 @@ export default function CRMPage() {
 
             {/* Ledger Modal */}
             {showLedgerModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-[900px] max-h-[80vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-[900px] max-h-[80vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold">{ledgerTitle}</h2>
+                            <h2 className="text-xl font-bold text-white">{ledgerTitle}</h2>
                             <button
                                 onClick={() => setShowPaymentForm(!showPaymentForm)}
-                                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                                className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded text-sm hover:bg-white/20"
                             >
                                 {showPaymentForm ? 'Cancel Payment' : 'Record Payment'}
                             </button>
                         </div>
 
                         {showPaymentForm && (
-                            <div className="mb-6 bg-gray-50 p-4 rounded border">
-                                <h3 className="text-sm font-semibold mb-2">Record New Payment</h3>
+                            <div className="mb-6 bg-white/5 p-4 rounded border border-white/10">
+                                <h3 className="text-sm font-semibold mb-2 text-white">Record New Payment</h3>
                                 <form onSubmit={handlePaymentSubmit} className="grid grid-cols-2 gap-4">
                                     <input
                                         type="number"
                                         placeholder="Amount"
                                         required
-                                        className="border p-2 rounded"
+                                        className="bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                         value={paymentData.amount}
                                         onChange={(e) => setPaymentData({ ...paymentData, amount: e.target.value })}
                                     />
                                     <select
-                                        className="border p-2 rounded"
+                                        className="bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                         value={paymentData.payment_method}
                                         onChange={(e) => setPaymentData({ ...paymentData, payment_method: e.target.value })}
                                     >
@@ -233,18 +233,18 @@ export default function CRMPage() {
                                     </select>
                                     <input
                                         placeholder="Reference Number"
-                                        className="border p-2 rounded"
+                                        className="bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                         value={paymentData.reference_number}
                                         onChange={(e) => setPaymentData({ ...paymentData, reference_number: e.target.value })}
                                     />
                                     <input
                                         placeholder="Notes"
-                                        className="border p-2 rounded"
+                                        className="bg-black text-white border border-white/20 p-2 rounded focus:ring-white focus:border-white"
                                         value={paymentData.notes}
                                         onChange={(e) => setPaymentData({ ...paymentData, notes: e.target.value })}
                                     />
                                     <div className="col-span-2 flex justify-end">
-                                        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                                        <button type="submit" className="bg-white text-black px-4 py-2 rounded text-sm hover:bg-gray-200 font-medium">
                                             Save Payment
                                         </button>
                                     </div>
@@ -253,32 +253,32 @@ export default function CRMPage() {
                         )}
 
                         {ledgerData.length === 0 ? (
-                            <p className="text-gray-500 text-center py-8">No transactions found</p>
+                            <p className="text-gray-400 text-center py-8">No transactions found</p>
                         ) : (
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-white/10">
+                                <thead className="bg-white/5">
                                     <tr>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Debit</th>
-                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Credit</th>
-                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Balance</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Description</th>
+                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-400 uppercase">Debit</th>
+                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-400 uppercase">Credit</th>
+                                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-400 uppercase">Balance</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-black divide-y divide-white/10">
                                     {ledgerData.map((txn) => (
                                         <tr key={`${txn.type}-${txn.id}`}>
-                                            <td className="px-4 py-2 text-sm text-gray-500">
+                                            <td className="px-4 py-2 text-sm text-gray-400">
                                                 {new Date(txn.date).toLocaleDateString('en-IN')}
                                             </td>
-                                            <td className="px-4 py-2 text-sm text-gray-900">{txn.description}</td>
-                                            <td className="px-4 py-2 text-sm text-right text-red-600">
+                                            <td className="px-4 py-2 text-sm text-white">{txn.description}</td>
+                                            <td className="px-4 py-2 text-sm text-right text-white">
                                                 {txn.debit > 0 ? `₹${txn.debit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
                                             </td>
-                                            <td className="px-4 py-2 text-sm text-right text-green-600">
+                                            <td className="px-4 py-2 text-sm text-right text-white">
                                                 {txn.credit > 0 ? `₹${txn.credit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
                                             </td>
-                                            <td className="px-4 py-2 text-sm text-right font-bold text-gray-900">
+                                            <td className="px-4 py-2 text-sm text-right font-bold text-white">
                                                 ₹{txn.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                             </td>
                                         </tr>
@@ -289,7 +289,7 @@ export default function CRMPage() {
                         <div className="mt-4 flex justify-end">
                             <button
                                 onClick={() => setShowLedgerModal(false)}
-                                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+                                className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                             >
                                 Close
                             </button>
@@ -299,26 +299,26 @@ export default function CRMPage() {
             )}
 
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">CRM</h1>
+                <h1 className="text-2xl font-semibold text-white">CRM</h1>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                    className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 font-medium"
                 >
                     Add {activeTab === 'customers' ? 'Customer' : 'Supplier'}
                 </button>
             </div>
 
-            <div className="border-b border-gray-200 mb-4">
+            <div className="border-b border-white/20 mb-4">
                 <nav className="-mb-px flex space-x-8">
                     <button
                         onClick={() => setActiveTab('customers')}
-                        className={`${activeTab === 'customers' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        className={`${activeTab === 'customers' ? 'border-white text-white' : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                     >
                         Customers
                     </button>
                     <button
                         onClick={() => setActiveTab('suppliers')}
-                        className={`${activeTab === 'suppliers' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        className={`${activeTab === 'suppliers' ? 'border-white text-white' : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                     >
                         Suppliers
                     </button>
@@ -326,16 +326,16 @@ export default function CRMPage() {
             </div>
 
             {/* Analytics Section */}
-            <div className="mb-6 bg-white shadow rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3">
+            <div className="mb-6 bg-black border border-white/20 shadow-none rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 text-white">
                     Top {activeTab === 'customers' ? 'Customers' : 'Suppliers'}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {(activeTab === 'customers' ? topCustomers : topSuppliers).map((item) => (
-                        <div key={item.id} className="border rounded p-3 bg-gray-50">
-                            <p className="font-semibold text-gray-900">{item.name}</p>
-                            <p className="text-sm text-gray-600">{item.phone}</p>
-                            <p className="text-lg font-bold text-indigo-600 mt-2">
+                        <div key={item.id} className="border border-white/10 rounded p-3 bg-white/5">
+                            <p className="font-semibold text-white">{item.name}</p>
+                            <p className="text-sm text-gray-400">{item.phone}</p>
+                            <p className="text-lg font-bold text-white mt-2">
                                 ₹{(activeTab === 'customers' ? item.total_sales : item.total_purchases).toLocaleString('en-IN')}
                             </p>
                             <p className="text-xs text-gray-500">{item.transaction_count} transactions</p>
@@ -345,36 +345,36 @@ export default function CRMPage() {
             </div>
 
             {/* List */}
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <ul className="divide-y divide-gray-200">
+            <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-md">
+                <ul className="divide-y divide-white/10">
                     {(activeTab === 'customers' ? customers : suppliers).map((item) => (
-                        <li key={item.id} className="px-4 py-4 sm:px-6">
+                        <li key={item.id} className="px-4 py-4 sm:px-6 hover:bg-white/5 transition-colors">
                             <div className="flex items-center justify-between">
                                 <div className="flex-1">
-                                    <p className="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
+                                    <p className="text-sm font-medium text-white truncate">{item.name}</p>
                                     <div className="mt-2 flex justify-between">
                                         <div className="sm:flex space-x-4">
-                                            <p className="flex items-center text-sm text-gray-500">{item.phone}</p>
-                                            {item.email && <p className="flex items-center text-sm text-gray-500">{item.email}</p>}
+                                            <p className="flex items-center text-sm text-gray-400">{item.phone}</p>
+                                            {item.email && <p className="flex items-center text-sm text-gray-400">{item.email}</p>}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="ml-4 flex space-x-2">
                                     <button
                                         onClick={() => viewLedger(item.id, item.name)}
-                                        className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                                        className="text-white hover:text-gray-300 text-sm font-medium"
                                     >
                                         Ledger
                                     </button>
                                     <button
                                         onClick={() => handleEdit(item)}
-                                        className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                        className="text-white hover:text-gray-300 text-sm font-medium"
                                     >
                                         Edit
                                     </button>
                                     <button
                                         onClick={() => handleDelete(item.id)}
-                                        className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                        className="text-white hover:text-gray-300 text-sm font-medium"
                                     >
                                         Delete
                                     </button>

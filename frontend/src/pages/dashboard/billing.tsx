@@ -59,35 +59,35 @@ export default function BillingPage() {
     return (
         <DashboardLayout>
             <div className="space-y-8">
-                <h1 className="text-2xl font-semibold text-gray-900">Billing & Subscription</h1>
+                <h1 className="text-2xl font-semibold text-white">Billing & Subscription</h1>
 
                 {/* Current Plan Status */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-lg">
                     <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                         <div>
-                            <h3 className="text-lg leading-6 font-medium text-gray-900">Current Plan</h3>
-                            <p className="mt-1 max-w-2xl text-sm text-gray-500">Manage your subscription and billing details.</p>
+                            <h3 className="text-lg leading-6 font-medium text-white">Current Plan</h3>
+                            <p className="mt-1 max-w-2xl text-sm text-gray-400">Manage your subscription and billing details.</p>
                         </div>
                         {subscription?.status === 'active' && (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20">
                                 Active
                             </span>
                         )}
                     </div>
-                    <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
+                    <div className="border-t border-white/20 px-4 py-5 sm:p-6">
                         {loading ? (
-                            <p>Loading subscription details...</p>
+                            <p className="text-gray-400">Loading subscription details...</p>
                         ) : (
                             <div>
                                 <div className="flex items-center space-x-4">
-                                    <div className="bg-indigo-100 p-3 rounded-full">
-                                        <CreditCard className="h-6 w-6 text-indigo-600" />
+                                    <div className="bg-white/10 p-3 rounded-full border border-white/20">
+                                        <CreditCard className="h-6 w-6 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-lg font-medium text-gray-900">
+                                        <p className="text-lg font-medium text-white">
                                             {subscription?.plan ? subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1) : 'Free'} Plan
                                         </p>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-400">
                                             {subscription?.stripe_customer_id
                                                 ? 'Managed via Stripe'
                                                 : 'No active payment method'}
@@ -99,7 +99,7 @@ export default function BillingPage() {
                                     <div className="mt-6">
                                         <button
                                             onClick={handleManageSubscription}
-                                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                            className="inline-flex items-center px-4 py-2 border border-white/20 shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
                                         >
                                             Manage Subscription
                                         </button>
@@ -111,24 +111,24 @@ export default function BillingPage() {
                 </div>
 
                 {/* Available Plans */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-lg">
                     <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">Available Plans</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">Upgrade to unlock more features.</p>
+                        <h3 className="text-lg leading-6 font-medium text-white">Available Plans</h3>
+                        <p className="mt-1 max-w-2xl text-sm text-gray-400">Upgrade to unlock more features.</p>
                     </div>
-                    <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+                    <div className="border-t border-white/20 px-4 py-5 sm:p-0">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 p-6">
                             {/* Free Plan */}
-                            <div className={`border rounded-lg p-6 text-center ${subscription?.plan === 'free' ? 'border-indigo-500 ring-2 ring-indigo-500' : ''}`}>
-                                <h4 className="text-xl font-bold">Free</h4>
-                                <p className="text-gray-500 mt-2">$0/mo</p>
-                                <ul className="mt-4 text-sm text-left space-y-2">
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> 1 User</li>
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> 100 Items</li>
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> Basic Reports</li>
+                            <div className={`border rounded-lg p-6 text-center ${subscription?.plan === 'free' ? 'border-white ring-2 ring-white' : 'border-white/20'}`}>
+                                <h4 className="text-xl font-bold text-white">Free</h4>
+                                <p className="text-gray-400 mt-2">$0/mo</p>
+                                <ul className="mt-4 text-sm text-left space-y-2 text-gray-300">
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> 1 User</li>
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> 100 Items</li>
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> Basic Reports</li>
                                 </ul>
                                 <button
-                                    className="mt-6 w-full bg-gray-100 text-gray-800 py-2 rounded disabled:opacity-50"
+                                    className="mt-6 w-full bg-white/10 text-white py-2 rounded disabled:opacity-50 border border-white/20"
                                     disabled={subscription?.plan === 'free'}
                                 >
                                     {subscription?.plan === 'free' ? 'Current Plan' : 'Downgrade'}
@@ -136,27 +136,27 @@ export default function BillingPage() {
                             </div>
 
                             {/* Starter Plan */}
-                            <div className={`border rounded-lg p-6 text-center ${subscription?.plan === 'starter' ? 'border-indigo-500 ring-2 ring-indigo-500' : ''}`}>
-                                <h4 className="text-xl font-bold">Starter</h4>
-                                <p className="text-gray-500 mt-2">$29/mo</p>
-                                <ul className="mt-4 text-sm text-left space-y-2">
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> 5 Users</li>
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> Unlimited Items</li>
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> PDF Invoices</li>
+                            <div className={`border rounded-lg p-6 text-center ${subscription?.plan === 'starter' ? 'border-white ring-2 ring-white' : 'border-white/20'}`}>
+                                <h4 className="text-xl font-bold text-white">Starter</h4>
+                                <p className="text-gray-400 mt-2">$29/mo</p>
+                                <ul className="mt-4 text-sm text-left space-y-2 text-gray-300">
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> 5 Users</li>
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> Unlimited Items</li>
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> PDF Invoices</li>
                                 </ul>
                                 {subscription?.plan === 'starter' ? (
-                                    <button className="mt-6 w-full bg-gray-100 text-gray-800 py-2 rounded" disabled>Current Plan</button>
+                                    <button className="mt-6 w-full bg-white/10 text-white py-2 rounded border border-white/20" disabled>Current Plan</button>
                                 ) : (
                                     <div className="space-y-2 mt-6">
                                         <button
                                             onClick={() => handleSubscribe('starter')}
-                                            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+                                            className="w-full bg-white text-black py-2 rounded hover:bg-gray-200 font-bold border border-white"
                                         >
                                             Upgrade with Card
                                         </button>
                                         <button
                                             onClick={() => handlePayPalSubscribe('starter')}
-                                            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                                            className="w-full bg-black text-white py-2 rounded hover:bg-white/10 border border-white/20"
                                         >
                                             Pay with PayPal
                                         </button>
@@ -165,27 +165,27 @@ export default function BillingPage() {
                             </div>
 
                             {/* Pro Plan */}
-                            <div className={`border rounded-lg p-6 text-center ${subscription?.plan === 'pro' ? 'border-indigo-500 ring-2 ring-indigo-500' : ''}`}>
-                                <h4 className="text-xl font-bold">Pro</h4>
-                                <p className="text-gray-500 mt-2">$99/mo</p>
-                                <ul className="mt-4 text-sm text-left space-y-2">
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> Unlimited Users</li>
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> AI Insights</li>
-                                    <li className="flex items-center"><Check className="h-4 w-4 text-green-500 mr-2" /> Priority Support</li>
+                            <div className={`border rounded-lg p-6 text-center ${subscription?.plan === 'pro' ? 'border-white ring-2 ring-white' : 'border-white/20'}`}>
+                                <h4 className="text-xl font-bold text-white">Pro</h4>
+                                <p className="text-gray-400 mt-2">$99/mo</p>
+                                <ul className="mt-4 text-sm text-left space-y-2 text-gray-300">
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> Unlimited Users</li>
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> AI Insights</li>
+                                    <li className="flex items-center"><Check className="h-4 w-4 text-white mr-2" /> Priority Support</li>
                                 </ul>
                                 {subscription?.plan === 'pro' ? (
-                                    <button className="mt-6 w-full bg-gray-100 text-gray-800 py-2 rounded" disabled>Current Plan</button>
+                                    <button className="mt-6 w-full bg-white/10 text-white py-2 rounded border border-white/20" disabled>Current Plan</button>
                                 ) : (
                                     <div className="space-y-2 mt-6">
                                         <button
                                             onClick={() => handleSubscribe('pro')}
-                                            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+                                            className="w-full bg-white text-black py-2 rounded hover:bg-gray-200 font-bold border border-white"
                                         >
                                             Upgrade with Card
                                         </button>
                                         <button
                                             onClick={() => handlePayPalSubscribe('pro')}
-                                            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                                            className="w-full bg-black text-white py-2 rounded hover:bg-white/10 border border-white/20"
                                         >
                                             Pay with PayPal
                                         </button>

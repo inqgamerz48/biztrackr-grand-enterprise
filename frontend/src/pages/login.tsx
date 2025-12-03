@@ -41,24 +41,24 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-hidden relative">
-            {/* Background Elements */}
+        <div className="min-h-screen flex items-center justify-center bg-black overflow-hidden relative">
+            {/* Background Elements - Removed for strict 2-color theme */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[100px]" />
+                {/* <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[100px]" /> */}
+                {/* <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[100px]" /> */}
             </div>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="w-full max-w-md p-8 glass-card relative z-10 mx-4"
+                className="w-full max-w-md p-8 bg-black border border-white/20 rounded-2xl relative z-10 mx-4"
             >
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                    <h1 className="text-3xl font-bold text-white">
                         Welcome Back
                     </h1>
-                    <p className="text-slate-400 mt-2">Sign in to access your dashboard</p>
+                    <p className="text-gray-400 mt-2">Sign in to access your dashboard</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -66,7 +66,7 @@ export default function LoginPage() {
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center"
+                            className="p-3 rounded-lg bg-white/10 border border-white/20 text-white text-sm text-center"
                         >
                             {error}
                         </motion.div>
@@ -74,22 +74,22 @@ export default function LoginPage() {
 
                     <div className="space-y-4">
                         <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors w-5 h-5" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-white transition-colors w-5 h-5" />
                             <input
                                 type="email"
                                 required
-                                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all"
                                 placeholder="Email address"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div className="relative group">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors w-5 h-5" />
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-white transition-colors w-5 h-5" />
                             <input
                                 type="password"
                                 required
-                                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 transition-all"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -99,18 +99,18 @@ export default function LoginPage() {
 
                     <div className="flex items-center justify-between text-sm">
                         <label className="flex items-center space-x-2 cursor-pointer group">
-                            <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-indigo-500 focus:ring-indigo-500/50 transition-colors" />
-                            <span className="text-slate-400 group-hover:text-slate-300 transition-colors">Remember me</span>
+                            <input type="checkbox" className="w-4 h-4 rounded border-white/20 bg-white/5 text-white focus:ring-white/20 transition-colors" />
+                            <span className="text-gray-400 group-hover:text-gray-300 transition-colors">Remember me</span>
                         </label>
                         <Link href="/forgot-password">
-                            <a className="text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</a>
+                            <a className="text-white hover:underline transition-colors">Forgot Password?</a>
                         </Link>
                     </div>
 
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full bg-white hover:bg-gray-200 text-black font-medium py-3 rounded-xl shadow-lg shadow-white/10 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isLoading ? (
                             <>
@@ -126,10 +126,10 @@ export default function LoginPage() {
 
                     <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-700/50"></div>
+                            <div className="w-full border-t border-white/10"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-slate-900 text-slate-500">Or continue with</span>
+                            <span className="px-4 bg-black text-gray-500">Or continue with</span>
                         </div>
                     </div>
 
@@ -146,7 +146,7 @@ export default function LoginPage() {
                                     })
                                     .catch((err: any) => setError(err.response?.data?.detail || 'GitHub Login Failed'));
                             }}
-                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
+                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-gray-300 transition-all group"
                         >
                             <Github className="w-5 h-5 group-hover:text-white transition-colors" />
                             <span className="group-hover:text-white transition-colors">GitHub</span>
@@ -154,7 +154,7 @@ export default function LoginPage() {
                         <button
                             type="button"
                             onClick={() => loginGoogle()}
-                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-800 hover:border-slate-600 text-slate-300 transition-all group"
+                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-gray-300 transition-all group"
                         >
                             <Chrome className="w-5 h-5 group-hover:text-white transition-colors" />
                             <span className="group-hover:text-white transition-colors">Google</span>
@@ -162,10 +162,10 @@ export default function LoginPage() {
                     </div>
 
                     <div className="text-center mt-6">
-                        <p className="text-slate-400 text-sm">
+                        <p className="text-gray-400 text-sm">
                             Don't have an account?{' '}
                             <Link href="/register">
-                                <a className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                                <a className="text-white hover:underline font-medium transition-colors">
                                     Create account
                                 </a>
                             </Link>
