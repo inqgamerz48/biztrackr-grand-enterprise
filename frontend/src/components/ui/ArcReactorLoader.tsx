@@ -7,39 +7,51 @@ const ArcReactorLoader = () => {
     useEffect(() => {
         if (!reactorRef.current) return;
 
-        // Core Pulse
+        // Core Pulse - Neon Blue & Green
         anime({
             targets: '.reactor-core',
-            opacity: [0.4, 0.8],
-            boxShadow: ['0 0 10px #fff', '0 0 40px #fff'],
+            opacity: [0.6, 1],
+            boxShadow: [
+                '0 0 10px #00f3ff',
+                '0 0 20px #00f3ff',
+                '0 0 40px #0aff0a',
+                '0 0 20px #00f3ff'
+            ],
+            fill: ['#00f3ff', '#0aff0a'], // Cycle colors
             easing: 'easeInOutSine',
-            duration: 1000,
+            duration: 2000,
             direction: 'alternate',
             loop: true
         });
 
-        // Inner Ring Rotation
+        // Inner Ring Rotation - Neon Yellow
         anime({
             targets: '.reactor-inner-ring',
             rotate: 360,
+            stroke: ['#fdfc00', '#ffffff'], // Pulse yellow to white
             duration: 3000,
             easing: 'linear',
             loop: true
         });
 
-        // Outer Ring Rotation (Counter-clockwise)
+        // Outer Ring Rotation (Counter-clockwise) - Neon Red
         anime({
             targets: '.reactor-outer-ring',
             rotate: -360,
+            stroke: ['#ff003c', '#ffffff'], // Pulse red to white
             duration: 8000,
             easing: 'linear',
             loop: true
         });
 
-        // Mechanical Bits Slide
+        // Mechanical Bits Slide - Multi-color
         anime({
             targets: '.mech-bit',
             translateX: [0, 5, 0],
+            fill: function (el: any, i: number) {
+                const colors = ['#fdfc00', '#ff003c', '#0aff0a', '#00f3ff']; // Yellow, Red, Green, Blue
+                return colors[i % colors.length];
+            },
             duration: 2000,
             delay: anime.stagger(200),
             easing: 'easeInOutQuad',
@@ -74,7 +86,7 @@ const ArcReactorLoader = () => {
 
                 {/* Outer Ring */}
                 <g className="reactor-outer-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="75" fill="none" stroke="#fff" strokeWidth="2" strokeOpacity="0.5" />
+                    <circle cx="100" cy="100" r="75" fill="none" stroke="#ff003c" strokeWidth="2" strokeOpacity="0.8" />
                     {[0, 60, 120, 180, 240, 300].map((angle, i) => (
                         <rect
                             key={i}
@@ -91,7 +103,7 @@ const ArcReactorLoader = () => {
 
                 {/* Inner Ring */}
                 <g className="reactor-inner-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="50" fill="none" stroke="#fff" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
+                    <circle cx="100" cy="100" r="50" fill="none" stroke="#fdfc00" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
                     <circle cx="100" cy="100" r="45" fill="none" stroke="#fff" strokeWidth="1" />
                 </g>
 
@@ -100,14 +112,14 @@ const ArcReactorLoader = () => {
                     cx="100"
                     cy="100"
                     r="30"
-                    fill="#fff"
+                    fill="#00f3ff"
                     className="reactor-core"
                     filter="url(#glow)"
                 />
                 <path
                     d="M100 75 L115 110 L85 110 Z"
                     fill="#fff"
-                    opacity="0.5"
+                    opacity="0.8"
                     className="reactor-core-triangle"
                     transform="rotate(180 100 100)"
                 />
