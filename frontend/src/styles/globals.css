@@ -28,34 +28,122 @@
   }
 
   [data-theme='stranger'] {
-    --background: 0 0 0;
+    --background: 10 5 5;
+    /* Abyssal Black */
     --foreground: 220 220 220;
-    --primary: 208 0 0;
-    /* Blood Red */
+    --primary: 220 20 60;
+    /* Crimson Red */
     --primary-foreground: 255 255 255;
     --card: 20 5 5;
-    /* Very Dark Red/Black */
-    --border: 75 0 75;
-    /* Purple Haze */
+    --border: 100 0 0;
     --muted: 40 0 0;
   }
 
   [data-theme='christmas'] {
-    --background: 250 250 250;
-    /* Snow White */
-    --foreground: 22 30 25;
-    --primary: 15 106 77;
-    /* Pine Green */
+    --background: 11 22 34;
+    /* Midnight Winter Blue */
+    --foreground: 240 248 255;
+    /* Alice Blue */
+    --primary: 220 38 38;
+    /* Holiday Red */
     --primary-foreground: 255 255 255;
-    --card: 255 255 255;
-    --border: 212 160 23;
+    --card: 23 37 84;
+    /* Dark Blue Card */
+    --border: 212 175 55;
     /* Gold */
-    --muted: 240 248 245;
+    --muted: 30 41 59;
   }
 
   body {
     @apply bg-background text-foreground antialiased transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Theme Animations */
+  [data-theme='stranger'] body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 130px 80px, #fff, rgba(0, 0, 0, 0));
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: ash-float 10s linear infinite;
+    opacity: 0.3;
+  }
+
+  [data-theme='stranger'] body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 49;
+    background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(139, 0, 0, 0.1));
+    animation: red-pulse 4s ease-in-out infinite;
+  }
+
+  [data-theme='christmas'] body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #fff, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 50px 160px, #fff, rgba(0, 0, 0, 0)),
+      radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0));
+    background-repeat: repeat;
+    background-size: 400px 400px;
+    animation: snowfall 10s linear infinite;
+    opacity: 0.5;
+  }
+}
+
+@keyframes ash-float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+
+  100% {
+    transform: translateY(-200px) translateX(20px);
+  }
+}
+
+@keyframes red-pulse {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes snowfall {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+
+  100% {
+    background-position: 400px 1000px, 400px 400px, 300px 300px, 200px 200px;
   }
 }
 

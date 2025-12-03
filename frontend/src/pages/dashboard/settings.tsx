@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { Save, User, Lock, Bell, Globe, Palette } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function SettingsPage() {
     const { theme, setTheme } = useTheme();
+    const { user, updateProfile } = useAuth();
     const [loading, setLoading] = useState(false);
     const [settings, setSettings] = useState({
         name: '',
@@ -16,25 +18,31 @@ export default function SettingsPage() {
     });
 
     useEffect(() => {
-        // Mock fetch settings
-        setSettings({
-            name: 'John Doe',
-            email: 'john@example.com',
-            notifications_email: true,
-            notifications_push: false,
-            language: 'en',
-            timezone: 'UTC'
-        });
-    }, []);
+        if (user) {
+            setSettings(prev => ({
+                ...prev,
+                name: user.full_name || '',
+                email: user.email || '',
+            }));
+        }
+    }, [user]);
 
     const handleSave = async () => {
         setLoading(true);
         try {
-            // await api.put('/user/settings', settings);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            alert('Settings saved successfully');
+            const res = await updateProfile({
+                full_name: settings.name,
+                email: settings.email
+            });
+
+            if (res.success) {
+                alert('Settings saved successfully');
+            } else {
+                alert('Failed to save settings: ' + res.error);
+            }
         } catch (error) {
             console.error('Failed to save settings', error);
+            alert('An unexpected error occurred');
         } finally {
             setLoading(false);
         }

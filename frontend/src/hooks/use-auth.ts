@@ -85,5 +85,15 @@ export function useAuth() {
         return user.permissions?.includes(permission) || false;
     };
 
-    return { user, loading, login, register, logout, hasPermission };
+    const updateProfile = async (data: { full_name?: string; email?: string }) => {
+        try {
+            const res = await api.put('/users/me', data);
+            setUser(res.data);
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error.response?.data?.detail || 'Profile update failed' };
+        }
+    };
+
+    return { user, loading, login, register, logout, hasPermission, updateProfile };
 }

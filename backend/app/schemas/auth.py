@@ -23,6 +23,10 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
     role: Optional[str] = None  # Allow role updates
 
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+
 class User(UserBase):
     id: int
     is_active: bool

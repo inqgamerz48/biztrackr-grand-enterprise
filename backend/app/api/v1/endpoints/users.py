@@ -40,6 +40,42 @@ def read_users_me(
     return current_user
 
 
+from app.schemas.auth import UserProfileUpdate
+
+@router.put("/me", response_model=UserSchema)
+def update_user_me(
+    user_update: UserProfileUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Update current user profile.
+    """
+    # Check if email is being updated and if it's already taken
+    if user_update.email and user_update.email != current_user.email:
+        from app.services import auth_service
+        existing_user = auth_service.get_user_by_email(db, email=user_update.email)
+        if existing_user:
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered",
+            )
+        current_user.email = user_update.email
+    
+    if user_update.full_name is not None:
+        current_user.full_name = user_update.full_name
+        
+    db.commit()
+    db.refresh(current_user)
+    
+    # Re-fetch permissions to ensure response model is complete
+    from app.services.permission_service import permission_service
+    perms = permission_service.get_user_permissions(db, current_user.id)
+    current_user.permissions = list(perms)
+    
+    return current_user
+
+
 @router.get("/", response_model=List[UserSchema])
 def list_users(
     db: Session = Depends(database.get_db),
