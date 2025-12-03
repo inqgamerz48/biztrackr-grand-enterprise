@@ -195,23 +195,23 @@ export default function PurchasesPage() {
             {/* Payment Modal */}
             {
                 showPaymentModal && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
-                            <h2 className="text-xl font-bold mb-4 text-gray-900">Record Payment</h2>
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-[400px]">
+                            <h2 className="text-xl font-bold mb-4 text-white">Record Payment</h2>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Amount</label>
+                                    <label className="block text-sm font-medium text-gray-300">Amount</label>
                                     <input
                                         type="number"
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
                                         value={paymentAmount}
                                         onChange={(e) => setPaymentAmount(parseFloat(e.target.value))}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                                    <label className="block text-sm font-medium text-gray-300">Payment Method</label>
                                     <select
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        className="mt-1 block w-full bg-black text-white pl-3 pr-10 py-2 text-base border border-white/20 focus:outline-none focus:ring-white focus:border-white sm:text-sm rounded-md"
                                         value={paymentMethod}
                                         onChange={(e) => setPaymentMethod(e.target.value)}
                                     >
@@ -222,9 +222,9 @@ export default function PurchasesPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Payment Account</label>
+                                    <label className="block text-sm font-medium text-gray-300">Payment Account</label>
                                     <select
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        className="mt-1 block w-full bg-black text-white pl-3 pr-10 py-2 text-base border border-white/20 focus:outline-none focus:ring-white focus:border-white sm:text-sm rounded-md"
                                         value={selectedAccount}
                                         onChange={(e) => setSelectedAccount(e.target.value)}
                                     >
@@ -238,13 +238,13 @@ export default function PurchasesPage() {
                             <div className="mt-6 flex justify-end space-x-3">
                                 <button
                                     onClick={() => setShowPaymentModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                    className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded hover:bg-white/20"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={confirmPayment}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold"
+                                    className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 font-semibold border border-white"
                                 >
                                     Save Payment
                                 </button>
@@ -257,50 +257,22 @@ export default function PurchasesPage() {
             {/* Receive Confirmation Modal */}
             {
                 showReceiveModal && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
-                            <h2 className="text-xl font-bold mb-4 text-gray-900">Confirm Receipt</h2>
-                            <p className="text-gray-600 mb-6">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-[400px]">
+                            <h2 className="text-xl font-bold mb-4 text-white">Confirm Receipt</h2>
+                            <p className="text-gray-400 mb-6">
                                 Are you sure you want to mark this order as Received? This will update your inventory stock.
                             </p>
                             <div className="flex justify-end space-x-3">
                                 <button
                                     onClick={() => setShowReceiveModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                    className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded hover:bg-white/20"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={confirmReceive}
-                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold"
-                                >
-                                    Confirm Receive
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Receive Confirmation Modal */}
-            {
-                showReceiveModal && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-xl w-[400px]">
-                            <h2 className="text-xl font-bold mb-4 text-gray-900">Confirm Receipt</h2>
-                            <p className="text-gray-600 mb-6">
-                                Are you sure you want to mark this order as Received? This will update your inventory stock.
-                            </p>
-                            <div className="flex justify-end space-x-3">
-                                <button
-                                    onClick={() => setShowReceiveModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmReceive}
-                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold"
+                                    className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 font-semibold border border-white"
                                 >
                                     Confirm Receive
                                 </button>
@@ -313,30 +285,30 @@ export default function PurchasesPage() {
             {/* Purchase Confirmation Modal */}
             {
                 showConfirmModal && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-xl w-[600px] max-h-[90vh] overflow-y-auto">
-                            <h2 className="text-2xl font-bold mb-4 text-gray-900">Confirm Purchase Order</h2>
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-[600px] max-h-[90vh] overflow-y-auto">
+                            <h2 className="text-2xl font-bold mb-4 text-white">Confirm Purchase Order</h2>
 
                             {/* Supplier Info */}
-                            <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
-                                <p className="text-sm font-semibold text-gray-700">Supplier:</p>
-                                <p className="text-lg font-bold text-blue-700">{selectedSupplierData?.name}</p>
+                            <div className="mb-4 p-3 bg-white/5 rounded border border-white/20">
+                                <p className="text-sm font-semibold text-gray-300">Supplier:</p>
+                                <p className="text-lg font-bold text-white">{selectedSupplierData?.name}</p>
                             </div>
 
                             {/* Items */}
                             <div className="mb-6">
-                                <h3 className="font-semibold text-lg mb-3">Items to Purchase</h3>
+                                <h3 className="font-semibold text-lg mb-3 text-white">Items to Purchase</h3>
                                 <div className="space-y-3">
                                     {cart.map((item) => (
-                                        <div key={item.item_id} className="flex justify-between items-start border-b pb-2">
+                                        <div key={item.item_id} className="flex justify-between items-start border-b border-white/10 pb-2">
                                             <div className="flex-1">
-                                                <p className="font-medium">{item.name}</p>
-                                                <p className="text-sm text-gray-600">
+                                                <p className="font-medium text-white">{item.name}</p>
+                                                <p className="text-sm text-gray-400">
                                                     {item.quantity} × ₹{item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-semibold">₹{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                                <p className="font-semibold text-white">₹{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -344,20 +316,20 @@ export default function PurchasesPage() {
                             </div>
 
                             {/* Totals */}
-                            <div className="border-t pt-4 space-y-2 mb-6">
+                            <div className="border-t border-white/10 pt-4 space-y-2 mb-6">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Subtotal:</span>
-                                    <span>₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span className="text-gray-400">Subtotal:</span>
+                                    <span className="text-white">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                                 {transportCharges > 0 && (
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600">Transport Charges:</span>
-                                        <span>₹{transportCharges.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span className="text-gray-400">Transport Charges:</span>
+                                        <span className="text-white">₹{transportCharges.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                 )}
-                                <div className="flex justify-between text-xl font-bold pt-2 border-t">
-                                    <span>Total Amount:</span>
-                                    <span className="text-blue-600">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <div className="flex justify-between text-xl font-bold pt-2 border-t border-white/10">
+                                    <span className="text-white">Total Amount:</span>
+                                    <span className="text-white">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             </div>
 
@@ -365,13 +337,13 @@ export default function PurchasesPage() {
                             <div className="flex justify-end space-x-3">
                                 <button
                                     onClick={() => setShowConfirmModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300"
+                                    className="bg-white/10 text-white border border-white/20 px-6 py-2 rounded hover:bg-white/20"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={confirmPurchase}
-                                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold"
+                                    className="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 font-semibold border border-white"
                                 >
                                     Create PO
                                 </button>
@@ -383,19 +355,19 @@ export default function PurchasesPage() {
 
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold text-gray-900">Purchase Management</h1>
+                    <h1 className="text-2xl font-semibold text-white">Purchase Management</h1>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex space-x-4 border-b">
+                <div className="flex space-x-4 border-b border-white/20">
                     <button
-                        className={`py-2 px-4 font-medium ${activeTab === 'new' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`py-2 px-4 font-medium ${activeTab === 'new' ? 'border-b-2 border-white text-white' : 'text-gray-400 hover:text-white'}`}
                         onClick={() => setActiveTab('new')}
                     >
                         New Purchase Order
                     </button>
                     <button
-                        className={`py-2 px-4 font-medium ${activeTab === 'history' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`py-2 px-4 font-medium ${activeTab === 'history' ? 'border-b-2 border-white text-white' : 'text-gray-400 hover:text-white'}`}
                         onClick={() => setActiveTab('history')}
                     >
                         Order History
@@ -405,10 +377,10 @@ export default function PurchasesPage() {
                 {activeTab === 'new' ? (
                     <>
                         {/* Supplier Selection */}
-                        <div className="bg-white p-4 rounded shadow">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Select Supplier *</label>
+                        <div className="bg-black border border-white/20 p-4 rounded shadow-none">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Select Supplier *</label>
                             <select
-                                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 border rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full bg-black text-white pl-3 pr-10 py-2 text-base border border-white/20 rounded focus:outline-none focus:ring-white focus:border-white"
                                 value={selectedSupplier}
                                 onChange={(e) => setSelectedSupplier(e.target.value)}
                             >
@@ -421,11 +393,11 @@ export default function PurchasesPage() {
 
                         <div className="flex gap-4" style={{ height: 'calc(100vh - 350px)' }}>
                             {/* Items List */}
-                            <div className="flex-1 bg-white p-4 rounded shadow overflow-y-auto">
+                            <div className="flex-1 bg-black border border-white/20 p-4 rounded shadow-none overflow-y-auto">
                                 <input
                                     type="text"
                                     placeholder="Search items..."
-                                    className="w-full p-2 border rounded mb-4"
+                                    className="w-full bg-black text-white p-2 border border-white/20 rounded mb-4 focus:ring-white focus:border-white"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
@@ -433,12 +405,12 @@ export default function PurchasesPage() {
                                     {filteredItems.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="border p-4 rounded cursor-pointer hover:shadow-md hover:border-blue-400 transition"
+                                            className="border border-white/20 p-4 rounded cursor-pointer hover:shadow-none hover:border-white transition bg-white/5"
                                             onClick={() => addToCart(item)}
                                         >
-                                            <h3 className="font-bold text-gray-900">{item.name}</h3>
-                                            <p className="text-sm text-gray-500">Current Stock: {item.quantity}</p>
-                                            <p className="text-xs text-gray-400 mt-1">
+                                            <h3 className="font-bold text-white">{item.name}</h3>
+                                            <p className="text-sm text-gray-400">Current Stock: {item.quantity}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
                                                 Price: ₹{(item.purchase_price || item.selling_price || 0).toLocaleString('en-IN')}
                                             </p>
                                         </div>
@@ -447,46 +419,46 @@ export default function PurchasesPage() {
                             </div>
 
                             {/* Purchase Cart */}
-                            <div className="w-96 bg-white p-4 rounded shadow flex flex-col">
-                                <h2 className="text-xl font-bold mb-4">Draft Order</h2>
+                            <div className="w-96 bg-black border border-white/20 p-4 rounded shadow-none flex flex-col">
+                                <h2 className="text-xl font-bold mb-4 text-white">Draft Order</h2>
                                 <div className="flex-1 overflow-y-auto">
                                     {cart.map((item) => (
-                                        <div key={item.item_id} className="border-b pb-3 mb-3">
+                                        <div key={item.item_id} className="border-b border-white/10 pb-3 mb-3">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex-1">
-                                                    <p className="font-medium">{item.name}</p>
+                                                    <p className="font-medium text-white">{item.name}</p>
                                                 </div>
-                                                <button onClick={() => removeFromCart(item.item_id)} className="text-red-500 text-xl">×</button>
+                                                <button onClick={() => removeFromCart(item.item_id)} className="text-white hover:text-gray-300 text-xl">×</button>
                                             </div>
 
                                             <div className="flex items-center gap-2 mb-2">
-                                                <label className="text-xs text-gray-600 w-16">Quantity:</label>
+                                                <label className="text-xs text-gray-400 w-16">Quantity:</label>
                                                 <button
                                                     onClick={() => updateQuantity(item.item_id, -1)}
-                                                    className="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300"
+                                                    className="bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20 border border-white/20"
                                                 >
                                                     -
                                                 </button>
-                                                <span className="w-12 text-center font-medium">{item.quantity}</span>
+                                                <span className="w-12 text-center font-medium text-white">{item.quantity}</span>
                                                 <button
                                                     onClick={() => updateQuantity(item.item_id, 1)}
-                                                    className="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300"
+                                                    className="bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20 border border-white/20"
                                                 >
                                                     +
                                                 </button>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <label className="text-xs text-gray-600 w-16">Price (₹):</label>
+                                                <label className="text-xs text-gray-400 w-16">Price (₹):</label>
                                                 <input
                                                     type="number"
                                                     min="0"
                                                     step="0.01"
                                                     value={item.price}
                                                     onChange={(e) => updatePrice(item.item_id, parseFloat(e.target.value) || 0)}
-                                                    className="flex-1 px-2 py-1 border rounded text-sm"
+                                                    className="flex-1 bg-black text-white px-2 py-1 border border-white/20 rounded text-sm focus:ring-white focus:border-white"
                                                 />
-                                                <span className="text-sm text-gray-600">
+                                                <span className="text-sm text-gray-400">
                                                     = ₹{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                 </span>
                                             </div>
@@ -494,35 +466,35 @@ export default function PurchasesPage() {
                                     ))}
                                 </div>
 
-                                <div className="mt-4 border-t pt-4 space-y-3">
+                                <div className="mt-4 border-t border-white/10 pt-4 space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <label className="text-sm text-gray-600 w-32">Transport Charges:</label>
+                                        <label className="text-sm text-gray-400 w-32">Transport Charges:</label>
                                         <input
                                             type="number"
                                             min="0"
                                             step="0.01"
                                             value={transportCharges}
                                             onChange={(e) => setTransportCharges(parseFloat(e.target.value) || 0)}
-                                            className="flex-1 px-2 py-1 border rounded text-sm"
+                                            className="flex-1 bg-black text-white px-2 py-1 border border-white/20 rounded text-sm focus:ring-white focus:border-white"
                                             placeholder="0.00"
                                         />
-                                        <span className="text-xs">₹</span>
+                                        <span className="text-xs text-white">₹</span>
                                     </div>
 
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600">Subtotal:</span>
-                                        <span>₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span className="text-gray-400">Subtotal:</span>
+                                        <span className="text-white">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
 
-                                    <div className="flex justify-between text-xl font-bold pt-2 border-t">
-                                        <span>Total:</span>
-                                        <span>₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <div className="flex justify-between text-xl font-bold pt-2 border-t border-white/10">
+                                        <span className="text-white">Total:</span>
+                                        <span className="text-white">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
 
                                     <button
                                         onClick={handlePurchase}
                                         disabled={cart.length === 0 || !selectedSupplier}
-                                        className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full bg-white text-black py-3 rounded font-bold hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed border border-white"
                                     >
                                         Create Purchase Order
                                     </button>
@@ -531,42 +503,42 @@ export default function PurchasesPage() {
                         </div>
                     </>
                 ) : (
-                    <div className="bg-white rounded shadow overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                    <div className="bg-black border border-white/20 rounded shadow-none overflow-hidden">
+                        <table className="min-w-full divide-y divide-white/10">
+                            <thead className="bg-white/5">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Invoice</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Supplier</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Payment</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-black divide-y divide-white/10">
                                 {purchases.map((p) => (
                                     <tr key={p.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                             {new Date(p.date).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                                             {p.invoice_number}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                             {p.supplier_name}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                             ₹{p.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.status === 'Received' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.status === 'Received' ? 'bg-white/10 text-white border border-white/20' : 'bg-white/10 text-white border border-white/20'}`}>
                                                 {p.status || 'Ordered'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex flex-col">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit ${p.payment_status === 'paid' ? 'bg-green-100 text-green-800' : p.payment_status === 'partial' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit ${p.payment_status === 'paid' ? 'bg-white/10 text-white border border-white/20' : p.payment_status === 'partial' ? 'bg-white/10 text-white border border-white/20' : 'bg-white/10 text-white border border-white/20'}`}>
                                                     {p.payment_status ? p.payment_status.toUpperCase() : 'PENDING'}
                                                 </span>
                                                 <span className="text-xs text-gray-500 mt-1">
@@ -578,7 +550,7 @@ export default function PurchasesPage() {
                                             {p.status !== 'Received' && (
                                                 <button
                                                     onClick={() => handleReceiveClick(p.id)}
-                                                    className="text-indigo-600 hover:text-indigo-900 inline-flex items-center gap-1"
+                                                    className="text-white hover:text-gray-300 inline-flex items-center gap-1"
                                                 >
                                                     <Truck size={16} /> Receive
                                                 </button>
@@ -586,7 +558,7 @@ export default function PurchasesPage() {
                                             {p.payment_status !== 'paid' && (
                                                 <button
                                                     onClick={() => handlePaymentClick(p)}
-                                                    className="text-green-600 hover:text-green-900 inline-flex items-center gap-1"
+                                                    className="text-white hover:text-gray-300 inline-flex items-center gap-1"
                                                 >
                                                     <ShoppingCart size={16} /> Pay
                                                 </button>

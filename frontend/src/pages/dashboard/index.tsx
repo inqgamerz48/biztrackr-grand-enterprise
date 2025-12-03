@@ -61,17 +61,17 @@ export default function DashboardPage() {
                 {/* Header */}
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-                        <p className="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
+                        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+                        <p className="text-gray-400 mt-1">Welcome back, here's what's happening today.</p>
                     </div>
                     <div className="flex gap-3">
                         <Link href="/dashboard/reports">
-                            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium hover:bg-slate-50 transition-colors shadow-sm">
+                            <button className="px-4 py-2 bg-black border border-white/20 rounded-xl text-white font-medium hover:bg-white/10 transition-colors shadow-none">
                                 Export Report
                             </button>
                         </Link>
                         <Link href="/dashboard/sales">
-                            <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
+                            <button className="px-4 py-2 bg-white text-black rounded-xl font-medium hover:bg-gray-200 transition-colors shadow-lg shadow-white/10">
                                 New Sale
                             </button>
                         </Link>
@@ -87,68 +87,68 @@ export default function DashboardPage() {
                 >
                     {/* Card 1 */}
                     <Link href="/dashboard/sales">
-                        <motion.div variants={item} className="glass-card p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                        <motion.div variants={item} className="bg-black border border-white/20 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-white/40 transition-colors">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <DollarSign className="w-24 h-24 text-indigo-600" />
+                                <DollarSign className="w-24 h-24 text-white" />
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl">
+                                <div className="p-3 bg-white/10 text-white rounded-xl">
                                     <DollarSign className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Total Sales Today</p>
-                                    <h3 className="text-2xl font-bold text-slate-900 mt-1">₹{stats.sales_today.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                                    <p className="text-sm font-medium text-gray-400">Total Sales Today</p>
+                                    <h3 className="text-2xl font-bold text-white mt-1">₹{stats.sales_today.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center text-sm">
-                                <span className={`${stats.sales_trend >= 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
+                                <span className={`${stats.sales_trend >= 0 ? 'text-white bg-white/10 border border-white/20' : 'text-white bg-white/10 border border-white/20'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
                                     <TrendingUp className={`w-4 h-4 mr-1 ${stats.sales_trend < 0 ? 'rotate-180' : ''}`} />
                                     {stats.sales_trend > 0 ? '+' : ''}{stats.sales_trend}%
                                 </span>
-                                <span className="text-slate-400 ml-2">vs yesterday</span>
+                                <span className="text-gray-500 ml-2">vs yesterday</span>
                             </div>
                         </motion.div>
                     </Link>
 
                     {/* Card 2 */}
                     <Link href="/dashboard/inventory">
-                        <motion.div variants={item} className="glass-card p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                        <motion.div variants={item} className="bg-black border border-white/20 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-white/40 transition-colors">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <Package className="w-24 h-24 text-purple-600" />
+                                <Package className="w-24 h-24 text-white" />
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
+                                <div className="p-3 bg-white/10 text-white rounded-xl">
                                     <Package className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Active Inventory</p>
-                                    <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.total_inventory} Items</h3>
+                                    <p className="text-sm font-medium text-gray-400">Active Inventory</p>
+                                    <h3 className="text-2xl font-bold text-white mt-1">{stats.total_inventory} Items</h3>
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center text-sm">
-                                <span className={`${stats.low_stock_items > 0 ? 'text-orange-600 bg-orange-50' : 'text-green-600 bg-green-50'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
+                                <span className={`${stats.low_stock_items > 0 ? 'text-white bg-white/10 border border-white/20' : 'text-white bg-white/10 border border-white/20'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
                                     {stats.low_stock_items > 0 ? <AlertTriangle className="w-4 h-4 mr-1" /> : <ArrowUpRight className="w-4 h-4 mr-1" />}
                                     {stats.low_stock_items > 0 ? `${stats.low_stock_items} Low Stock` : 'Healthy Stock'}
                                 </span>
-                                <span className="text-slate-400 ml-2">status</span>
+                                <span className="text-gray-500 ml-2">status</span>
                             </div>
                         </motion.div>
                     </Link>
 
                     {/* Card 3 - AI Insight Summary */}
-                    <motion.div variants={item} className="glass-card p-6 relative overflow-hidden group bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-none">
-                        <div className="absolute top-0 right-0 p-4 opacity-20">
-                            <Sparkles className="w-24 h-24 text-white" />
+                    <motion.div variants={item} className="bg-white text-black rounded-2xl p-6 relative overflow-hidden group border border-white/20">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                            <Sparkles className="w-24 h-24 text-black" />
                         </div>
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-4">
-                                <Sparkles className="w-5 h-5 text-yellow-300" />
-                                <span className="font-medium text-indigo-100">AI Insight</span>
+                                <Sparkles className="w-5 h-5 text-black" />
+                                <span className="font-medium text-gray-600">AI Insight</span>
                             </div>
                             <h3 className="text-lg font-semibold leading-snug mb-2">
                                 Sales are trending up!
                             </h3>
-                            <p className="text-indigo-100 text-sm opacity-90">
+                            <p className="text-gray-600 text-sm opacity-90">
                                 Consider restocking "Wireless Headphones" as demand is increasing.
                             </p>
                         </div>
@@ -160,42 +160,42 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="glass-card overflow-hidden"
+                    className="bg-black border border-white/20 rounded-2xl overflow-hidden"
                 >
-                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-indigo-600" />
+                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-white" />
                             Detailed AI Insights
                         </h2>
                         <Link href="/dashboard/reports">
-                            <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                            <button className="text-sm text-white hover:text-gray-300 font-medium underline">
                                 View All
                             </button>
                         </Link>
                     </div>
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-white/10">
                         {loading ? (
-                            <div className="p-8 text-center text-slate-500">
-                                <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <div className="p-8 text-center text-gray-400">
+                                <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
                                 Analyzing data...
                             </div>
                         ) : (
                             insights.length > 0 ? (
                                 insights.map((insight, idx) => (
-                                    <div key={idx} className="p-6 hover:bg-slate-50 transition-colors flex gap-4">
+                                    <div key={idx} className="p-6 hover:bg-white/5 transition-colors flex gap-4">
                                         <div className="flex-shrink-0 mt-1">
-                                            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center">
-                                                <Sparkles className="w-4 h-4 text-indigo-600" />
+                                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                                                <Sparkles className="w-4 h-4 text-white" />
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-slate-700 leading-relaxed">{insight}</p>
-                                            <p className="text-xs text-slate-400 mt-2">Generated just now</p>
+                                            <p className="text-white leading-relaxed">{insight}</p>
+                                            <p className="text-xs text-gray-500 mt-2">Generated just now</p>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="p-8 text-center text-slate-500">
+                                <div className="p-8 text-center text-gray-400">
                                     No new insights available at the moment.
                                 </div>
                             )

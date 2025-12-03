@@ -119,14 +119,14 @@ export default function UsersPage() {
         <div className="p-8">
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-                    <p className="text-gray-600 mt-2">
+                    <h1 className="text-3xl font-bold text-white">User Management</h1>
+                    <p className="text-gray-400 mt-2">
                         {isAdmin ? 'Manage user roles and permissions' : 'View team members (Manager)'}
                     </p>
                 </div>
                 <button
                     onClick={() => router.push('/dashboard')}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors flex items-center gap-2 border border-white/20"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -136,7 +136,7 @@ export default function UsersPage() {
                 {isAdmin && (
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="ml-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors flex items-center gap-2"
+                        className="ml-4 px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md transition-colors flex items-center gap-2 border border-white"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -148,44 +148,44 @@ export default function UsersPage() {
 
             {/* Success Message */}
             {successMessage && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md animate-fade-in">
-                    <p className="text-green-800 font-medium">{successMessage}</p>
+                <div className="mb-4 p-4 bg-white/10 border border-white/20 rounded-md animate-fade-in">
+                    <p className="text-white font-medium">{successMessage}</p>
                 </div>
             )}
 
             {/* Error Message */}
             {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md animate-fade-in">
-                    <p className="text-red-800 font-medium">{error}</p>
+                <div className="mb-4 p-4 bg-white/10 border border-white/20 rounded-md animate-fade-in">
+                    <p className="text-white font-medium">{error}</p>
                 </div>
             )}
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-black shadow-none rounded-lg overflow-hidden border border-white/20">
+                <table className="min-w-full divide-y divide-white/10">
+                    <thead className="bg-white/5">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                 User
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                 Role
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-black divide-y divide-white/10">
                         {users.map((user) => (
-                            <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={user.id} className="hover:bg-white/5 transition-colors">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
                                         <div>
-                                            <div className="text-sm font-medium text-gray-900">{user.email}</div>
-                                            <div className="text-sm text-gray-500">{user.full_name || 'No name'}</div>
+                                            <div className="text-sm font-medium text-white">{user.email}</div>
+                                            <div className="text-sm text-gray-400">{user.full_name || 'No name'}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -194,18 +194,18 @@ export default function UsersPage() {
                                         value={user.role}
                                         onChange={(e) => updateUserRole(user.id, e.target.value, user.email)}
                                         disabled={!isAdmin || user.id === currentUser?.id}
-                                        className={`text-sm border rounded px-2 py-1 transition-all ${user.role === 'admin' ? 'bg-purple-50 text-purple-800 border-purple-200' :
-                                            user.role === 'manager' ? 'bg-blue-50 text-blue-800 border-blue-200' :
-                                                'bg-green-50 text-green-800 border-green-200'
+                                        className={`text-sm border rounded px-2 py-1 transition-all ${user.role === 'admin' ? 'bg-white/10 text-white border-white/20' :
+                                            user.role === 'manager' ? 'bg-white/10 text-white border-white/20' :
+                                                'bg-white/10 text-white border-white/20'
                                             } ${!isAdmin || user.id === currentUser?.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}`}
                                     >
-                                        <option value="admin">Admin</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="cashier">Cashier</option>
+                                        <option value="admin" className="bg-black text-white">Admin</option>
+                                        <option value="manager" className="bg-black text-white">Manager</option>
+                                        <option value="cashier" className="bg-black text-white">Cashier</option>
                                     </select>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.is_active ? 'bg-white/10 text-white border border-white/20' : 'bg-white/10 text-white border border-white/20'
                                         }`}>
                                         {user.is_active ? 'Active' : 'Inactive'}
                                     </span>
@@ -217,9 +217,9 @@ export default function UsersPage() {
                                         className={`px-3 py-1 rounded ${!isAdmin || user.id === currentUser?.id
                                             ? 'opacity-50 cursor-not-allowed text-gray-400'
                                             : user.is_active
-                                                ? 'text-red-600 hover:bg-red-50 hover:text-red-800'
-                                                : 'text-green-600 hover:bg-green-50 hover:text-green-800'
-                                            } transition-colors`}
+                                                ? 'text-white hover:bg-white/10'
+                                                : 'text-white hover:bg-white/10'
+                                            } transition-colors border border-white/20`}
                                     >
                                         {user.is_active ? 'Deactivate' : 'Activate'}
                                     </button>
@@ -230,9 +230,9 @@ export default function UsersPage() {
                 </table>
             </div>
 
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-                <h3 className="text-sm font-medium text-blue-800 mb-2">Role Permissions:</h3>
-                <ul className="text-sm text-blue-700 space-y-1">
+            <div className="mt-6 bg-white/5 border border-white/20 rounded-md p-4">
+                <h3 className="text-sm font-medium text-white mb-2">Role Permissions:</h3>
+                <ul className="text-sm text-gray-300 space-y-1">
                     <li><strong>Admin:</strong> Full access to all features including user management, settings, and billing</li>
                     <li><strong>Manager:</strong> Access to operations (sales, purchases, inventory, CRM, expenses, reports)</li>
                     <li><strong>Cashier:</strong> Limited to creating sales and viewing inventory (read-only)</li>
@@ -242,44 +242,44 @@ export default function UsersPage() {
             {/* Add User Modal */}
             {
                 isModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-8 max-w-md w-full">
-                            <h2 className="text-2xl font-bold mb-6">Add New User</h2>
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-black border border-white/20 rounded-lg p-8 max-w-md w-full">
+                            <h2 className="text-2xl font-bold mb-6 text-white">Add New User</h2>
                             <form onSubmit={handleCreateUser}>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
                                     <input
                                         type="email"
                                         required
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded-md px-3 py-2 focus:ring-white focus:border-white"
                                         value={newUser.email}
                                         onChange={e => setNewUser({ ...newUser, email: e.target.value })}
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
                                     <input
                                         type="text"
                                         required
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded-md px-3 py-2 focus:ring-white focus:border-white"
                                         value={newUser.full_name}
                                         onChange={e => setNewUser({ ...newUser, full_name: e.target.value })}
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
                                     <input
                                         type="password"
                                         required
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded-md px-3 py-2 focus:ring-white focus:border-white"
                                         value={newUser.password}
                                         onChange={e => setNewUser({ ...newUser, password: e.target.value })}
                                     />
                                 </div>
                                 <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
                                     <select
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full bg-black text-white border border-white/20 rounded-md px-3 py-2 focus:ring-white focus:border-white"
                                         value={newUser.role}
                                         onChange={e => setNewUser({ ...newUser, role: e.target.value })}
                                     >
@@ -291,13 +291,13 @@ export default function UsersPage() {
                                     <button
                                         type="button"
                                         onClick={() => setIsModalOpen(false)}
-                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                                        className="px-4 py-2 text-gray-300 hover:bg-white/10 rounded-md border border-white/20"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                        className="px-4 py-2 bg-white text-black rounded-md hover:bg-gray-200 border border-white"
                                     >
                                         Create User
                                     </button>

@@ -230,12 +230,12 @@ export default function InventoryPage() {
     return (
         <DashboardLayout>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
+                <h1 className="text-2xl font-semibold text-white">Inventory</h1>
                 <div className="space-x-2 flex">
                     <AnimeButton
                         onClick={() => setShowCategoryModal(true)}
                         variant="ghost"
-                        className="text-gray-700 border border-gray-300 hover:bg-gray-50"
+                        className="text-gray-300 border border-white/20 hover:bg-white/5"
                     >
                         Manage Categories
                     </AnimeButton>
@@ -249,14 +249,14 @@ export default function InventoryPage() {
                     <AnimeButton
                         onClick={() => setShowBulkImportModal(true)}
                         variant="primary"
-                        className="bg-green-600 hover:bg-green-700 border-green-500"
+                        className="bg-white text-black hover:bg-gray-200 border-white"
                     >
                         Bulk Import
                     </AnimeButton>
                     <AnimeButton
                         onClick={() => setShowAddModal(true)}
                         variant="primary"
-                        className="bg-indigo-600 hover:bg-indigo-700 border-indigo-500"
+                        className="bg-white text-black hover:bg-gray-200 border-white"
                     >
                         Add Item
                     </AnimeButton>
@@ -264,7 +264,7 @@ export default function InventoryPage() {
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <div className="bg-white/10 border border-white/20 text-white px-4 py-3 rounded relative mb-4" role="alert">
                     <strong className="font-bold">Error: </strong>
                     <span className="block sm:inline">{error}</span>
                 </div>
@@ -272,27 +272,27 @@ export default function InventoryPage() {
 
             {/* Add Item Modal */}
             {showAddModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold mb-4">Add New Item</h2>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-lg font-bold mb-4 text-white">Add New Item</h2>
                         <form onSubmit={handleAddItem}>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <label className="block text-sm font-medium text-gray-300">Name</label>
                                 <input
                                     type="text"
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={newItem.name}
                                     onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Barcode (Optional)</label>
+                                <label className="block text-sm font-medium text-gray-300">Barcode (Optional)</label>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                        className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                         value={newItem.barcode || ''}
                                         onChange={(e) => setNewItem({ ...newItem, barcode: e.target.value })}
                                         placeholder="Scan or enter code"
@@ -300,19 +300,19 @@ export default function InventoryPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShowScanModal(true)}
-                                        className="mt-1 bg-gray-100 border border-gray-300 rounded px-3 hover:bg-gray-200"
+                                        className="mt-1 bg-white/10 border border-white/20 rounded px-3 hover:bg-white/20 text-white"
                                         title="Scan Barcode"
                                     >
                                         <Scan size={18} />
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Leave empty to auto-generate</p>
+                                <p className="text-xs text-gray-400 mt-1">Leave empty to auto-generate</p>
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Category</label>
+                                <label className="block text-sm font-medium text-gray-300">Category</label>
                                 <select
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={newItem.category_id}
                                     onChange={(e) => setNewItem({ ...newItem, category_id: e.target.value })}
                                 >
@@ -324,59 +324,59 @@ export default function InventoryPage() {
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Image</label>
+                                <label className="block text-sm font-medium text-gray-300">Image</label>
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                    className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
                                     onChange={(e) => handleImageUpload(e, false)}
                                 />
                                 {newItem.image_url && (
-                                    <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${newItem.image_url}`} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded" />
+                                    <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${newItem.image_url}`} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded border border-white/20" />
                                 )}
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                                <label className="block text-sm font-medium text-gray-300">Quantity</label>
                                 <input
                                     type="number"
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={newItem.quantity}
                                     onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Min Stock Alert</label>
+                                <label className="block text-sm font-medium text-gray-300">Min Stock Alert</label>
                                 <input
                                     type="number"
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={newItem.min_stock}
                                     onChange={(e) => setNewItem({ ...newItem, min_stock: parseInt(e.target.value) })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Purchase Price (₹)</label>
+                                <label className="block text-sm font-medium text-gray-300">Purchase Price (₹)</label>
                                 <input
                                     type="number"
                                     required
                                     step="0.01"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={newItem.purchase_price}
                                     onChange={(e) => setNewItem({ ...newItem, purchase_price: parseFloat(e.target.value) })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Selling Price (₹)</label>
+                                <label className="block text-sm font-medium text-gray-300">Selling Price (₹)</label>
                                 <input
                                     type="number"
                                     required
                                     step="0.01"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={newItem.selling_price}
                                     onChange={(e) => setNewItem({ ...newItem, selling_price: parseFloat(e.target.value) })}
                                 />
@@ -385,13 +385,13 @@ export default function InventoryPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowAddModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                    className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                                    className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
                                 >
                                     Save
                                 </button>
@@ -403,35 +403,35 @@ export default function InventoryPage() {
 
             {/* Edit Item Modal */}
             {showEditModal && editItem && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold mb-4">Edit Item</h2>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-lg font-bold mb-4 text-white">Edit Item</h2>
                         <form onSubmit={handleEditItem}>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <label className="block text-sm font-medium text-gray-300">Name</label>
                                 <input
                                     type="text"
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.name}
                                     onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Barcode</label>
+                                <label className="block text-sm font-medium text-gray-300">Barcode</label>
                                 <input
                                     type="text"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.barcode || ''}
                                     onChange={(e) => setEditItem({ ...editItem, barcode: e.target.value })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Category</label>
+                                <label className="block text-sm font-medium text-gray-300">Category</label>
                                 <select
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.category_id}
                                     onChange={(e) => setEditItem({ ...editItem, category_id: e.target.value })}
                                 >
@@ -443,20 +443,20 @@ export default function InventoryPage() {
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Image</label>
+                                <label className="block text-sm font-medium text-gray-300">Image</label>
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                    className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
                                     onChange={(e) => handleImageUpload(e, true)}
                                 />
                                 {editItem.image_url && (
                                     <div className="mt-2 relative">
-                                        <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${editItem.image_url}`} alt="Preview" className="h-20 w-20 object-cover rounded" />
+                                        <img src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${editItem.image_url}`} alt="Preview" className="h-20 w-20 object-cover rounded border border-white/20" />
                                         <button
                                             type="button"
                                             onClick={() => setEditItem({ ...editItem, image_url: '' })}
-                                            className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                                            className="absolute top-0 right-0 bg-white text-black rounded-full w-5 h-5 flex items-center justify-center text-xs"
                                         >
                                             ×
                                         </button>
@@ -465,46 +465,46 @@ export default function InventoryPage() {
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                                <label className="block text-sm font-medium text-gray-300">Quantity</label>
                                 <input
                                     type="number"
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.quantity}
                                     onChange={(e) => setEditItem({ ...editItem, quantity: parseInt(e.target.value) })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Min Stock Alert</label>
+                                <label className="block text-sm font-medium text-gray-300">Min Stock Alert</label>
                                 <input
                                     type="number"
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.min_stock}
                                     onChange={(e) => setEditItem({ ...editItem, min_stock: parseInt(e.target.value) })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Purchase Price (₹)</label>
+                                <label className="block text-sm font-medium text-gray-300">Purchase Price (₹)</label>
                                 <input
                                     type="number"
                                     required
                                     step="0.01"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.purchase_price}
                                     onChange={(e) => setEditItem({ ...editItem, purchase_price: parseFloat(e.target.value) })}
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Selling Price (₹)</label>
+                                <label className="block text-sm font-medium text-gray-300">Selling Price (₹)</label>
                                 <input
                                     type="number"
                                     required
                                     step="0.01"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                    className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                     value={editItem.selling_price}
                                     onChange={(e) => setEditItem({ ...editItem, selling_price: parseFloat(e.target.value) })}
                                 />
@@ -513,13 +513,13 @@ export default function InventoryPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowEditModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                    className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                                    className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
                                 >
                                     Update
                                 </button>
@@ -531,32 +531,32 @@ export default function InventoryPage() {
 
             {/* Category Modal */}
             {showCategoryModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
-                        <h2 className="text-lg font-bold mb-4">Manage Categories</h2>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-full max-w-md mx-4">
+                        <h2 className="text-lg font-bold mb-4 text-white">Manage Categories</h2>
                         <form onSubmit={handleAddCategory} className="mb-4 flex gap-2">
                             <input
                                 type="text"
                                 placeholder="New Category Name"
                                 required
-                                className="flex-1 border border-gray-300 rounded-md shadow-sm p-2 text-gray-900 bg-white"
+                                className="flex-1 bg-black text-white border border-white/20 rounded-md shadow-sm p-2 focus:ring-white focus:border-white"
                                 value={newCategory.name}
                                 onChange={(e) => setNewCategory({ name: e.target.value })}
                             />
-                            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add</button>
+                            <button type="submit" className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200">Add</button>
                         </form>
-                        <ul className="divide-y divide-gray-200 max-h-60 overflow-y-auto">
+                        <ul className="divide-y divide-white/10 max-h-60 overflow-y-auto">
                             {categories.map((cat) => (
-                                <li key={cat.id} className="py-2 flex justify-between items-center">
+                                <li key={cat.id} className="py-2 flex justify-between items-center text-white">
                                     <span>{cat.name}</span>
-                                    <button onClick={() => handleDeleteCategory(cat.id)} className="text-red-600 hover:text-red-800 text-sm">Delete</button>
+                                    <button onClick={() => handleDeleteCategory(cat.id)} className="text-white hover:text-gray-300 text-sm">Delete</button>
                                 </li>
                             ))}
                         </ul>
                         <div className="mt-4 flex justify-end">
                             <button
                                 onClick={() => setShowCategoryModal(false)}
-                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                             >
                                 Close
                             </button>
@@ -567,23 +567,23 @@ export default function InventoryPage() {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
-                        <h2 className="text-lg font-bold mb-4 text-gray-900">Confirm Delete</h2>
-                        <p className="text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-full max-w-md mx-4">
+                        <h2 className="text-lg font-bold mb-4 text-white">Confirm Delete</h2>
+                        <p className="text-gray-400 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
                         <div className="flex justify-end space-x-2">
                             <button
                                 onClick={() => {
                                     setShowDeleteModal(false);
                                     setItemToDelete(null);
                                 }}
-                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmDelete}
-                                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                                className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 border border-white"
                             >
                                 Delete
                             </button>
@@ -594,23 +594,23 @@ export default function InventoryPage() {
 
             {/* Delete Category Confirmation Modal */}
             {showDeleteCategoryModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
-                        <h2 className="text-lg font-bold mb-4 text-gray-900">Confirm Delete Category</h2>
-                        <p className="text-gray-600 mb-6">Are you sure you want to delete this category? This action cannot be undone.</p>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-full max-w-md mx-4">
+                        <h2 className="text-lg font-bold mb-4 text-white">Confirm Delete Category</h2>
+                        <p className="text-gray-400 mb-6">Are you sure you want to delete this category? This action cannot be undone.</p>
                         <div className="flex justify-end space-x-2">
                             <button
                                 onClick={() => {
                                     setShowDeleteCategoryModal(false);
                                     setCategoryToDelete(null);
                                 }}
-                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmDeleteCategory}
-                                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                                className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 border border-white"
                             >
                                 Delete
                             </button>
@@ -621,39 +621,39 @@ export default function InventoryPage() {
 
             {/* Scanner Modal */}
             {showScanModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-md relative">
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-4 rounded-lg shadow-none w-full max-w-md relative">
                         <button
                             onClick={() => setShowScanModal(false)}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10"
+                            className="absolute top-2 right-2 text-gray-400 hover:text-white z-10"
                         >
                             ×
                         </button>
-                        <h2 className="text-lg font-bold mb-4 text-center">Scan Barcode/QR</h2>
-                        <div className="aspect-square bg-black rounded overflow-hidden">
+                        <h2 className="text-lg font-bold mb-4 text-center text-white">Scan Barcode/QR</h2>
+                        <div className="aspect-square bg-black rounded overflow-hidden border border-white/20">
                             <QrReader
                                 onResult={handleScan}
                                 constraints={{ facingMode: 'environment' }}
                                 className="w-full h-full"
                             />
                         </div>
-                        <p className="text-center text-sm text-gray-500 mt-4">Point camera at a barcode or QR code</p>
+                        <p className="text-center text-sm text-gray-400 mt-4">Point camera at a barcode or QR code</p>
                     </div>
                 </div>
             )}
 
             {/* QR Code Modal */}
             {showQRModal && selectedQRItem && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-                        <h2 className="text-lg font-bold mb-4">{selectedQRItem.name}</h2>
-                        <div className="bg-white p-4 rounded border">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none flex flex-col items-center">
+                        <h2 className="text-lg font-bold mb-4 text-white">{selectedQRItem.name}</h2>
+                        <div className="bg-white p-4 rounded border border-white/20">
                             <QRCode value={selectedQRItem.barcode || selectedQRItem.id.toString()} size={200} />
                         </div>
-                        <p className="mt-4 text-sm text-gray-500 font-mono">{selectedQRItem.barcode || `ID: ${selectedQRItem.id}`}</p>
+                        <p className="mt-4 text-sm text-gray-400 font-mono">{selectedQRItem.barcode || `ID: ${selectedQRItem.id}`}</p>
                         <button
                             onClick={() => setShowQRModal(false)}
-                            className="mt-6 bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 w-full"
+                            className="mt-6 bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20 w-full"
                         >
                             Close
                         </button>
@@ -663,38 +663,38 @@ export default function InventoryPage() {
 
             {/* Bulk Import Modal */}
             {showBulkImportModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold mb-4 text-gray-900">Bulk Import Inventory</h2>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-lg font-bold mb-4 text-white">Bulk Import Inventory</h2>
 
                         {!bulkImportResults ? (
                             <>
                                 <div className="mb-4">
-                                    <p className="text-sm text-gray-600 mb-2">Upload a CSV or XLSX file to import multiple items at once.</p>
+                                    <p className="text-sm text-gray-400 mb-2">Upload a CSV or XLSX file to import multiple items at once.</p>
                                     <button
                                         onClick={downloadTemplate}
-                                        className="text-sm text-indigo-600 hover:text-indigo-800 underline mb-4"
+                                        className="text-sm text-white hover:text-gray-300 underline mb-4"
                                     >
                                         Download Template
                                     </button>
                                 </div>
 
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Select File</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Select File</label>
                                     <input
                                         type="file"
                                         accept=".csv,.xlsx"
                                         onChange={(e) => setBulkImportFile(e.target.files?.[0] || null)}
-                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                        className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
                                     />
                                     {bulkImportFile && (
-                                        <p className="mt-2 text-sm text-gray-600">Selected: {bulkImportFile.name}</p>
+                                        <p className="mt-2 text-sm text-gray-400">Selected: {bulkImportFile.name}</p>
                                     )}
                                 </div>
 
-                                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
-                                    <p className="text-sm text-blue-800 font-medium mb-1">Required Columns:</p>
-                                    <ul className="text-xs text-blue-700 list-disc list-inside">
+                                <div className="bg-white/5 border border-white/20 rounded p-3 mb-4">
+                                    <p className="text-sm text-white font-medium mb-1">Required Columns:</p>
+                                    <ul className="text-xs text-gray-400 list-disc list-inside">
                                         <li>name (required)</li>
                                         <li>quantity (required)</li>
                                         <li>selling_price (required)</li>
@@ -710,7 +710,7 @@ export default function InventoryPage() {
                                             setBulkImportFile(null);
                                             setBulkImportResults(null);
                                         }}
-                                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                                        className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                                         disabled={bulkImportLoading}
                                     >
                                         Cancel
@@ -718,7 +718,7 @@ export default function InventoryPage() {
                                     <button
                                         onClick={handleBulkImport}
                                         disabled={!bulkImportFile || bulkImportLoading}
-                                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed border border-white"
                                     >
                                         {bulkImportLoading ? 'Importing...' : 'Import'}
                                     </button>
@@ -727,19 +727,19 @@ export default function InventoryPage() {
                         ) : (
                             <>
                                 <div className="mb-4">
-                                    <div className="bg-green-50 border border-green-200 rounded p-4 mb-3">
-                                        <h3 className="font-semibold text-green-800 mb-2">Import Successful!</h3>
-                                        <p className="text-sm text-green-700">✅ Items created: {bulkImportResults.items_created}</p>
-                                        <p className="text-sm text-green-700">✅ Categories created: {bulkImportResults.categories_created}</p>
-                                        <p className="text-sm text-green-700">📊 Total rows processed: {bulkImportResults.total_rows}</p>
+                                    <div className="bg-white/10 border border-white/20 rounded p-4 mb-3">
+                                        <h3 className="font-semibold text-white mb-2">Import Successful!</h3>
+                                        <p className="text-sm text-gray-300">✅ Items created: {bulkImportResults.items_created}</p>
+                                        <p className="text-sm text-gray-300">✅ Categories created: {bulkImportResults.categories_created}</p>
+                                        <p className="text-sm text-gray-300">📊 Total rows processed: {bulkImportResults.total_rows}</p>
                                     </div>
 
                                     {bulkImportResults.errors && bulkImportResults.errors.length > 0 && (
-                                        <div className="bg-red-50 border border-red-200 rounded p-4">
-                                            <h3 className="font-semibold text-red-800 mb-2">Errors ({bulkImportResults.errors.length}):</h3>
+                                        <div className="bg-white/10 border border-white/20 rounded p-4">
+                                            <h3 className="font-semibold text-white mb-2">Errors ({bulkImportResults.errors.length}):</h3>
                                             <div className="max-h-40 overflow-y-auto">
                                                 {bulkImportResults.errors.map((err: any, idx: number) => (
-                                                    <p key={idx} className="text-xs text-red-700 mb-1">
+                                                    <p key={idx} className="text-xs text-gray-300 mb-1">
                                                         Row {err.row}: {err.error}
                                                     </p>
                                                 ))}
@@ -755,7 +755,7 @@ export default function InventoryPage() {
                                             setBulkImportFile(null);
                                             setBulkImportResults(null);
                                         }}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                                        className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
                                     >
                                         Close
                                     </button>
@@ -770,28 +770,28 @@ export default function InventoryPage() {
             <div className="hidden md:flex mt-8 flex-col">
                 <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                        <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                        <div className="shadow-none overflow-hidden border border-white/20 sm:rounded-lg">
+                            <table className="min-w-full divide-y divide-white/10">
+                                <thead className="bg-white/5">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                             Item
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                             Category
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                             Quantity
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                             Price
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                                             Actions
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-black divide-y divide-white/10">
                                     {items.map((item) => {
                                         const category = categories.find(c => c.id === item.category_id);
                                         const isLowStock = item.quantity < item.min_stock;
@@ -801,36 +801,36 @@ export default function InventoryPage() {
                                                     <div className="flex items-center">
                                                         {item.image_url ? (
                                                             <div className="flex-shrink-0 h-10 w-10">
-                                                                <img className="h-10 w-10 rounded-full object-cover" src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${item.image_url}`} alt="" />
+                                                                <img className="h-10 w-10 rounded-full object-cover border border-white/20" src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${item.image_url}`} alt="" />
                                                             </div>
                                                         ) : (
-                                                            <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-xs">
+                                                            <div className="flex-shrink-0 h-10 w-10 bg-white/10 rounded-full flex items-center justify-center text-gray-400 text-xs border border-white/20">
                                                                 No Img
                                                             </div>
                                                         )}
                                                         <div className="ml-4">
-                                                            <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                                                            <div className="text-sm font-medium text-white">{item.name}</div>
                                                             {isLowStock && (
-                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-white/10 text-white border border-white/20">
                                                                     Low Stock
                                                                 </span>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                                     {category?.name || '-'}
                                                 </td>
-                                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${isLowStock ? 'text-red-600 font-bold' : 'text-gray-500'}`}>
+                                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${isLowStock ? 'text-white font-bold' : 'text-gray-400'}`}>
                                                     {item.quantity}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                                     ₹{item.selling_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                                    <button onClick={() => { setSelectedQRItem(item); setShowQRModal(true); }} className="text-gray-600 hover:text-gray-900"><QrCode size={18} /></button>
-                                                    <button onClick={() => openEditModal(item)} className="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                                    <button onClick={() => handleDeleteItem(item.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                                                    <button onClick={() => { setSelectedQRItem(item); setShowQRModal(true); }} className="text-white hover:text-gray-300"><QrCode size={18} /></button>
+                                                    <button onClick={() => openEditModal(item)} className="text-white hover:text-gray-300">Edit</button>
+                                                    <button onClick={() => handleDeleteItem(item.id)} className="text-white hover:text-gray-300">Delete</button>
                                                 </td>
                                             </tr>
                                         );
@@ -848,52 +848,52 @@ export default function InventoryPage() {
                     const category = categories.find(c => c.id === item.category_id);
                     const isLowStock = item.quantity < item.min_stock;
                     return (
-                        <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
+                        <div key={item.id} className="bg-black p-4 rounded-xl shadow-none border border-white/20 space-y-3">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center space-x-3">
                                     {item.image_url ? (
-                                        <img className="h-12 w-12 rounded-lg object-cover" src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${item.image_url}`} alt="" />
+                                        <img className="h-12 w-12 rounded-lg object-cover border border-white/20" src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}${item.image_url}`} alt="" />
                                     ) : (
-                                        <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                                        <div className="h-12 w-12 bg-white/10 rounded-lg flex items-center justify-center text-gray-400 text-xs border border-white/20">No Img</div>
                                     )}
                                     <div>
-                                        <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
-                                        <p className="text-xs text-gray-500">{category?.name || 'Uncategorized'}</p>
+                                        <h3 className="text-sm font-semibold text-white">{item.name}</h3>
+                                        <p className="text-xs text-gray-400">{category?.name || 'Uncategorized'}</p>
                                     </div>
                                 </div>
                                 {isLowStock && (
-                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Low Stock</span>
+                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-white/10 text-white border border-white/20">Low Stock</span>
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-3 rounded-lg">
+                            <div className="grid grid-cols-2 gap-4 text-sm bg-white/5 p-3 rounded-lg border border-white/10">
                                 <div>
-                                    <p className="text-gray-500 text-xs uppercase tracking-wider">Price</p>
-                                    <p className="font-semibold text-gray-900">₹{item.selling_price.toLocaleString('en-IN')}</p>
+                                    <p className="text-gray-400 text-xs uppercase tracking-wider">Price</p>
+                                    <p className="font-semibold text-white">₹{item.selling_price.toLocaleString('en-IN')}</p>
                                 </div>
                                 <div>
-                                    <p className="text-gray-500 text-xs uppercase tracking-wider">Stock</p>
-                                    <p className={`font-semibold ${isLowStock ? 'text-red-600' : 'text-gray-900'}`}>{item.quantity}</p>
+                                    <p className="text-gray-400 text-xs uppercase tracking-wider">Stock</p>
+                                    <p className={`font-semibold ${isLowStock ? 'text-white' : 'text-white'}`}>{item.quantity}</p>
                                 </div>
                             </div>
 
                             <div className="pt-2 flex justify-end space-x-2">
                                 <button
                                     onClick={() => { setSelectedQRItem(item); setShowQRModal(true); }}
-                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    className="p-2 text-white hover:bg-white/10 rounded-lg border border-white/20"
                                     title="View QR"
                                 >
                                     <QrCode size={18} />
                                 </button>
                                 <button
                                     onClick={() => openEditModal(item)}
-                                    className="flex-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-lg text-sm font-medium text-center"
+                                    className="flex-1 bg-white/10 text-white hover:bg-white/20 px-3 py-2 rounded-lg text-sm font-medium text-center border border-white/20"
                                 >
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => handleDeleteItem(item.id)}
-                                    className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-medium text-center"
+                                    className="flex-1 bg-white/10 text-white hover:bg-white/20 px-3 py-2 rounded-lg text-sm font-medium text-center border border-white/20"
                                 >
                                     Delete
                                 </button>

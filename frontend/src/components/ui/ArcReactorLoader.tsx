@@ -11,7 +11,7 @@ const ArcReactorLoader = () => {
         anime({
             targets: '.reactor-core',
             opacity: [0.4, 0.8],
-            boxShadow: ['0 0 10px #0ff', '0 0 40px #0ff'],
+            boxShadow: ['0 0 10px #fff', '0 0 40px #fff'],
             easing: 'easeInOutSine',
             duration: 1000,
             direction: 'alternate',
@@ -49,7 +49,7 @@ const ArcReactorLoader = () => {
     }, []);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-95 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 backdrop-blur-sm">
             <svg
                 ref={reactorRef}
                 width="200"
@@ -69,12 +69,12 @@ const ArcReactorLoader = () => {
                 </defs>
 
                 {/* Outer Housing */}
-                <circle cx="100" cy="100" r="90" fill="none" stroke="#334155" strokeWidth="4" />
-                <circle cx="100" cy="100" r="85" fill="none" stroke="#475569" strokeWidth="1" strokeDasharray="5,5" />
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#333" strokeWidth="4" />
+                <circle cx="100" cy="100" r="85" fill="none" stroke="#555" strokeWidth="1" strokeDasharray="5,5" />
 
                 {/* Outer Ring */}
                 <g className="reactor-outer-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="75" fill="none" stroke="#0ea5e9" strokeWidth="2" strokeOpacity="0.5" />
+                    <circle cx="100" cy="100" r="75" fill="none" stroke="#fff" strokeWidth="2" strokeOpacity="0.5" />
                     {[0, 60, 120, 180, 240, 300].map((angle, i) => (
                         <rect
                             key={i}
@@ -82,7 +82,7 @@ const ArcReactorLoader = () => {
                             y="20"
                             width="10"
                             height="15"
-                            fill="#0ea5e9"
+                            fill="#fff"
                             transform={`rotate(${angle} 100 100)`}
                             className="mech-bit"
                         />
@@ -91,8 +91,8 @@ const ArcReactorLoader = () => {
 
                 {/* Inner Ring */}
                 <g className="reactor-inner-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="50" fill="none" stroke="#06b6d4" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
-                    <circle cx="100" cy="100" r="45" fill="none" stroke="#06b6d4" strokeWidth="1" />
+                    <circle cx="100" cy="100" r="50" fill="none" stroke="#fff" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
+                    <circle cx="100" cy="100" r="45" fill="none" stroke="#fff" strokeWidth="1" />
                 </g>
 
                 {/* Core */}
@@ -100,19 +100,19 @@ const ArcReactorLoader = () => {
                     cx="100"
                     cy="100"
                     r="30"
-                    fill="#ecfeff"
+                    fill="#fff"
                     className="reactor-core"
                     filter="url(#glow)"
                 />
                 <path
                     d="M100 75 L115 110 L85 110 Z"
-                    fill="#06b6d4"
+                    fill="#fff"
                     opacity="0.5"
                     className="reactor-core-triangle"
                     transform="rotate(180 100 100)"
                 />
             </svg>
-            <div className="absolute mt-64 text-cyan-400 font-mono text-sm tracking-widest animate-pulse">
+            <div className="absolute mt-64 text-white font-mono text-sm tracking-widest animate-pulse">
                 INITIALIZING SYSTEMS...
             </div>
         </div>

@@ -49,34 +49,34 @@ export default function SuperAdminDashboard() {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <h1 className="text-2xl font-bold text-gray-900">Super Admin Dashboard</h1>
+                <h1 className="text-2xl font-bold text-white">Super Admin Dashboard</h1>
 
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-lg">
                     <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">Pending Upgrade Requests</h3>
+                        <h3 className="text-lg leading-6 font-medium text-white">Pending Upgrade Requests</h3>
                     </div>
-                    <div className="border-t border-gray-200">
+                    <div className="border-t border-white/20">
                         {loading ? (
-                            <p className="p-4 text-gray-500">Loading...</p>
+                            <p className="p-4 text-gray-400">Loading...</p>
                         ) : requests.length === 0 ? (
-                            <p className="p-4 text-gray-500">No pending requests.</p>
+                            <p className="p-4 text-gray-400">No pending requests.</p>
                         ) : (
-                            <ul className="divide-y divide-gray-200">
+                            <ul className="divide-y divide-white/10">
                                 {requests.map((req) => (
                                     <li key={req.id} className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-indigo-600 truncate">
+                                                <p className="text-sm font-medium text-white truncate">
                                                     Request #{req.id} - Plan: {req.plan_requested.toUpperCase()}
                                                 </p>
-                                                <p className="text-sm text-gray-500">
+                                                <p className="text-sm text-gray-400">
                                                     User ID: {req.user_id} | Company ID: {req.company_id}
                                                 </p>
-                                                <p className="text-sm text-gray-500">
+                                                <p className="text-sm text-gray-400">
                                                     Ref: {req.payment_ref}
                                                 </p>
                                                 {req.screenshot_url && (
-                                                    <a href={req.screenshot_url} target="_blank" rel="noreferrer" className="text-sm text-blue-500 hover:underline">
+                                                    <a href={req.screenshot_url} target="_blank" rel="noreferrer" className="text-sm text-white underline hover:text-gray-300">
                                                         View Screenshot
                                                     </a>
                                                 )}
@@ -84,13 +84,13 @@ export default function SuperAdminDashboard() {
                                             <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => handleAction(req.id, 'approve')}
-                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                    className="inline-flex items-center px-3 py-1.5 border border-white text-xs font-medium rounded-md text-black bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
                                                 >
                                                     Approve
                                                 </button>
                                                 <button
                                                     onClick={() => handleAction(req.id, 'reject')}
-                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                    className="inline-flex items-center px-3 py-1.5 border border-white text-xs font-medium rounded-md text-white bg-black hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
                                                 >
                                                     Reject
                                                 </button>

@@ -67,18 +67,18 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         <>
             {/* Mobile overlay */}
             <div
-                className={`fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm transition-opacity md:hidden ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-sm transition-opacity md:hidden ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 onClick={() => setOpen(false)}
             />
 
-            <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-auto md:flex md:flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="flex-1 flex flex-col min-h-0 bg-slate-900 border-r border-slate-800">
-                    <div className="flex items-center h-20 flex-shrink-0 px-6 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800">
+            <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-black transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-auto md:flex md:flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="flex-1 flex flex-col min-h-0 bg-black border-r border-white/20">
+                    <div className="flex items-center h-20 flex-shrink-0 px-6 bg-black border-b border-white/20">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black font-bold">
                                 B
                             </div>
-                            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                            <h1 className="text-xl font-bold text-white">
                                 BizTracker
                             </h1>
                         </div>
@@ -95,10 +95,10 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                                         href={item.href}
                                     >
                                         <a className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                            ? 'bg-white text-black'
+                                            : 'text-gray-400 hover:bg-white/10 hover:text-white'
                                             }`}>
-                                            <Icon className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'
+                                            <Icon className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-black' : 'text-gray-400 group-hover:text-white'
                                                 }`} />
                                             {item.name}
                                         </a>
@@ -110,23 +110,23 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
 
                     {/* User Profile */}
                     {user && (
-                        <div className="p-4 border-t border-slate-800 bg-slate-900/50">
+                        <div className="p-4 border-t border-white/20 bg-black">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center text-white font-medium border border-slate-600">
+                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-medium border border-white/20">
                                     {user.email[0].toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-white truncate">
                                         {user.email}
                                     </p>
-                                    <p className="text-xs text-slate-500 truncate capitalize">
+                                    <p className="text-xs text-gray-400 truncate capitalize">
                                         {user.role}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 onClick={logout}
-                                className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
+                                className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 bg-white/5 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                             >
                                 <LogOut className="w-4 h-4 mr-2" />
                                 Sign Out

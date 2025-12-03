@@ -12,9 +12,9 @@ export const AnimeButton = ({ children, variant = 'primary', className = '', ...
     const baseStyles = "relative overflow-hidden px-6 py-3 rounded-md font-bold uppercase tracking-wider transition-all duration-200";
 
     const variants = {
-        primary: "bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.5)] border border-blue-400/30",
-        secondary: "bg-purple-600 text-white hover:bg-purple-500 shadow-[0_0_15px_rgba(147,51,234,0.5)] border border-purple-400/30",
-        danger: "bg-red-600 text-white hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] border border-red-400/30",
+        primary: "bg-white text-black hover:bg-gray-200 shadow-[0_0_15px_rgba(255,255,255,0.5)] border border-white/30",
+        secondary: "bg-black text-white hover:bg-gray-900 shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-white/30",
+        danger: "bg-black text-white border border-white hover:bg-white hover:text-black shadow-[0_0_15px_rgba(255,255,255,0.5)]",
         ghost: "bg-transparent text-gray-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20",
     };
 

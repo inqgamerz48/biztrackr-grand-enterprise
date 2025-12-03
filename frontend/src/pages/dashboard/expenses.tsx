@@ -91,37 +91,25 @@ export default function ExpensesPage() {
     };
 
     const getCategoryColor = (category: string) => {
-        const colors: any = {
-            'Rent': 'bg-blue-100 text-blue-800',
-            'Salaries': 'bg-green-100 text-green-800',
-            'Utilities': 'bg-yellow-100 text-yellow-800',
-            'Marketing': 'bg-purple-100 text-purple-800',
-            'Transport': 'bg-pink-100 text-pink-800',
-            'Maintenance': 'bg-indigo-100 text-indigo-800',
-            'Supplies': 'bg-red-100 text-red-800',
-            'Insurance': 'bg-orange-100 text-orange-800',
-            'Taxes': 'bg-gray-100 text-gray-800',
-            'Miscellaneous': 'bg-teal-100 text-teal-800'
-        };
-        return colors[category] || 'bg-gray-100 text-gray-800';
+        return 'bg-white/10 text-white border border-white/20';
     };
 
     return (
         <DashboardLayout>
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-[500px]">
-                        <h2 className="text-xl font-bold mb-4">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none w-[500px]">
+                        <h2 className="text-xl font-bold mb-4 text-white">
                             {editingExpense ? 'Edit Expense' : 'Add New Expense'}
                         </h2>
                         <form onSubmit={handleSubmit}>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Category *</label>
                                     <select
                                         required
-                                        className="w-full border p-2 rounded"
+                                        className="w-full bg-black text-white border border-white/20 p-2 rounded focus:outline-none focus:ring-white focus:border-white"
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     >
@@ -131,33 +119,33 @@ export default function ExpensesPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹) *</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Amount (₹) *</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         required
                                         placeholder="0.00"
-                                        className="w-full border p-2 rounded"
+                                        className="w-full bg-black text-white border border-white/20 p-2 rounded focus:outline-none focus:ring-white focus:border-white"
                                         value={formData.amount}
                                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Date *</label>
                                     <input
                                         type="date"
                                         required
-                                        className="w-full border p-2 rounded"
+                                        className="w-full bg-black text-white border border-white/20 p-2 rounded focus:outline-none focus:ring-white focus:border-white"
                                         value={formData.date}
                                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
                                     <textarea
                                         rows={3}
                                         placeholder="Optional description..."
-                                        className="w-full border p-2 rounded"
+                                        className="w-full bg-black text-white border border-white/20 p-2 rounded focus:outline-none focus:ring-white focus:border-white"
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
@@ -171,11 +159,11 @@ export default function ExpensesPage() {
                                         setEditingExpense(null);
                                         setFormData({ category: 'Rent', amount: '', description: '', date: new Date().toISOString().split('T')[0] });
                                     }}
-                                    className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+                                    className="bg-white/10 text-white px-4 py-2 rounded hover:bg-white/20 border border-white/20"
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                                <button type="submit" className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200">
                                     {editingExpense ? 'Update' : 'Save'}
                                 </button>
                             </div>
@@ -186,10 +174,10 @@ export default function ExpensesPage() {
 
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold text-gray-900">Expense Management</h1>
+                    <h1 className="text-2xl font-semibold text-white">Expense Management</h1>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                        className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
                     >
                         Add Expense
                     </button>
@@ -197,12 +185,12 @@ export default function ExpensesPage() {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="bg-black border border-white/20 overflow-hidden shadow-none rounded-lg">
                         <div className="p-5">
                             <div className="flex items-center">
                                 <div className="flex-1">
-                                    <p className="text-sm font-medium text-gray-500 truncate">Total Expenses</p>
-                                    <p className="mt-1 text-3xl font-semibold text-gray-900">
+                                    <p className="text-sm font-medium text-gray-400 truncate">Total Expenses</p>
+                                    <p className="mt-1 text-3xl font-semibold text-white">
                                         ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                     </p>
                                 </div>
@@ -210,15 +198,15 @@ export default function ExpensesPage() {
                         </div>
                     </div>
                     {summary.slice(0, 3).map((item) => (
-                        <div key={item.category} className="bg-white overflow-hidden shadow rounded-lg">
+                        <div key={item.category} className="bg-black border border-white/20 overflow-hidden shadow-none rounded-lg">
                             <div className="p-5">
                                 <div className="flex items-center">
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-500 truncate">{item.category}</p>
-                                        <p className="mt-1 text-2xl font-semibold text-gray-900">
+                                        <p className="text-sm font-medium text-gray-400 truncate">{item.category}</p>
+                                        <p className="mt-1 text-2xl font-semibold text-white">
                                             ₹{item.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                         </p>
-                                        <p className="text-xs text-gray-400">{item.count} transactions</p>
+                                        <p className="text-xs text-gray-500">{item.count} transactions</p>
                                     </div>
                                 </div>
                             </div>
@@ -227,10 +215,10 @@ export default function ExpensesPage() {
                 </div>
 
                 {/* Filter */}
-                <div className="bg-white p-4 rounded shadow">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+                <div className="bg-black border border-white/20 p-4 rounded shadow-none">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Category</label>
                     <select
-                        className="block w-full max-w-xs pl-3 pr-10 py-2 text-base border-gray-300 border rounded focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block w-full max-w-xs pl-3 pr-10 py-2 text-base bg-black text-white border-white/20 border rounded focus:outline-none focus:ring-white focus:border-white"
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
                     >
@@ -242,19 +230,19 @@ export default function ExpensesPage() {
                 </div>
 
                 {/* Expenses List */}
-                <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                    <ul className="divide-y divide-gray-200">
+                <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-md">
+                    <ul className="divide-y divide-white/10">
                         {expenses.length === 0 ? (
-                            <li className="px-4 py-8 text-center text-gray-500">
+                            <li className="px-4 py-8 text-center text-gray-400">
                                 No expenses found. Click "Add Expense" to get started.
                             </li>
                         ) : (
                             expenses.map((expense) => (
-                                <li key={expense.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                                <li key={expense.id} className="px-4 py-4 sm:px-6 hover:bg-white/5 transition-colors">
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between">
-                                                <p className="text-sm font-medium text-indigo-600 truncate">
+                                                <p className="text-sm font-medium text-white truncate">
                                                     {expense.description || 'No description'}
                                                 </p>
                                                 <div className="ml-2 flex-shrink-0 flex">
@@ -265,23 +253,23 @@ export default function ExpensesPage() {
                                             </div>
                                             <div className="mt-2 flex justify-between">
                                                 <div className="sm:flex">
-                                                    <p className="flex items-center text-sm text-gray-500">
+                                                    <p className="flex items-center text-sm text-gray-400">
                                                         {new Date(expense.date).toLocaleDateString('en-IN')}
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center space-x-4">
-                                                    <p className="text-lg font-bold text-gray-900">
+                                                    <p className="text-lg font-bold text-white">
                                                         ₹{expense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                     </p>
                                                     <button
                                                         onClick={() => handleEdit(expense)}
-                                                        className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                                        className="text-white hover:text-gray-300 text-sm font-medium"
                                                     >
                                                         Edit
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(expense.id)}
-                                                        className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                                        className="text-white hover:text-gray-300 text-sm font-medium"
                                                     >
                                                         Delete
                                                     </button>
