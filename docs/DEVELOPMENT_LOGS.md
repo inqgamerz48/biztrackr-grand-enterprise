@@ -77,3 +77,21 @@ This document serves as a comprehensive log of the development phases, challenge
 ### Priority 3: Third-Party Integrations
 - Payment gateway integration (Stripe/PayPal).
 - Email service integration (SendGrid/AWS SES).
+
+---
+
+## 🎨 Major Update: Themes & Admin Tools
+
+### 1. Multi-Theme System
+**Goal**: Provide a personalized and immersive user experience.
+**Implementation**:
+- Refactored entire codebase to use semantic CSS classes (`bg-background`, `text-foreground`).
+- Implemented `ThemeContext` for dynamic switching.
+- Added 4 themes: Light, Dark, Stranger Things (Animated), Christmas (Animated).
+
+### 2. Company Details & Profile Sync
+**Goal**: Empower admins and users to manage their data.
+**Implementation**:
+- **Profile Sync**: Users can now update their name and email directly from Settings.
+- **Company Details**: Admins have a dedicated page to manage tenant information.
+- **RBAC**: Strict role-based access control enforced on all new endpoints.

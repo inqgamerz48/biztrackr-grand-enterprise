@@ -19,6 +19,13 @@ Visualize your business performance with interactive charts and real-time data.
 
 ![Dashboard Screenshot](docs/images/dashboard.png)
 
+### 🎨 **Multi-Theme System**
+Personalize your experience with our dynamic theme engine.
+- **Dark & Light Modes**: Seamless switching for day/night usage.
+- **Stranger Things Theme**: Immersive "Upside Down" aesthetic with particle effects.
+- **Christmas Theme**: Festive holiday vibes with snowfall animations.
+- **Semantic Styling**: Consistent look and feel across all components.
+
 ### 📦 **Inventory Management**
 Complete control over your stock across multiple locations.
 - **Real-time Tracking**: Monitor stock levels instantly.
@@ -51,6 +58,12 @@ Enterprise-grade security and control.
 - **Audit Logs**: Track every action taken within the system.
 - **Secure Auth**: JWT and Google OAuth authentication.
 - **Data Backup**: Automated backup solutions.
+
+### 🛠️ **Administration Tools**
+Powerful tools for system administrators.
+- **Company Details**: Dedicated page for Admins to manage tenant information.
+- **Profile Sync**: Seamless synchronization of user profile data.
+- **Plan Management**: Scripts to upgrade users and tenants to Pro plans.
 
 ---
 
@@ -129,6 +142,9 @@ python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+
+# Upgrade a user to Pro plan
+python backend/scripts/upgrade_user_plan.py
 ```
 
 **Frontend**:
