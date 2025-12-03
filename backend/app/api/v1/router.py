@@ -13,7 +13,8 @@ from app.api.v1.endpoints import (
     notifications,
     dashboard,
     payment_requests,
-    seed
+    seed,
+    tenants
 )
 
 api_router = APIRouter()
@@ -32,3 +33,4 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(payment_requests.router, prefix="/payment-requests", tags=["payment-requests"])
 api_router.include_router(seed.router, prefix="/seed", tags=["seed"])
+api_router.include_router(tenants.router, prefix="/tenants", tags=["tenants"])
