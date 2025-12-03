@@ -138,22 +138,22 @@ export default function ReportsPage() {
     return (
         <DashboardLayout>
             <div className="space-y-8">
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold text-foreground">Reports & Analytics</h1>
                         <p className="mt-1 text-sm text-muted-foreground">Visual insights and data exports</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full sm:w-auto">
                         <input
                             type="date"
-                            className="bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            className="flex-1 sm:flex-none bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-primary focus:border-primary"
                             value={dateRange.start}
                             onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                         />
                         <span className="self-center text-muted-foreground">-</span>
                         <input
                             type="date"
-                            className="bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            className="flex-1 sm:flex-none bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-primary focus:border-primary"
                             value={dateRange.end}
                             onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                         />

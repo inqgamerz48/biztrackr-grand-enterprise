@@ -83,7 +83,7 @@ export default function SuperAdminDashboard() {
     return (
         <DashboardLayout>
             <div className="space-y-8">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h1 className="text-2xl font-bold text-foreground">Super Admin Dashboard</h1>
                     <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-medium">
                         Super Admin Access
@@ -138,9 +138,9 @@ export default function SuperAdminDashboard() {
                         <ul className="divide-y divide-border">
                             {requests.map((req) => (
                                 <li key={req.id} className="p-6 hover:bg-muted/50 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-2">
+                                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                        <div className="flex-1 w-full">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1">
                                                 <h3 className="text-md font-medium text-foreground">
                                                     Request #{req.id} - {req.plan_requested.toUpperCase()} Plan
                                                 </h3>
@@ -148,7 +148,7 @@ export default function SuperAdminDashboard() {
                                                     {new Date(req.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm text-muted-foreground">
                                                 <p><strong>User ID:</strong> {req.user_id}</p>
                                                 <p><strong>Payment Ref:</strong> {req.payment_ref}</p>
                                             </div>
@@ -159,23 +159,23 @@ export default function SuperAdminDashboard() {
                                                         <img
                                                             src={req.screenshot_url}
                                                             alt="Payment Proof"
-                                                            className="h-32 object-cover rounded border border-border hover:opacity-75 transition-opacity"
+                                                            className="h-32 object-cover rounded border border-border hover:opacity-75 transition-opacity w-full sm:w-auto"
                                                         />
                                                     </a>
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="ml-6 flex flex-col space-y-2">
+                                        <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto">
                                             <button
                                                 onClick={() => handleApprove(req.id)}
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                                                className="flex-1 md:flex-none inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                                             >
                                                 <Check className="w-4 h-4 mr-2" />
                                                 Approve
                                             </button>
                                             <button
                                                 onClick={() => handleReject(req.id)}
-                                                className="inline-flex items-center px-3 py-2 border border-border text-sm leading-4 font-medium rounded-md text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                                                className="flex-1 md:flex-none inline-flex justify-center items-center px-3 py-2 border border-border text-sm leading-4 font-medium rounded-md text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                                             >
                                                 <X className="w-4 h-4 mr-2" />
                                                 Reject

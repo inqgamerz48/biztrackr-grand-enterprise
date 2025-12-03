@@ -229,34 +229,34 @@ export default function InventoryPage() {
 
     return (
         <DashboardLayout>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <h1 className="text-2xl font-semibold text-white">Inventory</h1>
-                <div className="space-x-2 flex">
+                <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
                     <AnimeButton
                         onClick={() => setShowCategoryModal(true)}
                         variant="ghost"
-                        className="text-gray-300 border border-white/20 hover:bg-white/5"
+                        className="text-gray-300 border border-white/20 hover:bg-white/5 whitespace-nowrap"
                     >
-                        Manage Categories
+                        Categories
                     </AnimeButton>
                     <AnimeButton
                         onClick={() => setShowScanModal(true)}
                         variant="secondary"
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 whitespace-nowrap"
                     >
                         <Scan size={18} /> Scan
                     </AnimeButton>
                     <AnimeButton
                         onClick={() => setShowBulkImportModal(true)}
                         variant="primary"
-                        className="bg-white text-black hover:bg-gray-200 border-white"
+                        className="bg-white text-black hover:bg-gray-200 border-white whitespace-nowrap"
                     >
-                        Bulk Import
+                        Import
                     </AnimeButton>
                     <AnimeButton
                         onClick={() => setShowAddModal(true)}
                         variant="primary"
-                        className="bg-white text-black hover:bg-gray-200 border-white"
+                        className="bg-white text-black hover:bg-gray-200 border-white whitespace-nowrap"
                     >
                         Add Item
                     </AnimeButton>

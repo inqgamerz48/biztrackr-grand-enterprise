@@ -117,33 +117,35 @@ export default function UsersPage() {
 
     return (
         <div className="p-8">
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white">User Management</h1>
                     <p className="text-gray-400 mt-2">
                         {isAdmin ? 'Manage user roles and permissions' : 'View team members (Manager)'}
                     </p>
                 </div>
-                <button
-                    onClick={() => router.push('/dashboard')}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors flex items-center gap-2 border border-white/20"
-                >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Back to Dashboard
-                </button>
-                {isAdmin && (
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="ml-4 px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md transition-colors flex items-center gap-2 border border-white"
+                        onClick={() => router.push('/dashboard')}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors flex items-center justify-center gap-2 border border-white/20"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Add User
+                        Back to Dashboard
                     </button>
-                )}
+                    {isAdmin && (
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md transition-colors flex items-center justify-center gap-2 border border-white"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add User
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Success Message */}
@@ -160,7 +162,8 @@ export default function UsersPage() {
                 </div>
             )}
 
-            <div className="bg-black shadow-none rounded-lg overflow-hidden border border-white/20">
+            {/* Desktop Table */}
+            <div className="hidden md:block bg-black shadow-none rounded-lg overflow-hidden border border-white/20">
                 <table className="min-w-full divide-y divide-white/10">
                     <thead className="bg-white/5">
                         <tr>
@@ -228,6 +231,58 @@ export default function UsersPage() {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile List View */}
+            <div className="md:hidden space-y-4">
+                {users.map((user) => (
+                    <div key={user.id} className="bg-black border border-white/20 rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <div className="text-sm font-medium text-white">{user.email}</div>
+                                <div className="text-sm text-gray-400">{user.full_name || 'No name'}</div>
+                            </div>
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.is_active ? 'bg-white/10 text-white border border-white/20' : 'bg-white/10 text-white border border-white/20'
+                                }`}>
+                                {user.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4 pt-2 border-t border-white/10">
+                            <div className="flex-1">
+                                <label className="text-xs text-gray-400 block mb-1">Role</label>
+                                <select
+                                    value={user.role}
+                                    onChange={(e) => updateUserRole(user.id, e.target.value, user.email)}
+                                    disabled={!isAdmin || user.id === currentUser?.id}
+                                    className={`w-full text-sm border rounded px-2 py-1 transition-all ${user.role === 'admin' ? 'bg-white/10 text-white border-white/20' :
+                                        user.role === 'manager' ? 'bg-white/10 text-white border-white/20' :
+                                            'bg-white/10 text-white border-white/20'
+                                        } ${!isAdmin || user.id === currentUser?.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                >
+                                    <option value="admin" className="bg-black text-white">Admin</option>
+                                    <option value="manager" className="bg-black text-white">Manager</option>
+                                    <option value="cashier" className="bg-black text-white">Cashier</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-400 block mb-1">Action</label>
+                                <button
+                                    onClick={() => toggleUserActivation(user.id, user.is_active, user.email)}
+                                    disabled={!isAdmin || user.id === currentUser?.id}
+                                    className={`w-full px-3 py-1 rounded text-sm ${!isAdmin || user.id === currentUser?.id
+                                        ? 'opacity-50 cursor-not-allowed text-gray-400'
+                                        : user.is_active
+                                            ? 'text-white hover:bg-white/10'
+                                            : 'text-white hover:bg-white/10'
+                                        } transition-colors border border-white/20`}
+                                >
+                                    {user.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             <div className="mt-6 bg-white/5 border border-white/20 rounded-md p-4">

@@ -20,8 +20,8 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors w-5 h-5" />
                         <input
                             type="text"
-                            placeholder="Search anything..."
-                            className="w-full bg-muted/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary/20 transition-all"
+                            placeholder="Search..."
+                            className="w-full bg-muted/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary/20 transition-all text-sm"
                         />
                     </div>
                 </div>

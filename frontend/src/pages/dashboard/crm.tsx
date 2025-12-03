@@ -298,11 +298,11 @@ export default function CRMPage() {
                 </div>
             )}
 
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h1 className="text-2xl font-semibold text-white">CRM</h1>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 font-medium"
+                    className="w-full sm:w-auto bg-white text-black px-4 py-2 rounded hover:bg-gray-200 font-medium"
                 >
                     Add {activeTab === 'customers' ? 'Customer' : 'Supplier'}
                 </button>
@@ -349,32 +349,30 @@ export default function CRMPage() {
                 <ul className="divide-y divide-white/10">
                     {(activeTab === 'customers' ? customers : suppliers).map((item) => (
                         <li key={item.id} className="px-4 py-4 sm:px-6 hover:bg-white/5 transition-colors">
-                            <div className="flex items-center justify-between">
-                                <div className="flex-1">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div className="flex-1 w-full">
                                     <p className="text-sm font-medium text-white truncate">{item.name}</p>
-                                    <div className="mt-2 flex justify-between">
-                                        <div className="sm:flex space-x-4">
-                                            <p className="flex items-center text-sm text-gray-400">{item.phone}</p>
-                                            {item.email && <p className="flex items-center text-sm text-gray-400">{item.email}</p>}
-                                        </div>
+                                    <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
+                                        <p className="flex items-center text-sm text-gray-400">{item.phone}</p>
+                                        {item.email && <p className="flex items-center text-sm text-gray-400">{item.email}</p>}
                                     </div>
                                 </div>
-                                <div className="ml-4 flex space-x-2">
+                                <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
                                     <button
                                         onClick={() => viewLedger(item.id, item.name)}
-                                        className="text-white hover:text-gray-300 text-sm font-medium"
+                                        className="flex-1 sm:flex-none bg-white/10 text-white px-3 py-1.5 rounded hover:bg-white/20 text-sm font-medium border border-white/20 whitespace-nowrap"
                                     >
                                         Ledger
                                     </button>
                                     <button
                                         onClick={() => handleEdit(item)}
-                                        className="text-white hover:text-gray-300 text-sm font-medium"
+                                        className="flex-1 sm:flex-none bg-white/10 text-white px-3 py-1.5 rounded hover:bg-white/20 text-sm font-medium border border-white/20 whitespace-nowrap"
                                     >
                                         Edit
                                     </button>
                                     <button
                                         onClick={() => handleDelete(item.id)}
-                                        className="text-white hover:text-gray-300 text-sm font-medium"
+                                        className="flex-1 sm:flex-none bg-white/10 text-white px-3 py-1.5 rounded hover:bg-white/20 text-sm font-medium border border-white/20 whitespace-nowrap"
                                     >
                                         Delete
                                     </button>

@@ -67,12 +67,12 @@ export default function CompanyDetailsPage() {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">Company Details</h1>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+                        className="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
                     >
                         <Save className="mr-2 h-4 w-4" />
                         {saving ? 'Saving...' : 'Save Changes'}
@@ -115,8 +115,8 @@ export default function CompanyDetailsPage() {
                                 <label className="block text-sm font-medium text-muted-foreground">Subscription Status</label>
                                 <div className="mt-1">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${company.subscription_status === 'active'
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
                                         }`}>
                                         {company.subscription_status}
                                     </span>

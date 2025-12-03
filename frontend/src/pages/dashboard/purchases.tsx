@@ -391,7 +391,7 @@ export default function PurchasesPage() {
                             </select>
                         </div>
 
-                        <div className="flex gap-4" style={{ height: 'calc(100vh - 350px)' }}>
+                        <div className="flex flex-col lg:flex-row gap-4" style={{ height: 'calc(100vh - 350px)' }}>
                             {/* Items List */}
                             <div className="flex-1 bg-black border border-white/20 p-4 rounded shadow-none overflow-y-auto">
                                 <input
@@ -401,7 +401,7 @@ export default function PurchasesPage() {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {filteredItems.map((item) => (
                                         <div
                                             key={item.id}
@@ -419,7 +419,7 @@ export default function PurchasesPage() {
                             </div>
 
                             {/* Purchase Cart */}
-                            <div className="w-96 bg-black border border-white/20 p-4 rounded shadow-none flex flex-col">
+                            <div className="w-full lg:w-96 bg-black border border-white/20 p-4 rounded shadow-none flex flex-col h-1/2 lg:h-auto">
                                 <h2 className="text-xl font-bold mb-4 text-white">Draft Order</h2>
                                 <div className="flex-1 overflow-y-auto">
                                     {cart.map((item) => (

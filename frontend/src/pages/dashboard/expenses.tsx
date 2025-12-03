@@ -173,11 +173,11 @@ export default function ExpensesPage() {
             )}
 
             <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h1 className="text-2xl font-semibold text-white">Expense Management</h1>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
+                        className="w-full sm:w-auto bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
                     >
                         Add Expense
                     </button>
@@ -239,40 +239,42 @@ export default function ExpensesPage() {
                         ) : (
                             expenses.map((expense) => (
                                 <li key={expense.id} className="px-4 py-4 sm:px-6 hover:bg-white/5 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <div className="flex-1 w-full">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                                 <p className="text-sm font-medium text-white truncate">
                                                     {expense.description || 'No description'}
                                                 </p>
-                                                <div className="ml-2 flex-shrink-0 flex">
+                                                <div className="flex-shrink-0 flex">
                                                     <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryColor(expense.category)}`}>
                                                         {expense.category}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="mt-2 flex justify-between">
+                                            <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-2">
                                                 <div className="sm:flex">
                                                     <p className="flex items-center text-sm text-gray-400">
                                                         {new Date(expense.date).toLocaleDateString('en-IN')}
                                                     </p>
                                                 </div>
-                                                <div className="flex items-center space-x-4">
+                                                <div className="flex items-center justify-between sm:justify-end space-x-4 w-full sm:w-auto">
                                                     <p className="text-lg font-bold text-white">
                                                         ₹{expense.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                     </p>
-                                                    <button
-                                                        onClick={() => handleEdit(expense)}
-                                                        className="text-white hover:text-gray-300 text-sm font-medium"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(expense.id)}
-                                                        className="text-white hover:text-gray-300 text-sm font-medium"
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    <div className="flex space-x-2">
+                                                        <button
+                                                            onClick={() => handleEdit(expense)}
+                                                            className="text-white hover:text-gray-300 text-sm font-medium"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(expense.id)}
+                                                            className="text-white hover:text-gray-300 text-sm font-medium"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

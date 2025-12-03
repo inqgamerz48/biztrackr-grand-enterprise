@@ -59,18 +59,19 @@ export default function DashboardPage() {
         <DashboardLayout>
             <div className="space-y-8">
                 {/* Welcome Section */}
-                <div className="flex justify-between items-end">
+                {/* Welcome Section */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
                         <p className="mt-2 text-muted-foreground">
                             Overview of your business performance.
                         </p>
                     </div>
-                    <div className="flex space-x-3">
-                        <button className="inline-flex items-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <div className="flex space-x-3 w-full sm:w-auto">
+                        <button className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                             Download Report
                         </button>
-                        <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                        <button className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                             Create Invoice
                         </button>
                     </div>

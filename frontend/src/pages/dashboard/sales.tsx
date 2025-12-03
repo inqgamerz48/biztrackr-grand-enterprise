@@ -238,35 +238,46 @@ export default function SalesPage() {
         <DashboardLayout>
             <div className="flex flex-col h-[calc(100vh-100px)]">
                 {/* Header Actions */}
-                <div className="flex justify-between items-center mb-4 bg-black border border-white/20 p-3 rounded shadow-none">
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-xl font-bold text-white">POS Terminal</h1>
-                        <span className="text-xs bg-white/10 text-white border border-white/20 px-2 py-1 rounded flex items-center gap-1">
-                            <Barcode size={14} /> Ready to Scan
-                        </span>
-                    </div>
-                    <div className="flex gap-2">
+                {/* Header Actions */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 bg-black border border-white/20 p-3 rounded shadow-none gap-3">
+                    <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl font-bold text-white">POS</h1>
+                            <span className="text-xs bg-white/10 text-white border border-white/20 px-2 py-1 rounded flex items-center gap-1">
+                                <Barcode size={14} /> <span className="hidden sm:inline">Ready</span>
+                            </span>
+                        </div>
+                        {/* Mobile Scan Button (Visible only on small screens) */}
                         <button
                             onClick={() => setShowScanModal(true)}
-                            className="flex items-center gap-2 px-3 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors border border-white"
+                            className="md:hidden p-2 bg-white text-black rounded hover:bg-gray-200 transition-colors border border-white"
                         >
                             <Scan size={18} />
-                            <span className="hidden sm:inline">Camera Scan</span>
+                        </button>
+                    </div>
+
+                    <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+                        <button
+                            onClick={() => setShowScanModal(true)}
+                            className="hidden md:flex items-center gap-2 px-3 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors border border-white whitespace-nowrap"
+                        >
+                            <Scan size={18} />
+                            <span>Camera Scan</span>
                         </button>
                         <button
                             onClick={() => setShowRecallModal(true)}
-                            className="flex items-center gap-2 px-3 py-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors border border-white/20"
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors border border-white/20 whitespace-nowrap"
                         >
                             <RotateCcw size={18} />
-                            <span className="hidden sm:inline">Recall ({heldCarts.length})</span>
+                            <span>Recall ({heldCarts.length})</span>
                         </button>
                         <button
                             onClick={handleHoldCart}
                             disabled={cart.length === 0}
-                            className="flex items-center gap-2 px-3 py-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors disabled:opacity-50 border border-white/20"
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors disabled:opacity-50 border border-white/20 whitespace-nowrap"
                         >
                             <Save size={18} />
-                            <span className="hidden sm:inline">Hold Cart</span>
+                            <span>Hold</span>
                         </button>
                     </div>
                 </div>
