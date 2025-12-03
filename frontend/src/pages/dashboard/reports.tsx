@@ -5,10 +5,10 @@ import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-
-const COLORS = ['#ffffff', '#d4d4d4', '#a3a3a3', '#737373', '#404040', '#171717'];
+import { useTheme } from '@/context/ThemeContext';
 
 export default function ReportsPage() {
+    const { theme } = useTheme();
     const [loading, setLoading] = useState<string | null>(null);
     const [dateRange, setDateRange] = useState({
         start: '',
@@ -81,31 +81,79 @@ export default function ReportsPage() {
     };
 
     const reports = [
-        { id: 'inventory', title: 'Inventory Report', description: 'Export all inventory items', icon: '📦', color: 'bg-white/10' },
-        { id: 'sales', title: 'Sales Report', description: 'Export sales transactions', icon: '💰', color: 'bg-white/10' },
-        { id: 'purchases', title: 'Purchases Report', description: 'Export purchase transactions', icon: '🛒', color: 'bg-white/10' },
-        { id: 'expenses', title: 'Expenses Report', description: 'Export all expenses', icon: '💸', color: 'bg-white/10' }
+        { id: 'inventory', title: 'Inventory Report', description: 'Export all inventory items', icon: '📦', color: 'bg-primary/10' },
+        { id: 'sales', title: 'Sales Report', description: 'Export sales transactions', icon: '💰', color: 'bg-primary/10' },
+        { id: 'purchases', title: 'Purchases Report', description: 'Export purchase transactions', icon: '🛒', color: 'bg-primary/10' },
+        { id: 'expenses', title: 'Expenses Report', description: 'Export all expenses', icon: '💸', color: 'bg-primary/10' }
     ];
+
+    // Dynamic Chart Colors based on Theme
+    const getChartColors = () => {
+        switch (theme) {
+            case 'light':
+                return {
+                    grid: '#e5e7eb',
+                    text: '#6b7280',
+                    tooltipBg: '#ffffff',
+                    tooltipText: '#1f2937',
+                    primary: '#2563eb',
+                    secondary: '#3b82f6',
+                    colors: ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe']
+                };
+            case 'stranger':
+                return {
+                    grid: '#4b004b',
+                    text: '#d1d5db',
+                    tooltipBg: '#1a0505',
+                    tooltipText: '#ffffff',
+                    primary: '#d00000',
+                    secondary: '#ff0000',
+                    colors: ['#d00000', '#ff0000', '#ff4d4d', '#ff8080', '#ffb3b3']
+                };
+            case 'christmas':
+                return {
+                    grid: '#d4a017',
+                    text: '#161e19',
+                    tooltipBg: '#ffffff',
+                    tooltipText: '#161e19',
+                    primary: '#0f6a4d',
+                    secondary: '#c62828',
+                    colors: ['#0f6a4d', '#c62828', '#d4a017', '#1b5e20', '#b71c1c']
+                };
+            default: // dark
+                return {
+                    grid: '#333333',
+                    text: '#a3a3a3',
+                    tooltipBg: '#000000',
+                    tooltipText: '#ffffff',
+                    primary: '#00e5ff',
+                    secondary: '#ffffff',
+                    colors: ['#00e5ff', '#ffffff', '#a3a3a3', '#737373', '#404040']
+                };
+        }
+    };
+
+    const chartColors = getChartColors();
 
     return (
         <DashboardLayout>
             <div className="space-y-8">
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-2xl font-semibold text-white">Reports & Analytics</h1>
-                        <p className="mt-1 text-sm text-gray-400">Visual insights and data exports</p>
+                        <h1 className="text-2xl font-semibold text-foreground">Reports & Analytics</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">Visual insights and data exports</p>
                     </div>
                     <div className="flex gap-2">
                         <input
                             type="date"
-                            className="bg-black text-white border border-white/20 rounded px-3 py-2 text-sm focus:outline-none focus:ring-white focus:border-white"
+                            className="bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-primary focus:border-primary"
                             value={dateRange.start}
                             onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                         />
-                        <span className="self-center text-gray-400">-</span>
+                        <span className="self-center text-muted-foreground">-</span>
                         <input
                             type="date"
-                            className="bg-black text-white border border-white/20 rounded px-3 py-2 text-sm focus:outline-none focus:ring-white focus:border-white"
+                            className="bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-primary focus:border-primary"
                             value={dateRange.end}
                             onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                         />
@@ -114,29 +162,29 @@ export default function ReportsPage() {
 
                 {/* Charts Grid */}
                 {chartsLoading ? (
-                    <div className="h-64 flex items-center justify-center text-gray-400">Loading analytics...</div>
+                    <div className="h-64 flex items-center justify-center text-muted-foreground">Loading analytics...</div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Sales Trend */}
-                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-white">Sales Trend (Last 30 Days)</h3>
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <h3 className="text-lg font-semibold mb-4 text-foreground">Sales Trend (Last 30 Days)</h3>
                             <div className="h-64">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={salesData?.daily_sales || []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                        <XAxis dataKey="date" tickFormatter={(str) => new Date(str).toLocaleDateString()} stroke="#666" />
-                                        <YAxis stroke="#666" />
-                                        <Tooltip contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff' }} />
+                                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                                        <XAxis dataKey="date" tickFormatter={(str) => new Date(str).toLocaleDateString()} stroke={chartColors.text} />
+                                        <YAxis stroke={chartColors.text} />
+                                        <Tooltip contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
                                         <Legend />
-                                        <Line type="monotone" dataKey="total" stroke="#ffffff" name="Sales (₹)" />
+                                        <Line type="monotone" dataKey="total" stroke={chartColors.primary} name="Sales (₹)" />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
                         {/* Profit & Loss */}
-                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-white">Profit & Loss Overview</h3>
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <h3 className="text-lg font-semibold mb-4 text-foreground">Profit & Loss Overview</h3>
                             {profitLossData && (
                                 <div className="h-64">
                                     <ResponsiveContainer width="100%" height="100%">
@@ -146,11 +194,11 @@ export default function ReportsPage() {
                                             { name: 'Expenses', value: profitLossData.operating_expenses },
                                             { name: 'Net Profit', value: profitLossData.net_profit }
                                         ]}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                            <XAxis dataKey="name" stroke="#666" />
-                                            <YAxis stroke="#666" />
-                                            <Tooltip contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff' }} />
-                                            <Bar dataKey="value" fill="#ffffff">
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                                            <XAxis dataKey="name" stroke={chartColors.text} />
+                                            <YAxis stroke={chartColors.text} />
+                                            <Tooltip contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
+                                            <Bar dataKey="value" fill={chartColors.primary}>
                                                 {
                                                     [
                                                         { name: 'Revenue', value: profitLossData.revenue },
@@ -158,7 +206,7 @@ export default function ReportsPage() {
                                                         { name: 'Expenses', value: profitLossData.operating_expenses },
                                                         { name: 'Net Profit', value: profitLossData.net_profit }
                                                     ].map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={entry.value >= 0 ? COLORS[index % COLORS.length] : '#333333'} stroke={entry.value < 0 ? '#ffffff' : 'none'} />
+                                                        <Cell key={`cell-${index}`} fill={entry.value >= 0 ? chartColors.colors[index % chartColors.colors.length] : '#333333'} stroke={entry.value < 0 ? chartColors.primary : 'none'} />
                                                     ))
                                                 }
                                             </Bar>
@@ -169,22 +217,22 @@ export default function ReportsPage() {
                         </div>
 
                         {/* Tax Report */}
-                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-white">Tax Report</h3>
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <h3 className="text-lg font-semibold mb-4 text-foreground">Tax Report</h3>
                             {taxData && (
                                 <div className="h-64 flex flex-col justify-center">
                                     <div className="grid grid-cols-3 gap-4 text-center mb-6">
-                                        <div className="p-3 bg-white/5 border border-white/10 rounded">
-                                            <p className="text-sm text-gray-400">Input Tax (Purchases)</p>
-                                            <p className="text-xl font-bold text-white">₹{taxData.input_tax.toLocaleString('en-IN')}</p>
+                                        <div className="p-3 bg-muted border border-border rounded">
+                                            <p className="text-sm text-muted-foreground">Input Tax (Purchases)</p>
+                                            <p className="text-xl font-bold text-foreground">₹{taxData.input_tax.toLocaleString('en-IN')}</p>
                                         </div>
-                                        <div className="p-3 bg-white/5 border border-white/10 rounded">
-                                            <p className="text-sm text-gray-400">Output Tax (Sales)</p>
-                                            <p className="text-xl font-bold text-white">₹{taxData.output_tax.toLocaleString('en-IN')}</p>
+                                        <div className="p-3 bg-muted border border-border rounded">
+                                            <p className="text-sm text-muted-foreground">Output Tax (Sales)</p>
+                                            <p className="text-xl font-bold text-foreground">₹{taxData.output_tax.toLocaleString('en-IN')}</p>
                                         </div>
-                                        <div className="p-3 bg-white/5 border border-white/10 rounded">
-                                            <p className="text-sm text-gray-400">Net Payable</p>
-                                            <p className={`text-xl font-bold text-white`}>
+                                        <div className="p-3 bg-muted border border-border rounded">
+                                            <p className="text-sm text-muted-foreground">Net Payable</p>
+                                            <p className={`text-xl font-bold text-foreground`}>
                                                 ₹{taxData.net_tax_payable.toLocaleString('en-IN')}
                                             </p>
                                         </div>
@@ -194,13 +242,13 @@ export default function ReportsPage() {
                                             { name: 'Input Tax', value: taxData.input_tax },
                                             { name: 'Output Tax', value: taxData.output_tax }
                                         ]}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                            <XAxis type="number" stroke="#666" />
-                                            <YAxis dataKey="name" type="category" width={100} stroke="#666" />
-                                            <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff' }} />
-                                            <Bar dataKey="value" fill="#8884d8">
-                                                <Cell fill="#333333" stroke="#ffffff" /> {/* Input */}
-                                                <Cell fill="#ffffff" /> {/* Output */}
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                                            <XAxis type="number" stroke={chartColors.text} />
+                                            <YAxis dataKey="name" type="category" width={100} stroke={chartColors.text} />
+                                            <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
+                                            <Bar dataKey="value" fill={chartColors.primary}>
+                                                <Cell fill={chartColors.secondary} /> {/* Input */}
+                                                <Cell fill={chartColors.primary} /> {/* Output */}
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>
@@ -209,8 +257,8 @@ export default function ReportsPage() {
                         </div>
 
                         {/* Inventory by Category */}
-                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-white">Inventory Value by Category</h3>
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <h3 className="text-lg font-semibold mb-4 text-foreground">Inventory Value by Category</h3>
                             <div className="h-64">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -225,26 +273,26 @@ export default function ReportsPage() {
                                             dataKey="value"
                                         >
                                             {(inventoryData || []).map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#000" />
+                                                <Cell key={`cell-${index}`} fill={chartColors.colors[index % chartColors.colors.length]} stroke={chartColors.tooltipBg} />
                                             ))}
                                         </Pie>
-                                        <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff' }} />
+                                        <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
                         {/* Expenses by Category */}
-                        <div className="bg-black border border-white/20 p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-white">Expenses by Category</h3>
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <h3 className="text-lg font-semibold mb-4 text-foreground">Expenses by Category</h3>
                             <div className="h-64">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={expenseData || []} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                        <XAxis type="number" stroke="#666" />
-                                        <YAxis dataKey="name" type="category" width={100} stroke="#666" />
-                                        <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff' }} />
-                                        <Bar dataKey="value" fill="#ffffff" name="Amount (₹)" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                                        <XAxis type="number" stroke={chartColors.text} />
+                                        <YAxis dataKey="name" type="category" width={100} stroke={chartColors.text} />
+                                        <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
+                                        <Bar dataKey="value" fill={chartColors.primary} name="Amount (₹)" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -254,21 +302,21 @@ export default function ReportsPage() {
 
                 {/* CSV Exports */}
                 <div>
-                    <h2 className="text-lg font-semibold text-white mb-4">Data Exports</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Data Exports</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {reports.map((report) => (
-                            <div key={report.id} className="bg-black border border-white/20 shadow-none rounded-lg overflow-hidden hover:border-white/40 transition-colors">
+                            <div key={report.id} className="bg-card border border-border shadow-none rounded-lg overflow-hidden hover:border-primary/40 transition-colors">
                                 <div className={`${report.color} h-2`}></div>
                                 <div className="p-5">
                                     <div className="flex items-center mb-3">
                                         <span className="text-3xl mr-3">{report.icon}</span>
-                                        <h3 className="text-lg font-semibold text-white">{report.title}</h3>
+                                        <h3 className="text-lg font-semibold text-foreground">{report.title}</h3>
                                     </div>
-                                    <p className="text-sm text-gray-400 mb-4">{report.description}</p>
+                                    <p className="text-sm text-muted-foreground mb-4">{report.description}</p>
                                     <button
                                         onClick={() => downloadCSV(report.id)}
                                         disabled={loading === report.id}
-                                        className={`w-full ${loading === report.id ? 'bg-white/5 text-gray-400' : 'bg-white text-black hover:bg-gray-200'} px-4 py-2 rounded transition-colors text-sm font-medium border border-white`}
+                                        className={`w-full ${loading === report.id ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:opacity-90'} px-4 py-2 rounded transition-colors text-sm font-medium border border-transparent`}
                                     >
                                         {loading === report.id ? 'Downloading...' : 'Download CSV'}
                                     </button>

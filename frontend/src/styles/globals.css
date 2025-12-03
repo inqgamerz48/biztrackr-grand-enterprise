@@ -4,12 +4,57 @@
 
 @layer base {
   :root {
-    --background: 0 0 0;
+    /* Default (Dark Mode - Modern) */
+    --background: 18 18 18;
     --foreground: 255 255 255;
+    --primary: 0 229 255;
+    /* Cyan */
+    --primary-foreground: 0 0 0;
+    --card: 30 30 30;
+    --border: 51 51 51;
+    --muted: 30 30 30;
+    --radius: 0.5rem;
+  }
+
+  [data-theme='light'] {
+    --background: 247 247 247;
+    --foreground: 31 41 55;
+    --primary: 37 99 235;
+    /* Blue */
+    --primary-foreground: 255 255 255;
+    --card: 255 255 255;
+    --border: 229 231 235;
+    --muted: 243 244 246;
+  }
+
+  [data-theme='stranger'] {
+    --background: 0 0 0;
+    --foreground: 220 220 220;
+    --primary: 208 0 0;
+    /* Blood Red */
+    --primary-foreground: 255 255 255;
+    --card: 20 5 5;
+    /* Very Dark Red/Black */
+    --border: 75 0 75;
+    /* Purple Haze */
+    --muted: 40 0 0;
+  }
+
+  [data-theme='christmas'] {
+    --background: 250 250 250;
+    /* Snow White */
+    --foreground: 22 30 25;
+    --primary: 15 106 77;
+    /* Pine Green */
+    --primary-foreground: 255 255 255;
+    --card: 255 255 255;
+    --border: 212 160 23;
+    /* Gold */
+    --muted: 240 248 245;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

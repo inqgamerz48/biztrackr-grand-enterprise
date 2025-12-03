@@ -52,10 +52,10 @@ export default function NotificationsPage() {
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'warning': return <AlertTriangle className="h-6 w-6 text-white" />;
-            case 'success': return <CheckCircle className="h-6 w-6 text-white" />;
-            case 'error': return <XCircle className="h-6 w-6 text-white" />;
-            default: return <Info className="h-6 w-6 text-white" />;
+            case 'warning': return <AlertTriangle className="h-6 w-6 text-yellow-500" />;
+            case 'success': return <CheckCircle className="h-6 w-6 text-green-500" />;
+            case 'error': return <XCircle className="h-6 w-6 text-red-500" />;
+            default: return <Info className="h-6 w-6 text-primary" />;
         }
     };
 
@@ -63,11 +63,11 @@ export default function NotificationsPage() {
         <DashboardLayout>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold tracking-tight text-white">Notifications</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Notifications</h1>
                     {notifications.length > 0 && (
                         <button
                             onClick={markAllAsRead}
-                            className="inline-flex items-center px-4 py-2 border border-white shadow-sm text-sm font-medium rounded-md text-black bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+                            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                             <Check className="mr-2 h-4 w-4" />
                             Mark all as read
@@ -75,40 +75,40 @@ export default function NotificationsPage() {
                     )}
                 </div>
 
-                <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-lg">
+                <div className="bg-card border border-border shadow-none overflow-hidden sm:rounded-lg">
                     {loading ? (
-                        <div className="p-6 text-center text-gray-400">Loading notifications...</div>
+                        <div className="p-6 text-center text-muted-foreground">Loading notifications...</div>
                     ) : notifications.length === 0 ? (
                         <div className="p-12 text-center flex flex-col items-center">
-                            <div className="p-3 bg-white/10 rounded-full mb-4 border border-white/20">
-                                <Bell className="h-8 w-8 text-white" />
+                            <div className="p-3 bg-muted rounded-full mb-4 border border-border">
+                                <Bell className="h-8 w-8 text-primary" />
                             </div>
-                            <h3 className="text-lg font-medium text-white">No new notifications</h3>
-                            <p className="mt-1 text-gray-400">You're all caught up!</p>
+                            <h3 className="text-lg font-medium text-foreground">No new notifications</h3>
+                            <p className="mt-1 text-muted-foreground">You're all caught up!</p>
                         </div>
                     ) : (
-                        <ul className="divide-y divide-white/10">
+                        <ul className="divide-y divide-border">
                             {notifications.map((notification) => (
-                                <li key={notification.id} className="p-6 hover:bg-white/5 transition-colors">
+                                <li key={notification.id} className="p-6 hover:bg-muted/50 transition-colors">
                                     <div className="flex items-start space-x-4">
                                         <div className="flex-shrink-0">
                                             {getIcon(notification.type)}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-white">
+                                            <p className="text-sm font-medium text-foreground">
                                                 {notification.title}
                                             </p>
-                                            <p className="text-sm text-gray-400 mt-1">
+                                            <p className="text-sm text-muted-foreground mt-1">
                                                 {notification.message}
                                             </p>
-                                            <p className="text-xs text-gray-500 mt-2">
+                                            <p className="text-xs text-muted-foreground mt-2">
                                                 {format(new Date(notification.created_at), 'MMM d, yyyy HH:mm')}
                                             </p>
                                         </div>
                                         <div>
                                             <button
                                                 onClick={() => markAsRead(notification.id)}
-                                                className="text-gray-400 hover:text-white"
+                                                className="text-muted-foreground hover:text-foreground"
                                                 title="Mark as read"
                                             >
                                                 <Check className="h-5 w-5" />

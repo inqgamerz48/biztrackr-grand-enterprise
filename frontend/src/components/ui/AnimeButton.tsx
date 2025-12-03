@@ -12,17 +12,17 @@ export const AnimeButton = ({ children, variant = 'primary', className = '', ...
     const baseStyles = "relative overflow-hidden px-6 py-3 rounded-md font-bold uppercase tracking-wider transition-all duration-200";
 
     const variants = {
-        primary: "bg-white text-black hover:bg-gray-200 shadow-[0_0_15px_rgba(255,255,255,0.5)] border border-white/30",
-        secondary: "bg-black text-white hover:bg-gray-900 shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-white/30",
-        danger: "bg-black text-white border border-white hover:bg-white hover:text-black shadow-[0_0_15px_rgba(255,255,255,0.5)]",
-        ghost: "bg-transparent text-gray-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20",
+        primary: "bg-primary text-primary-foreground hover:opacity-90 shadow-[0_0_15px_rgba(var(--primary),0.5)] border border-primary/30",
+        secondary: "bg-secondary text-secondary-foreground hover:opacity-90 shadow-[0_0_15px_rgba(var(--secondary),0.3)] border border-secondary/30",
+        danger: "bg-destructive text-destructive-foreground border border-destructive hover:bg-destructive/90 shadow-[0_0_15px_rgba(var(--destructive),0.5)]",
+        ghost: "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent hover:border-border",
     };
 
     return (
         <motion.button
             whileHover={{
                 scale: 1.05,
-                boxShadow: "0 0 25px rgba(255,255,255,0.3)",
+                boxShadow: "0 0 25px rgba(var(--primary),0.3)",
             }}
             whileTap={{
                 scale: 0.95,
@@ -34,7 +34,7 @@ export const AnimeButton = ({ children, variant = 'primary', className = '', ...
         >
             {/* Energy overlay effect */}
             <motion.div
-                className="absolute inset-0 bg-white/20"
+                className="absolute inset-0 bg-primary/20"
                 initial={{ x: '-100%', skewX: -15 }}
                 whileHover={{ x: '200%', transition: { duration: 0.6, ease: "easeInOut" } }}
             />

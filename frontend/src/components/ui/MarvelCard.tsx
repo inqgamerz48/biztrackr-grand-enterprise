@@ -46,7 +46,7 @@ export const MarvelCard = ({ children, className = '', glowColor = "rgba(59, 130
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className={`relative group rounded-xl bg-gray-900/80 border border-gray-800 backdrop-blur-sm overflow-hidden ${className}`}
+            className={`relative group rounded-xl bg-card/80 border border-border backdrop-blur-sm overflow-hidden ${className}`}
         >
             {/* Holographic Gradient Border */}
             <div

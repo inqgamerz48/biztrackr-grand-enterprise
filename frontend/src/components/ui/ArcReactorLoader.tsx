@@ -61,13 +61,13 @@ const ArcReactorLoader = () => {
     }, []);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
             <svg
                 ref={reactorRef}
                 width="200"
                 height="200"
                 viewBox="0 0 200 200"
-                className="overflow-visible"
+                className="overflow-visible text-muted-foreground"
             >
                 {/* Glow Filter */}
                 <defs>
@@ -81,8 +81,8 @@ const ArcReactorLoader = () => {
                 </defs>
 
                 {/* Outer Housing */}
-                <circle cx="100" cy="100" r="90" fill="none" stroke="#333" strokeWidth="4" />
-                <circle cx="100" cy="100" r="85" fill="none" stroke="#555" strokeWidth="1" strokeDasharray="5,5" />
+                <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="4" />
+                <circle cx="100" cy="100" r="85" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="5,5" className="opacity-50" />
 
                 {/* Outer Ring */}
                 <g className="reactor-outer-ring" style={{ transformOrigin: '100px 100px' }}>
@@ -124,7 +124,7 @@ const ArcReactorLoader = () => {
                     transform="rotate(180 100 100)"
                 />
             </svg>
-            <div className="absolute mt-64 text-white font-mono text-sm tracking-widest animate-pulse">
+            <div className="absolute mt-64 text-foreground font-mono text-sm tracking-widest animate-pulse">
                 INITIALIZING SYSTEMS...
             </div>
         </div>

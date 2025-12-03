@@ -1,289 +1,224 @@
 import { useState, useEffect } from 'react';
-import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { motion } from 'framer-motion';
-
-interface Settings {
-    company_name: string;
-    currency_symbol: string;
-    tax_rate: number;
-    logo_url?: string;
-    terms_and_conditions?: string;
-    company_address?: string;
-    company_phone?: string;
-    company_email?: string;
-    company_website?: string;
-    footer_text?: string;
-    enable_notifications: boolean;
-}
+import { Save, User, Lock, Bell, Globe, Palette } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function SettingsPage() {
-    const [settings, setSettings] = useState<Settings>({
-        company_name: '',
-        currency_symbol: '$',
-        tax_rate: 0.1,
-        company_address: '',
-        company_phone: '',
-        company_email: '',
-        company_website: '',
-        footer_text: 'Thank you for your business!',
-        enable_notifications: true
+    const { theme, setTheme } = useTheme();
+    const [loading, setLoading] = useState(false);
+    const [settings, setSettings] = useState({
+        name: '',
+        email: '',
+        notifications_email: true,
+        notifications_push: false,
+        language: 'en',
+        timezone: 'UTC'
     });
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        fetchSettings();
+        // Mock fetch settings
+        setSettings({
+            name: 'John Doe',
+            email: 'john@example.com',
+            notifications_email: true,
+            notifications_push: false,
+            language: 'en',
+            timezone: 'UTC'
+        });
     }, []);
 
-    const fetchSettings = async () => {
+    const handleSave = async () => {
+        setLoading(true);
         try {
-            const res = await api.get('/settings/');
-            setSettings(res.data);
+            // await api.put('/user/settings', settings);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            alert('Settings saved successfully');
         } catch (error) {
-            console.error('Failed to fetch settings', error);
+            console.error('Failed to save settings', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            await api.put('/settings/', settings);
-            alert('Settings saved successfully!');
-        } catch (error) {
-            alert('Failed to save settings');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // ... (imports remain same)
+    const themes = [
+        { id: 'light', name: 'Light Mode', color: 'bg-gray-100 border-gray-300' },
+        { id: 'dark', name: 'Dark Mode', color: 'bg-gray-900 border-gray-700' },
+        { id: 'stranger', name: 'Stranger Things', color: 'bg-black border-red-900' },
+        { id: 'christmas', name: 'Christmas', color: 'bg-green-900 border-red-700' },
+    ];
 
     return (
         <DashboardLayout>
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-8"
-            >
-                <h1 className="text-2xl font-semibold text-white">Settings & Billing</h1>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
+                    <button
+                        onClick={handleSave}
+                        disabled={loading}
+                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    >
+                        <Save className="mr-2 h-4 w-4" />
+                        {loading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </div>
 
-                {/* General Settings */}
-                <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="bg-black border border-white/20 shadow-none sm:rounded-lg"
-                >
-                    {/* ... (content remains same) */}
-                    <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-white">General Configuration</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-400">Manage your global application settings.</p>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {/* Theme Settings */}
+                    <div className="lg:col-span-3">
+                        <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">
+                            <div className="p-6 border-b border-border">
+                                <div className="flex items-center">
+                                    <Palette className="h-6 w-6 text-primary mr-3" />
+                                    <h2 className="text-lg font-medium text-foreground">Theme Preference</h2>
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">Customize the look and feel of your dashboard.</p>
+                            </div>
+                            <div className="p-6">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {themes.map((t) => (
+                                        <button
+                                            key={t.id}
+                                            onClick={() => setTheme(t.id as any)}
+                                            className={`relative rounded-lg border-2 p-4 flex flex-col items-center space-y-2 transition-all ${theme === t.id ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-border hover:border-primary/50'
+                                                }`}
+                                        >
+                                            <div className={`w-full h-12 rounded-md ${t.color} shadow-inner`}></div>
+                                            <span className={`text-sm font-medium ${theme === t.id ? 'text-primary' : 'text-muted-foreground'}`}>
+                                                {t.name}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="border-t border-white/20 px-4 py-5 sm:p-6">
-                        {loading ? (
-                            <p className="text-white">Loading settings...</p>
-                        ) : (
-                            <form onSubmit={handleSave} className="space-y-6">
-                                {/* ... (form fields remain same) */}
-                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                                    {/* ... (fields) */}
-                                    <div className="sm:col-span-3">
-                                        <label className="block text-sm font-medium text-gray-300">Company Name</label>
+
+                    {/* Profile Settings */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">
+                            <div className="p-6 border-b border-border">
+                                <div className="flex items-center">
+                                    <User className="h-6 w-6 text-primary mr-3" />
+                                    <h2 className="text-lg font-medium text-foreground">Profile Information</h2>
+                                </div>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-foreground">Full Name</label>
                                         <input
                                             type="text"
-                                            value={settings.company_name}
-                                            onChange={(e) => setSettings({ ...settings, company_name: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
+                                            value={settings.name}
+                                            onChange={(e) => setSettings({ ...settings, name: e.target.value })}
+                                            className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
                                         />
                                     </div>
-
-                                    <div className="sm:col-span-3">
-                                        <label className="block text-sm font-medium text-gray-300">Currency Symbol</label>
-                                        <input
-                                            type="text"
-                                            value={settings.currency_symbol}
-                                            onChange={(e) => setSettings({ ...settings, currency_symbol: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3">
-                                        <label className="block text-sm font-medium text-gray-300">Tax Rate (decimal, e.g. 0.10)</label>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            value={settings.tax_rate}
-                                            onChange={(e) => setSettings({ ...settings, tax_rate: parseFloat(e.target.value) })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-6">
-                                        <label className="block text-sm font-medium text-gray-300">Company Address</label>
-                                        <textarea
-                                            rows={3}
-                                            value={settings.company_address || ''}
-                                            onChange={(e) => setSettings({ ...settings, company_address: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3">
-                                        <label className="block text-sm font-medium text-gray-300">Company Phone</label>
-                                        <input
-                                            type="text"
-                                            value={settings.company_phone || ''}
-                                            onChange={(e) => setSettings({ ...settings, company_phone: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3">
-                                        <label className="block text-sm font-medium text-gray-300">Company Email</label>
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-foreground">Email Address</label>
                                         <input
                                             type="email"
-                                            value={settings.company_email || ''}
-                                            onChange={(e) => setSettings({ ...settings, company_email: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
+                                            value={settings.email}
+                                            onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                                            className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
                                         />
                                     </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div className="sm:col-span-3">
-                                        <label className="block text-sm font-medium text-gray-300">Company Website</label>
-                                        <input
-                                            type="text"
-                                            value={settings.company_website || ''}
-                                            onChange={(e) => setSettings({ ...settings, company_website: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
-                                        />
-                                    </div>
+                        <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">
+                            <div className="p-6 border-b border-border">
+                                <div className="flex items-center">
+                                    <Lock className="h-6 w-6 text-primary mr-3" />
+                                    <h2 className="text-lg font-medium text-foreground">Security</h2>
+                                </div>
+                            </div>
+                            <div className="p-6">
+                                <button className="text-primary hover:text-primary/80 font-medium text-sm">
+                                    Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                                    <div className="sm:col-span-6">
-                                        <label className="block text-sm font-medium text-gray-300">Invoice Footer Text</label>
+                    {/* Preferences */}
+                    <div className="space-y-6">
+                        <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">
+                            <div className="p-6 border-b border-border">
+                                <div className="flex items-center">
+                                    <Bell className="h-6 w-6 text-primary mr-3" />
+                                    <h2 className="text-lg font-medium text-foreground">Notifications</h2>
+                                </div>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="flex items-start">
+                                    <div className="flex h-5 items-center">
                                         <input
-                                            type="text"
-                                            value={settings.footer_text || ''}
-                                            onChange={(e) => setSettings({ ...settings, footer_text: e.target.value })}
-                                            className="mt-1 block w-full bg-black text-white border border-white/20 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-white focus:border-white sm:text-sm"
-                                        />
-                                    </div>
-
-                                    <div className="sm:col-span-3 flex items-center mt-6">
-                                        <input
-                                            id="notifications"
                                             type="checkbox"
-                                            checked={settings.enable_notifications}
-                                            onChange={(e) => setSettings({ ...settings, enable_notifications: e.target.checked })}
-                                            className="h-4 w-4 text-white focus:ring-white border-white/20 rounded bg-black"
+                                            checked={settings.notifications_email}
+                                            onChange={(e) => setSettings({ ...settings, notifications_email: e.target.checked })}
+                                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary bg-background"
                                         />
-                                        <label htmlFor="notifications" className="ml-2 block text-sm text-white">
-                                            Enable Notifications
-                                        </label>
+                                    </div>
+                                    <div className="ml-3 text-sm">
+                                        <label className="font-medium text-foreground">Email Notifications</label>
+                                        <p className="text-muted-foreground">Receive daily summaries and alerts.</p>
                                     </div>
                                 </div>
-
-                                <div className="flex justify-end">
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        type="submit"
-                                        disabled={saving}
-                                        className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white disabled:opacity-50"
-                                    >
-                                        {saving ? 'Saving...' : 'Save Settings'}
-                                    </motion.button>
+                                <div className="flex items-start">
+                                    <div className="flex h-5 items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={settings.notifications_push}
+                                            onChange={(e) => setSettings({ ...settings, notifications_push: e.target.checked })}
+                                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary bg-background"
+                                        />
+                                    </div>
+                                    <div className="ml-3 text-sm">
+                                        <label className="font-medium text-foreground">Push Notifications</label>
+                                        <p className="text-muted-foreground">Receive real-time alerts on your device.</p>
+                                    </div>
                                 </div>
-                            </form>
-                        )}
-                    </div>
-                </motion.div>
-
-                {/* Subscription Management */}
-                <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="bg-black border border-white/20 shadow-none sm:rounded-lg"
-                >
-                    {/* ... (content remains same) */}
-                    <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-white">Subscription & Billing</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-400">Manage your plan and billing details.</p>
-                    </div>
-                    <div className="border-t border-white/20 px-4 py-5 sm:p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="text-sm font-medium text-white">Current Plan: <span className="text-white font-bold">Free Tier</span></h4>
-                                <p className="text-sm text-gray-400">Upgrade to Pro for unlimited invoices and advanced analytics.</p>
                             </div>
-                            <div className="flex space-x-3">
-                                <a
-                                    href="/dashboard/upgrade"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
-                                >
-                                    Upgrade to Pro
-                                </a>
+                        </div>
+
+                        <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">
+                            <div className="p-6 border-b border-border">
+                                <div className="flex items-center">
+                                    <Globe className="h-6 w-6 text-primary mr-3" />
+                                    <h2 className="text-lg font-medium text-foreground">Regional</h2>
+                                </div>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground">Language</label>
+                                    <select
+                                        value={settings.language}
+                                        onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+                                        className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
+                                    >
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground">Timezone</label>
+                                    <select
+                                        value={settings.timezone}
+                                        onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
+                                        className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
+                                    >
+                                        <option value="UTC">UTC</option>
+                                        <option value="EST">EST</option>
+                                        <option value="PST">PST</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </motion.div>
-
-                {/* Data Management */}
-                <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="bg-black border border-white/20 shadow-none sm:rounded-lg"
-                >
-                    {/* ... (content remains same) */}
-                    <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-white">Data Management</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-400">Export your data and manage backups.</p>
-                    </div>
-                    <div className="border-t border-white/20 px-4 py-5 sm:p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h4 className="text-sm font-medium text-white">Backup & Export</h4>
-                                <p className="text-sm text-gray-400">Download CSV exports of your inventory, sales, and customers.</p>
-                            </div>
-                            <a
-                                href="/dashboard/settings/backup"
-                                className="inline-flex items-center px-4 py-2 border border-white/20 shadow-sm text-sm font-medium rounded-md text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
-                            >
-                                Manage Backups
-                            </a>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/20">
-                            <div>
-                                <h4 className="text-sm font-medium text-white">Branch Management</h4>
-                                <p className="text-sm text-gray-400">Manage multiple business locations and branches.</p>
-                            </div>
-                            <a
-                                href="/dashboard/settings/branches"
-                                className="inline-flex items-center px-4 py-2 border border-white/20 shadow-sm text-sm font-medium rounded-md text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
-                            >
-                                Manage Branches
-                            </a>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/20">
-                            <div>
-                                <h4 className="text-sm font-medium text-white">Roles & Permissions</h4>
-                                <p className="text-sm text-gray-400">Create custom roles and assign permissions.</p>
-                            </div>
-                            <a
-                                href="/dashboard/settings/roles"
-                                className="inline-flex items-center px-4 py-2 border border-white/20 shadow-sm text-sm font-medium rounded-md text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
-                            >
-                                Manage Roles
-                            </a>
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
+                </div>
+            </div>
         </DashboardLayout>
     );
 }

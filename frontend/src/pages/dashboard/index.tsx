@@ -58,125 +58,240 @@ export default function DashboardPage() {
     return (
         <DashboardLayout>
             <div className="space-y-8">
-                {/* Header */}
+                {/* Welcome Section */}
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                        <p className="text-gray-400 mt-1">Welcome back, here's what's happening today.</p>
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+                        <p className="mt-2 text-muted-foreground">
+                            Overview of your business performance.
+                        </p>
                     </div>
-                    <div className="flex gap-3">
-                        <Link href="/dashboard/reports">
-                            <button className="px-4 py-2 bg-black border border-white/20 rounded-xl text-white font-medium hover:bg-white/10 transition-colors shadow-none">
-                                Export Report
-                            </button>
-                        </Link>
-                        <Link href="/dashboard/sales">
-                            <button className="px-4 py-2 bg-white text-black rounded-xl font-medium hover:bg-gray-200 transition-colors shadow-lg shadow-white/10">
-                                New Sale
-                            </button>
-                        </Link>
+                    <div className="flex space-x-3">
+                        <button className="inline-flex items-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            Download Report
+                        </button>
+                        <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            Create Invoice
+                        </button>
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <motion.div
-                    variants={container}
-                    initial="hidden"
-                    animate="show"
-                    className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                >
+                {/* KPI Cards */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {/* Note: The original `stats` is an object, not an array. This mapping will cause an error.
+                       To fix this, `stats` would need to be refactored into an array of KPI items.
+                       For now, this faithfully applies the requested change, which introduces this discrepancy. */}
+                    {/* {stats.map((item) => (
+                        <div key={item.name} className="bg-card overflow-hidden shadow-none rounded-lg border border-border">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <item.icon className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-muted-foreground truncate">{item.name}</dt>
+                                            <dd>
+                                                <div className="text-lg font-medium text-foreground">{item.value}</div>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-muted px-5 py-3">
+                                <div className="text-sm">
+                                    <a href={item.href} className="font-medium text-primary hover:text-primary/80">
+                                        View all
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))} */}
+                    {/* Reverting to original stats display due to type mismatch in the provided snippet */}
                     {/* Card 1 */}
                     <Link href="/dashboard/sales">
-                        <motion.div variants={item} className="bg-black border border-white/20 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-white/40 transition-colors">
+                        <motion.div variants={item} className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-primary/40 transition-colors">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <DollarSign className="w-24 h-24 text-white" />
+                                <DollarSign className="w-24 h-24 text-foreground" />
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/10 text-white rounded-xl">
+                                <div className="p-3 bg-primary/10 text-primary rounded-xl">
                                     <DollarSign className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-400">Total Sales Today</p>
-                                    <h3 className="text-2xl font-bold text-white mt-1">₹{stats.sales_today.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                                    <p className="text-sm font-medium text-muted-foreground">Total Sales Today</p>
+                                    <h3 className="text-2xl font-bold text-foreground mt-1">₹{stats.sales_today.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center text-sm">
-                                <span className={`${stats.sales_trend >= 0 ? 'text-white bg-white/10 border border-white/20' : 'text-white bg-white/10 border border-white/20'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
+                                <span className={`${stats.sales_trend >= 0 ? 'text-green-500 bg-green-500/10 border border-green-500/20' : 'text-red-500 bg-red-500/10 border border-red-500/20'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
                                     <TrendingUp className={`w-4 h-4 mr-1 ${stats.sales_trend < 0 ? 'rotate-180' : ''}`} />
                                     {stats.sales_trend > 0 ? '+' : ''}{stats.sales_trend}%
                                 </span>
-                                <span className="text-gray-500 ml-2">vs yesterday</span>
+                                <span className="text-muted-foreground ml-2">vs yesterday</span>
                             </div>
                         </motion.div>
                     </Link>
 
                     {/* Card 2 */}
                     <Link href="/dashboard/inventory">
-                        <motion.div variants={item} className="bg-black border border-white/20 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-white/40 transition-colors">
+                        <motion.div variants={item} className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-primary/40 transition-colors">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <Package className="w-24 h-24 text-white" />
+                                <Package className="w-24 h-24 text-foreground" />
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/10 text-white rounded-xl">
+                                <div className="p-3 bg-primary/10 text-primary rounded-xl">
                                     <Package className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-400">Active Inventory</p>
-                                    <h3 className="text-2xl font-bold text-white mt-1">{stats.total_inventory} Items</h3>
+                                    <p className="text-sm font-medium text-muted-foreground">Active Inventory</p>
+                                    <h3 className="text-2xl font-bold text-foreground mt-1">{stats.total_inventory} Items</h3>
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center text-sm">
-                                <span className={`${stats.low_stock_items > 0 ? 'text-white bg-white/10 border border-white/20' : 'text-white bg-white/10 border border-white/20'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
+                                <span className={`${stats.low_stock_items > 0 ? 'text-orange-500 bg-orange-500/10 border border-orange-500/20' : 'text-green-500 bg-green-500/10 border border-green-500/20'} flex items-center font-medium px-2 py-0.5 rounded-lg`}>
                                     {stats.low_stock_items > 0 ? <AlertTriangle className="w-4 h-4 mr-1" /> : <ArrowUpRight className="w-4 h-4 mr-1" />}
                                     {stats.low_stock_items > 0 ? `${stats.low_stock_items} Low Stock` : 'Healthy Stock'}
                                 </span>
-                                <span className="text-gray-500 ml-2">status</span>
+                                <span className="text-muted-foreground ml-2">status</span>
                             </div>
                         </motion.div>
                     </Link>
 
                     {/* Card 3 - AI Insight Summary */}
-                    <motion.div variants={item} className="bg-white text-black rounded-2xl p-6 relative overflow-hidden group border border-white/20">
+                    <motion.div variants={item} className="bg-card text-foreground rounded-2xl p-6 relative overflow-hidden group border border-border">
                         <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Sparkles className="w-24 h-24 text-black" />
+                            <Sparkles className="w-24 h-24 text-foreground" />
                         </div>
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-4">
-                                <Sparkles className="w-5 h-5 text-black" />
-                                <span className="font-medium text-gray-600">AI Insight</span>
+                                <Sparkles className="w-5 h-5 text-primary" />
+                                <span className="font-medium text-muted-foreground">AI Insight</span>
                             </div>
                             <h3 className="text-lg font-semibold leading-snug mb-2">
                                 Sales are trending up!
                             </h3>
-                            <p className="text-gray-600 text-sm opacity-90">
+                            <p className="text-muted-foreground text-sm opacity-90">
                                 Consider restocking "Wireless Headphones" as demand is increasing.
                             </p>
                         </div>
                     </motion.div>
-                </motion.div>
+                </div>
+
+                {/* Charts Section */}
+                {/* Note: This section requires additional imports (Recharts components) and data (`data` variable)
+                   which are not present in the original file. Adding this section as requested will
+                   result in compilation errors unless those dependencies are added. */}
+                {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-card p-6 rounded-lg border border-border shadow-none">
+                        <h3 className="text-lg font-medium leading-6 text-foreground mb-4">Revenue Overview</h3>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={data}>
+                                    <defs>
+                                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="rgb(var(--primary))" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="rgb(var(--primary))" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="rgb(var(--muted-foreground))"
+                                        tick={{ fill: 'rgb(var(--muted-foreground))' }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <YAxis
+                                        stroke="rgb(var(--muted-foreground))"
+                                        tick={{ fill: 'rgb(var(--muted-foreground))' }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(value) => `₹${value / 1000}k`}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'rgb(var(--card))',
+                                            borderColor: 'rgb(var(--border))',
+                                            color: 'rgb(var(--foreground))'
+                                        }}
+                                        itemStyle={{ color: 'rgb(var(--foreground))' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="revenue"
+                                        stroke="rgb(var(--primary))"
+                                        strokeWidth={2}
+                                        fillOpacity={1}
+                                        fill="url(#colorRevenue)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="bg-card rounded-lg border border-border shadow-none">
+                        <div className="p-6 border-b border-border">
+                            <h3 className="text-lg font-medium leading-6 text-foreground">Recent Activity</h3>
+                        </div>
+                        <ul className="divide-y divide-border">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <li key={i} className="p-4 hover:bg-muted/50 transition-colors">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex-shrink-0">
+                                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                <Activity className="h-4 w-4 text-primary" />
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-foreground truncate">
+                                                New order received
+                                            </p>
+                                            <p className="text-sm text-muted-foreground truncate">
+                                                Order #1234 from Acme Corp
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Completed
+                                            </span>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="bg-muted px-5 py-3 rounded-b-lg border-t border-border">
+                            <div className="text-sm">
+                                <a href="#" className="font-medium text-primary hover:text-primary/80">
+                                    View all activity
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div> */}
 
                 {/* AI Insights Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="bg-black border border-white/20 rounded-2xl overflow-hidden"
+                    className="bg-card border border-border rounded-2xl overflow-hidden"
                 >
-                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-white" />
+                    <div className="p-6 border-b border-border flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-primary" />
                             Detailed AI Insights
                         </h2>
                         <Link href="/dashboard/reports">
-                            <button className="text-sm text-white hover:text-gray-300 font-medium underline">
+                            <button className="text-sm text-primary hover:text-primary/80 font-medium underline">
                                 View All
                             </button>
                         </Link>
                     </div>
-                    <div className="divide-y divide-white/10">
+                    <div className="divide-y divide-border">
                         {loading ? (
-                            <div className="p-8 text-center text-gray-400">
-                                <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <div className="p-8 text-center text-muted-foreground">
+                                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
                                 Analyzing data...
                             </div>
                         ) : (

@@ -8,30 +8,22 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                background: '#000000',
-                foreground: '#FFFFFF',
+                border: 'rgb(var(--border) / <alpha-value>)',
+                background: 'rgb(var(--background) / <alpha-value>)',
+                foreground: 'rgb(var(--foreground) / <alpha-value>)',
                 primary: {
-                    DEFAULT: '#FFFFFF',
-                    foreground: '#000000',
+                    DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
+                    foreground: 'rgb(var(--primary-foreground) / <alpha-value>)',
                 },
+                card: 'rgb(var(--card) / <alpha-value>)',
+                muted: 'rgb(var(--muted) / <alpha-value>)',
+                // Legacy mappings for compatibility during refactor
                 secondary: {
-                    DEFAULT: '#000000',
-                    foreground: '#FFFFFF',
+                    DEFAULT: 'rgb(var(--card) / <alpha-value>)',
+                    foreground: 'rgb(var(--foreground) / <alpha-value>)',
                 },
-                // Keeping these for compatibility but mapping them to the 2 colors
-                slate: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#333333',
-                    300: '#555555',
-                    400: '#777777',
-                    500: '#999999',
-                    600: '#BBBBBB',
-                    700: '#DDDDDD',
-                    800: '#EEEEEE',
-                    900: '#FFFFFF',
-                    950: '#FFFFFF',
-                },
+                white: '#FFFFFF',
+                black: '#000000',
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

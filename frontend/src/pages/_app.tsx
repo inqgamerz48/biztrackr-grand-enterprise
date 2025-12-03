@@ -8,6 +8,7 @@ import ArcReactorLoader from '../components/ui/ArcReactorLoader';
 import { useState, useEffect } from 'react';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ThemeProvider } from '../context/ThemeContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -30,16 +31,18 @@ function MyApp({ Component, pageProps }: AppProps) {
 
     return (
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-            <Head>
-                <title>BizTracker PRO SaaS</title>
-                <meta name="description" content="Enterprise Business Management Platform" />
-            </Head>
-            {loading && <ArcReactorLoader />}
-            <AnimatePresence exitBeforeEnter>
-                <PageTransition key={router.route}>
-                    <Component {...pageProps} />
-                </PageTransition>
-            </AnimatePresence>
+            <ThemeProvider>
+                <Head>
+                    <title>BizTracker PRO SaaS</title>
+                    <meta name="description" content="Enterprise Business Management Platform" />
+                </Head>
+                {loading && <ArcReactorLoader />}
+                <AnimatePresence exitBeforeEnter>
+                    <PageTransition key={router.route}>
+                        <Component {...pageProps} />
+                    </PageTransition>
+                </AnimatePresence>
+            </ThemeProvider>
         </GoogleOAuthProvider>
     );
 }
