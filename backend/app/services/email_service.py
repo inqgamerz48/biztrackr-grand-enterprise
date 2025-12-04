@@ -452,3 +452,90 @@ def generate_generic_notification_email(metadata: Dict) -> tuple:
         """
     
     return (f"{title} - BizTrackr", get_email_base_template(content, title))
+
+
+# ==========================================
+# LEGACY COMPATIBILITY FUNCTIONS
+# (Keep for backward compatibility with existing code)
+# ==========================================
+
+def send_upgrade_request_notification(admin_email: str, user_email: str, company_name: str, plan: str, request_id: int):
+    """
+    Legacy function for upgrade request notifications
+    Kept for backward compatibility with super_admin.py
+    """
+    subject = f"New Upgrade Request: {company_name}"
+    approve_link = f"{settings.API_V1_STR}/super-admin/approve/{request_id}"
+    reject_link = f"{settings.API_V1_STR}/super-admin/reject/{request_id}"
+    
+    content = f"""
+    <h2 style="margin: 0 0 20px; color: {BIZTRACKR_COLORS['dark_gray']}; font-size: 24px;">
+        New Upgrade Request
+    </h2>
+    
+    <p style="margin: 0 0 16px; color: #374151; font-size: 16px; line-height: 1.6;">
+        User <strong>{user_email}</strong> from <strong>{company_name}</strong> has requested an upgrade to <strong>{plan}</strong>.
+    </p>
+    
+    <div style="background-color: {BIZTRACKR_COLORS['light_gray']}; padding: 20px; margin: 20px 0; border-radius: 8px;">
+        <p style="margin: 0 0 8px; color: #6B7280; font-size: 14px;">Request Details:</p>
+        <p style="margin: 0; color: {BIZTRACKR_COLORS['dark_gray']};"><strong>Company:</strong> {company_name}</p>
+        <p style="margin: 0; color: {BIZTRACKR_COLORS['dark_gray']};"><strong>User:</strong> {user_email}</p>
+        <p style="margin: 0; color: {BIZTRACKR_COLORS['dark_gray']};"><strong>Plan:</strong> {plan}</p>
+        <p style="margin: 0; color: {BIZTRACKR_COLORS['dark_gray']};"><strong>Request ID:</strong> {request_id}</p>
+    </div>
+    
+    <div style="margin: 30px 0;">
+        <a href="{approve_link}" style="display: inline-block; background-color: {BIZTRACKR_COLORS['green']}; color: {BIZTRACKR_COLORS['white']}; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; margin-right: 10px;">
+            ✓ Approve
+        </a>
+        <a href="{reject_link}" style="display: inline-block; background-color: #EF4444; color: {BIZTRACKR_COLORS['white']}; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600;">
+            ✗ Reject
+        </a>
+    </div>
+    """
+    
+    html = get_email_base_template(content, "New Upgrade Request")
+    return send_email(admin_email, subject, html)
+
+
+def send_upgrade_status_email(user_email: str, status: str, plan: str):
+    """
+    Legacy function for upgrade status notifications
+    Kept for backward compatibility with super_admin.py
+    """
+    subject = f"Upgrade Request {status.capitalize()}"
+    
+    if status == "approved":
+        icon = "🎉"
+        color = BIZTRACKR_COLORS['green']
+        message = f"Congratulations! Your request to upgrade to {plan} has been approved."
+        note = "You now have access to all premium features. Enjoy your upgraded plan!"
+    else:
+        icon = "📋"
+        color = "#EF4444"
+        message = f"Your request to upgrade to {plan} has been {status}."
+        note = "If you have any questions, please contact our support team."
+    
+    content = f"""
+    <div style="text-align: center; margin: 20px 0;">
+        <div style="font-size: 64px; margin-bottom: 20px;">{icon}</div>
+    </div>
+    
+    <h2 style="margin: 0 0 20px; color: {BIZTRACKR_COLORS['dark_gray']}; font-size: 24px; text-align: center;">
+        Upgrade Request {status.capitalize()}
+    </h2>
+    
+    <div style="background-color: {BIZTRACKR_COLORS['light_gray']}; border-left: 4px solid {color}; padding: 20px; margin: 24px 0; border-radius: 4px;">
+        <p style="margin: 0; color: {BIZTRACKR_COLORS['dark_gray']}; font-size: 16px; line-height: 1.6;">
+            {message}
+        </p>
+    </div>
+    
+    <p style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.6; text-align: center;">
+        {note}
+    </p>
+    """
+    
+    html = get_email_base_template(content, f"Upgrade {status.capitalize()}")
+    return send_email(user_email, subject, html)
