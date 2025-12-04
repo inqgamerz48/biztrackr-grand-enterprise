@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { CreditCard, Check, AlertTriangle } from 'lucide-react';
+import { CreditCard, Check, AlertTriangle, Lock } from 'lucide-react';
 
 interface Subscription {
     plan: string;
@@ -9,6 +9,13 @@ interface Subscription {
     stripe_customer_id: string | null;
     subscription_id: string | null;
 }
+
+// ============================================
+// VENDOR NOTE: Payment functionality is ready
+// but hidden from frontend for customization.
+// Uncomment payment handlers after configuring
+// your payment provider credentials.
+// ============================================
 
 export default function BillingPage() {
     const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -29,6 +36,7 @@ export default function BillingPage() {
         }
     };
 
+    /* VENDOR: Uncomment these handlers after configuring payment providers
     const handleSubscribe = async (plan: string) => {
         try {
             const res = await api.post(`/billing/stripe/create-checkout-session?plan=${plan}`);
@@ -55,6 +63,7 @@ export default function BillingPage() {
             alert('Failed to open billing portal');
         }
     };
+    */
 
     return (
         <DashboardLayout>
@@ -66,7 +75,7 @@ export default function BillingPage() {
                     <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                         <div>
                             <h3 className="text-lg leading-6 font-medium text-white">Current Plan</h3>
-                            <p className="mt-1 max-w-2xl text-sm text-gray-400">Manage your subscription and billing details.</p>
+                            <p className="mt-1 max-w-2xl text-sm text-gray-400">View your subscription and upgrade options.</p>
                         </div>
                         {subscription?.status === 'active' && (
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20">
@@ -88,23 +97,10 @@ export default function BillingPage() {
                                             {subscription?.plan ? subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1) : 'Free'} Plan
                                         </p>
                                         <p className="text-sm text-gray-400">
-                                            {subscription?.stripe_customer_id
-                                                ? 'Managed via Stripe'
-                                                : 'No active payment method'}
+                                            Contact support to upgrade your plan
                                         </p>
                                     </div>
                                 </div>
-
-                                {subscription?.stripe_customer_id && (
-                                    <div className="mt-6">
-                                        <button
-                                            onClick={handleManageSubscription}
-                                            className="inline-flex items-center px-4 py-2 border border-white/20 shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
-                                        >
-                                            Manage Subscription
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
@@ -114,7 +110,7 @@ export default function BillingPage() {
                 <div className="bg-black border border-white/20 shadow-none overflow-hidden sm:rounded-lg">
                     <div className="px-4 py-5 sm:px-6">
                         <h3 className="text-lg leading-6 font-medium text-white">Available Plans</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-400">Upgrade to unlock more features.</p>
+                        <p className="mt-1 max-w-2xl text-sm text-gray-400">Upgrade to unlock premium features.</p>
                     </div>
                     <div className="border-t border-white/20 px-4 py-5 sm:p-0">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 p-6">
@@ -131,7 +127,7 @@ export default function BillingPage() {
                                     className="mt-6 w-full bg-white/10 text-white py-2 rounded disabled:opacity-50 border border-white/20"
                                     disabled={subscription?.plan === 'free'}
                                 >
-                                    {subscription?.plan === 'free' ? 'Current Plan' : 'Downgrade'}
+                                    {subscription?.plan === 'free' ? 'Current Plan' : 'Free Plan'}
                                 </button>
                             </div>
 
@@ -149,17 +145,13 @@ export default function BillingPage() {
                                 ) : (
                                     <div className="space-y-2 mt-6">
                                         <button
-                                            onClick={() => handleSubscribe('starter')}
-                                            className="w-full bg-white text-black py-2 rounded hover:bg-gray-200 font-bold border border-white"
+                                            className="w-full bg-white/10 text-white py-2 rounded border border-white/20 flex items-center justify-center gap-2 cursor-not-allowed"
+                                            disabled
                                         >
-                                            Upgrade with Card
+                                            <Lock className="h-4 w-4" />
+                                            Contact Sales
                                         </button>
-                                        <button
-                                            onClick={() => handlePayPalSubscribe('starter')}
-                                            className="w-full bg-black text-white py-2 rounded hover:bg-white/10 border border-white/20"
-                                        >
-                                            Pay with PayPal
-                                        </button>
+                                        <p className="text-xs text-gray-500 text-center">Payment setup required</p>
                                     </div>
                                 )}
                             </div>
@@ -178,20 +170,30 @@ export default function BillingPage() {
                                 ) : (
                                     <div className="space-y-2 mt-6">
                                         <button
-                                            onClick={() => handleSubscribe('pro')}
-                                            className="w-full bg-white text-black py-2 rounded hover:bg-gray-200 font-bold border border-white"
+                                            className="w-full bg-white/10 text-white py-2 rounded border border-white/20 flex items-center justify-center gap-2 cursor-not-allowed"
+                                            disabled
                                         >
-                                            Upgrade with Card
+                                            <Lock className="h-4 w-4" />
+                                            Contact Sales
                                         </button>
-                                        <button
-                                            onClick={() => handlePayPalSubscribe('pro')}
-                                            className="w-full bg-black text-white py-2 rounded hover:bg-white/10 border border-white/20"
-                                        >
-                                            Pay with PayPal
-                                        </button>
+                                        <p className="text-xs text-gray-500 text-center">Payment setup required</p>
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* VENDOR INFO NOTICE */}
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                    <div className="flex items-start">
+                        <AlertTriangle className="h-5 w-5 text-blue-400 mt-0.5 mr-3" />
+                        <div>
+                            <h4 className="text-sm font-medium text-blue-300">Payment Setup Required</h4>
+                            <p className="mt-1 text-sm text-blue-400/80">
+                                Configure your payment provider (Stripe/PayPal/Instamojo) to enable automatic billing.
+                                Backend is ready - just add your API credentials in the environment configuration.
+                            </p>
                         </div>
                     </div>
                 </div>
