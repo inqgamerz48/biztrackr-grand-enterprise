@@ -118,6 +118,16 @@ def root():
 
 
 # --------------------------------------------------
+# ✔ STARTUP EVENTS
+# --------------------------------------------------
+from app.core.db_startup import run_pending_migrations
+
+@app.on_event("startup")
+async def startup_event():
+    await run_pending_migrations()
+
+
+# --------------------------------------------------
 # ✔ GLOBAL EXCEPTION HANDLER (CORS FIX FOR 500s)
 # --------------------------------------------------
 from fastapi import Request
