@@ -168,7 +168,17 @@ async def create_purchase(db: AsyncSession, purchase_in: PurchaseCreate, tenant_
         # NOTE: Stock is NOT updated here anymore. It happens on "Receive".
 
     await db.commit()
-    await db.refresh(new_purchase)
+    
+    # Eager load relationships for return
+    result = await db.execute(
+        select(Purchase)
+        .options(
+            selectinload(Purchase.items).selectinload(PurchaseItem.item),
+            selectinload(Purchase.supplier)
+        )
+        .filter(Purchase.id == new_purchase.id)
+    )
+    new_purchase = result.scalars().first()
     
     if user_id:
         await activity_log_service.log_action(
@@ -205,7 +215,19 @@ async def receive_purchase(db: AsyncSession, purchase_id: int, tenant_id: int, u
         
     purchase.status = "Received"
     await db.commit()
-    await db.refresh(purchase)
+    # No need to refresh if we already eager loaded at the start of function, 
+    # but to be safe and get DB generated values if any:
+    # await db.refresh(purchase) 
+    # Actually, refresh might clear eager loaded attributes if not careful.
+    # Since we loaded them at line 184, they should be there.
+    # But let's re-fetch to be absolutely sure we return a clean object with relationships.
+    
+    result = await db.execute(
+        select(Purchase)
+        .options(selectinload(Purchase.items).selectinload(PurchaseItem.item), selectinload(Purchase.supplier))
+        .filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id)
+    )
+    purchase = result.scalars().first()
     
     if user_id:
         await activity_log_service.log_action(
@@ -216,7 +238,11 @@ async def receive_purchase(db: AsyncSession, purchase_id: int, tenant_id: int, u
     return purchase
 
 async def record_payment(db: AsyncSession, purchase_id: int, amount: float, payment_method: str, tenant_id: int, user_id: Optional[int] = None, account_id: Optional[int] = None):
-    result = await db.execute(select(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id))
+    result = await db.execute(
+        select(Purchase)
+        .options(selectinload(Purchase.items).selectinload(PurchaseItem.item), selectinload(Purchase.supplier))
+        .filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id)
+    )
     purchase = result.scalars().first()
     if not purchase:
         # Raise exception or return None
@@ -243,7 +269,13 @@ async def record_payment(db: AsyncSession, purchase_id: int, amount: float, paym
             payment_account.balance -= amount # Payment is an outflow from our account
     
     await db.commit()
-    await db.refresh(purchase)
+    # Re-fetch with eager loading
+    result = await db.execute(
+        select(Purchase)
+        .options(selectinload(Purchase.items).selectinload(PurchaseItem.item), selectinload(Purchase.supplier))
+        .filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id)
+    )
+    purchase = result.scalars().first()
     
     if user_id:
         await activity_log_service.log_action(
