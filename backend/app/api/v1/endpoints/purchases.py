@@ -18,9 +18,17 @@ async def read_purchases(
     db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    result = await db.execute(select(Purchase).filter(
-        Purchase.tenant_id == current_user.tenant_id
-    ).offset(skip).limit(limit))
+    from sqlalchemy.orm import selectinload
+    result = await db.execute(
+        select(Purchase)
+        .options(
+            selectinload(Purchase.items).selectinload(PurchaseItem.item),
+            selectinload(Purchase.supplier)
+        )
+        .filter(Purchase.tenant_id == current_user.tenant_id)
+        .offset(skip)
+        .limit(limit)
+    )
     purchases = result.scalars().all()
     return purchases
 
