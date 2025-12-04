@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from typing import List, Optional
 from app.core import database
 from app.models.payment_account import PaymentAccount
@@ -30,9 +31,9 @@ class PaymentAccountOut(BaseModel):
         orm_mode = True
 
 @router.post("/", response_model=PaymentAccountOut)
-def create_account(
+async def create_account(
     account_in: PaymentAccountCreate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user = Depends(require_manager_or_above)
 ):
     account = PaymentAccount(
@@ -43,28 +44,35 @@ def create_account(
         tenant_id=current_user.tenant_id
     )
     db.add(account)
-    db.commit()
-    db.refresh(account)
+    await db.commit()
+    await db.refresh(account)
     return account
 
 @router.get("/", response_model=List[PaymentAccountOut])
-def list_accounts(
-    db: Session = Depends(database.get_db),
+async def list_accounts(
+    db: AsyncSession = Depends(database.get_db),
     current_user = Depends(get_current_user)
 ):
-    return db.query(PaymentAccount).filter(PaymentAccount.tenant_id == current_user.tenant_id).all()
+    result = await db.execute(
+        select(PaymentAccount).filter(PaymentAccount.tenant_id == current_user.tenant_id)
+    )
+    return result.scalars().all()
 
 @router.put("/{account_id}", response_model=PaymentAccountOut)
-def update_account(
+async def update_account(
     account_id: int,
     account_in: PaymentAccountUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user = Depends(require_manager_or_above)
 ):
-    account = db.query(PaymentAccount).filter(
-        PaymentAccount.id == account_id,
-        PaymentAccount.tenant_id == current_user.tenant_id
-    ).first()
+    result = await db.execute(
+        select(PaymentAccount).filter(
+            PaymentAccount.id == account_id,
+            PaymentAccount.tenant_id == current_user.tenant_id
+        )
+    )
+    account = result.scalars().first()
+    
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
         
@@ -75,23 +83,27 @@ def update_account(
     if account_in.balance is not None:
         account.balance = account_in.balance
         
-    db.commit()
-    db.refresh(account)
+    await db.commit()
+    await db.refresh(account)
     return account
 
 @router.delete("/{account_id}")
-def delete_account(
+async def delete_account(
     account_id: int,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user = Depends(require_manager_or_above)
 ):
-    account = db.query(PaymentAccount).filter(
-        PaymentAccount.id == account_id,
-        PaymentAccount.tenant_id == current_user.tenant_id
-    ).first()
+    result = await db.execute(
+        select(PaymentAccount).filter(
+            PaymentAccount.id == account_id,
+            PaymentAccount.tenant_id == current_user.tenant_id
+        )
+    )
+    account = result.scalars().first()
+    
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
         
-    db.delete(account)
-    db.commit()
+    await db.delete(account)
+    await db.commit()
     return {"message": "Account deleted"}
