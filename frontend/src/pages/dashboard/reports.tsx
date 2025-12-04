@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { useTheme } from '@/context/ThemeContext';
-import { TrendingUp, TrendingDown, DollarSign, Package, CreditCard, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Package, CreditCard, Activity, Landmark } from 'lucide-react';
 
 export default function ReportsPage() {
     const { theme } = useTheme();
@@ -18,6 +18,7 @@ export default function ReportsPage() {
     const [expenseData, setExpenseData] = useState<any>(null);
     const [profitLossData, setProfitLossData] = useState<any>(null);
     const [taxData, setTaxData] = useState<any>(null);
+    const [bankingData, setBankingData] = useState<any[]>([]);
     const [chartsLoading, setChartsLoading] = useState(true);
 
     useEffect(() => {
@@ -31,12 +32,13 @@ export default function ReportsPage() {
             if (dateRange.start) params.start_date = new Date(dateRange.start).toISOString();
             if (dateRange.end) params.end_date = new Date(dateRange.end).toISOString();
 
-            const [salesRes, invRes, expRes, plRes, taxRes] = await Promise.all([
+            const [salesRes, invRes, expRes, plRes, taxRes, bankRes] = await Promise.all([
                 api.get('/reports/analytics/sales', { params: { days: 30 } }),
                 api.get('/reports/analytics/inventory-by-category'),
                 api.get('/reports/analytics/expenses-by-category', { params }),
                 api.get('/reports/analytics/profit-loss', { params }),
-                api.get('/tax/tax', { params: { start_date: dateRange.start, end_date: dateRange.end } })
+                api.get('/tax/tax', { params: { start_date: dateRange.start, end_date: dateRange.end } }),
+                api.get('/banking/')
             ]);
 
             setSalesData(salesRes.data);
@@ -44,6 +46,7 @@ export default function ReportsPage() {
             setExpenseData(expRes.data);
             setProfitLossData(plRes.data);
             setTaxData(taxRes.data);
+            setBankingData(bankRes.data);
         } catch (error) {
             console.error('Failed to fetch analytics:', error);
         } finally {
@@ -88,6 +91,11 @@ export default function ReportsPage() {
     const calculateTotal = (data: any[], key: string) => {
         if (!data) return 0;
         return data.reduce((acc: number, item: any) => acc + (item[key] || 0), 0);
+    };
+
+    const calculateBankingTotal = () => {
+        if (!bankingData) return 0;
+        return bankingData.reduce((acc, account) => acc + (account.balance || 0), 0);
     };
 
     return (
@@ -173,6 +181,28 @@ export default function ReportsPage() {
                                     <div key={idx} className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">{item.name}</span>
                                         <span className="font-medium">₹{item.value.toLocaleString()}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Banking Overview */}
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-foreground">Banking & Cash</h3>
+                                <div className="p-2 bg-green-500/10 rounded-full text-green-500">
+                                    <Landmark className="w-5 h-5" />
+                                </div>
+                            </div>
+                            <div className="text-3xl font-bold text-foreground mb-1">
+                                ₹{calculateBankingTotal().toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total liquid assets</p>
+                            <div className="mt-4 space-y-2">
+                                {(bankingData || []).slice(0, 3).map((account: any, idx: number) => (
+                                    <div key={idx} className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">{account.name}</span>
+                                        <span className="font-medium">₹{account.balance.toLocaleString()}</span>
                                     </div>
                                 ))}
                             </div>

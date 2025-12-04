@@ -40,7 +40,7 @@ const navigation: NavItem[] = [
     { name: 'CRM', href: '/dashboard/crm', icon: Users, permission: 'view_sales' }, // CRM usually linked to sales
     { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, permission: 'view_reports' }, // Expenses often with reports
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, permission: 'view_reports' },
-    { name: 'Analytics', href: '/dashboard/reports/analytics', icon: TrendingUp, permission: 'view_reports' },
+
     { name: 'Team', href: '/dashboard/users', icon: UserCog, permission: 'manage_users' },
     { name: 'Activity Logs', href: '/dashboard/activity-logs', icon: FileText, permission: 'view_activity_logs' },
     { name: 'Notifications', href: '/dashboard/notifications', icon: Bell, permission: 'view_dashboard' }, // Everyone with dashboard access
