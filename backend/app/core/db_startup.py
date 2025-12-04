@@ -13,27 +13,29 @@ async def run_pending_migrations():
     """
     logger.info("Checking for pending migrations...")
     
-    async with engine.begin() as conn:
-        # 1. Create PaymentAccount table if not exists
-        try:
+    # 1. Create PaymentAccount table if not exists
+    try:
+        async with engine.begin() as conn:
             await conn.run_sync(PaymentAccount.__table__.create)
             logger.info("Created payment_accounts table (if it didn't exist).")
-        except Exception as e:
-            # Table likely exists, which is fine
-            logger.info(f"PaymentAccount table check: {e}")
+    except Exception as e:
+        # Table likely exists, which is fine
+        logger.info(f"PaymentAccount table check: {e}")
 
-        # 2. Add payment_account_id to Sales
-        try:
+    # 2. Add payment_account_id to Sales
+    try:
+        async with engine.begin() as conn:
             await conn.execute(text("ALTER TABLE sales ADD COLUMN IF NOT EXISTS payment_account_id INTEGER REFERENCES payment_accounts(id)"))
             logger.info("Verified payment_account_id on sales.")
-        except Exception as e:
-            logger.error(f"Error checking payment_account_id on sales: {e}")
+    except Exception as e:
+        logger.error(f"Error checking payment_account_id on sales: {e}")
 
-        # 3. Add payment_account_id to Purchases
-        try:
+    # 3. Add payment_account_id to Purchases
+    try:
+        async with engine.begin() as conn:
             await conn.execute(text("ALTER TABLE purchases ADD COLUMN IF NOT EXISTS payment_account_id INTEGER REFERENCES payment_accounts(id)"))
             logger.info("Verified payment_account_id on purchases.")
-        except Exception as e:
-            logger.error(f"Error checking payment_account_id on purchases: {e}")
+    except Exception as e:
+        logger.error(f"Error checking payment_account_id on purchases: {e}")
             
     logger.info("Startup migrations completed.")
