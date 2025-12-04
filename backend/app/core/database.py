@@ -4,8 +4,16 @@ from app.core.config import settings
 
 # Ensure the URL is asyncpg
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
-if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
-    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+connect_args = {}
+
+if SQLALCHEMY_DATABASE_URL:
+    # Handle sslmode for asyncpg
+    if "sslmode=require" in SQLALCHEMY_DATABASE_URL:
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("?sslmode=require", "").replace("&sslmode=require", "")
+        connect_args = {"ssl": "require"}
+        
+    if SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -13,7 +21,8 @@ engine = create_async_engine(
     future=True,
     pool_pre_ping=True,
     pool_size=20,
-    max_overflow=10
+    max_overflow=10,
+    connect_args=connect_args
 )
 
 AsyncSessionLocal = sessionmaker(

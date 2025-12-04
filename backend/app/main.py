@@ -118,6 +118,46 @@ def root():
 
 
 # --------------------------------------------------
+# ✔ GLOBAL EXCEPTION HANDLER (CORS FIX FOR 500s)
+# --------------------------------------------------
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global exception handler to ensure CORS headers are always present,
+    even when an unhandled exception (500) occurs.
+    """
+    import traceback
+    error_details = traceback.format_exc()
+    print(f"Global Exception: {exc}\n{error_details}")
+    
+    # Get origin from request headers
+    origin = request.headers.get("origin")
+    
+    # Check if origin is allowed
+    allowed_origins = [str(o) for o in settings.BACKEND_CORS_ORIGINS]
+    allow_origin = origin if origin in allowed_origins or "*" in allowed_origins else ""
+    
+    # If regex matching is needed (like for Vercel previews), we might need more logic.
+    # For now, we'll try to be permissive for the error response if it's a known domain pattern.
+    if not allow_origin and origin and ("vercel.app" in origin or "localhost" in origin):
+        allow_origin = origin
+
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal Server Error", "detail": str(exc)},
+        headers={
+            "Access-Control-Allow-Origin": allow_origin or "*",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
+
+
+# --------------------------------------------------
 # ✔ ENTRYPOINT FOR RENDER
 # --------------------------------------------------
 if __name__ == "__main__":
