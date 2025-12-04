@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     # Cookies & Security
     DOMAIN: str = "localhost"
     SECURE_COOKIES: bool = False  # Set to True in Production
-    SAME_SITE: str = "lax"  # 'strict' in prod if frontend is on same domain
+    SAME_SITE: str = "none"  # Must be 'none' for cross-site cookies (backend on render, frontend on vercel)
 
     # CORS / Hosts
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []

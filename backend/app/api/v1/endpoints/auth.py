@@ -69,7 +69,7 @@ async def login_access_token(
         httponly=True,
         secure=settings.SECURE_COOKIES,
         samesite=settings.SAME_SITE,
-        domain=settings.DOMAIN if settings.ENVIRONMENT == "production" else None,
+        domain=settings.DOMAIN if settings.ENVIRONMENT == "production" and settings.DOMAIN != "localhost" else None,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     
