@@ -278,5 +278,56 @@ async def get_expense_category_analytics(db: AsyncSession, tenant_id: int, start
             "name": category.value if hasattr(category, 'value') else str(category),
             "value": float(total) if total else 0.0
         }
-        for category, total in results
     ]
+
+async def get_dashboard_stats(db: AsyncSession, tenant_id: int):
+    """Get key metrics for the dashboard"""
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    
+    # Sales Today
+    result = await db.execute(
+        select(func.sum(Sale.total_amount)).filter(
+            Sale.tenant_id == tenant_id,
+            func.date(Sale.date) == today
+        )
+    )
+    sales_today = result.scalar() or 0.0
+    
+    # Sales Yesterday
+    result = await db.execute(
+        select(func.sum(Sale.total_amount)).filter(
+            Sale.tenant_id == tenant_id,
+            func.date(Sale.date) == yesterday
+        )
+    )
+    sales_yesterday = result.scalar() or 0.0
+    
+    # Sales Trend
+    sales_trend = 0
+    if sales_yesterday > 0:
+        sales_trend = ((sales_today - sales_yesterday) / sales_yesterday) * 100
+    elif sales_today > 0:
+        sales_trend = 100 # Infinite growth if yesterday was 0
+        
+    # Inventory Stats
+    result = await db.execute(
+        select(func.count(Item.id)).filter(Item.tenant_id == tenant_id)
+    )
+    total_inventory = result.scalar() or 0
+    
+    result = await db.execute(
+        select(func.count(Item.id)).filter(
+            Item.tenant_id == tenant_id,
+            Item.quantity <= 5 # Low stock threshold
+        )
+    )
+    low_stock_items = result.scalar() or 0
+    
+    return {
+        "sales_today": float(sales_today),
+        "sales_yesterday": float(sales_yesterday),
+        "sales_trend": round(sales_trend, 1),
+        "total_inventory": total_inventory,
+        "low_stock_items": low_stock_items
+    }

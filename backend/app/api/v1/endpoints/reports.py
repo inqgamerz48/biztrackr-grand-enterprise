@@ -18,8 +18,7 @@ async def get_dashboard_stats(
     current_user: User = Depends(require_manager_or_above),
 ):
     """Get key metrics for the dashboard"""
-    # ... existing implementation ...
-    return {"message": "Stats placeholder"}
+    return await report_service.get_dashboard_stats(db, current_user.tenant_id)
 
 @router.get("/sales-over-time")
 async def get_sales_over_time(
