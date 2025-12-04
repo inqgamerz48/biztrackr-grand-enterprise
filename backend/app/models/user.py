@@ -40,6 +40,3 @@ class User(Base):
     # Branch
     branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
     branch = relationship("Branch")
-    
-    # Licenses
-    licenses = relationship("License", back_populates="user")
