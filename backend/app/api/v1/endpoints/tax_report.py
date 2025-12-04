@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy import func
 from app.core import database
 from app.models import Sale, Purchase, Settings
@@ -9,10 +11,10 @@ from datetime import datetime, timedelta
 router = APIRouter()
 
 @router.get("/tax", response_model=dict)
-def get_tax_report(
+async def get_tax_report(
     start_date: str = None,
     end_date: str = None,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user = Depends(require_manager_or_above),
 ):
     # Default to current month if no dates provided
@@ -25,24 +27,31 @@ def get_tax_report(
     end = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1) # Include end date
     
     # Input Tax (Purchases)
-    input_tax = db.query(func.sum(Purchase.tax_amount)).filter(
-        Purchase.tenant_id == current_user.tenant_id,
-        Purchase.date >= start,
-        Purchase.date < end
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Purchase.tax_amount)).filter(
+            Purchase.tenant_id == current_user.tenant_id,
+            Purchase.date >= start,
+            Purchase.date < end
+        )
+    )
+    input_tax = result.scalar() or 0.0
     
     # Output Tax (Sales)
-    output_tax = db.query(func.sum(Sale.tax_amount)).filter(
-        Sale.tenant_id == current_user.tenant_id,
-        Sale.date >= start,
-        Sale.date < end
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Sale.tax_amount)).filter(
+            Sale.tenant_id == current_user.tenant_id,
+            Sale.date >= start,
+            Sale.date < end
+        )
+    )
+    output_tax = result.scalar() or 0.0
     
     # Net Tax
     net_tax = output_tax - input_tax
     
     # Get Tax Settings
-    settings = db.query(Settings).first()
+    result = await db.execute(select(Settings))
+    settings = result.scalars().first()
     tax_rate = settings.tax_rate if settings else 0.0
     
     return {

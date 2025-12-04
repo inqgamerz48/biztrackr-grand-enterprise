@@ -278,6 +278,7 @@ async def get_expense_category_analytics(db: AsyncSession, tenant_id: int, start
             "name": category.value if hasattr(category, 'value') else str(category),
             "value": float(total) if total else 0.0
         }
+        for category, total in results
     ]
 
 async def get_dashboard_stats(db: AsyncSession, tenant_id: int):
