@@ -12,9 +12,6 @@ except ImportError:
     PROPHET_AVAILABLE = False
 
 async def generate_forecast(db: AsyncSession, tenant_id: int, days: int = 30):
-    if not PROPHET_AVAILABLE:
-        return {"error": "Prophet library not available"}
-
     # Fetch historical sales
     result = await db.execute(
         select(
@@ -23,6 +20,7 @@ async def generate_forecast(db: AsyncSession, tenant_id: int, days: int = 30):
         )
         .filter(Sale.tenant_id == tenant_id)
         .group_by(func.date(Sale.date))
+        .order_by(func.date(Sale.date))
     )
     sales_data = result.all()
     
@@ -31,13 +29,56 @@ async def generate_forecast(db: AsyncSession, tenant_id: int, days: int = 30):
 
     df = pd.DataFrame(sales_data, columns=["ds", "y"])
     
-    m = Prophet()
-    m.fit(df)
+    # Try using Prophet if available
+    if PROPHET_AVAILABLE:
+        try:
+            m = Prophet()
+            m.fit(df)
+            
+            future = m.make_future_dataframe(periods=days)
+            forecast = m.predict(future)
+            
+            return forecast.tail(days)[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_dict(orient="records")
+        except Exception as e:
+            print(f"Prophet forecast failed: {e}. Falling back to simple forecast.")
+            # Fall through to simple forecast
     
-    future = m.make_future_dataframe(periods=days)
-    forecast = m.predict(future)
+    # Fallback: Simple Linear Regression
+    # Use last 60 days of data for trend
+    df_subset = df.tail(60).copy()
+    df_subset['x'] = range(len(df_subset))
     
-    return forecast.tail(days)[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_dict(orient="records")
+    n = len(df_subset)
+    if n < 2:
+        return []
+        
+    sum_x = df_subset['x'].sum()
+    sum_y = df_subset['y'].sum()
+    sum_xy = (df_subset['x'] * df_subset['y']).sum()
+    sum_xx = (df_subset['x'] ** 2).sum()
+    
+    denominator = (n * sum_xx - sum_x ** 2)
+    m = (n * sum_xy - sum_x * sum_y) / denominator if denominator != 0 else 0
+    c = (sum_y - m * sum_x) / n
+    
+    # Generate future dates
+    last_date = pd.to_datetime(df.iloc[-1]['ds'])
+    future_dates = [last_date + timedelta(days=i+1) for i in range(days)]
+    
+    forecast = []
+    for i, date in enumerate(future_dates):
+        # x for future is n + i
+        yhat = m * (n + i) + c
+        yhat = max(0, yhat) # Ensure no negative sales
+        
+        forecast.append({
+            "ds": date,
+            "yhat": yhat,
+            "yhat_lower": yhat * 0.9,
+            "yhat_upper": yhat * 1.1
+        })
+        
+    return forecast
 
 async def get_insights(db: AsyncSession, tenant_id: int):
     insights = []
