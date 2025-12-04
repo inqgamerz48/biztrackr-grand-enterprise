@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import {
-    LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
 import { useTheme } from '@/context/ThemeContext';
+import { TrendingUp, TrendingDown, DollarSign, Package, CreditCard, Activity } from 'lucide-react';
 
 export default function ReportsPage() {
     const { theme } = useTheme();
@@ -87,53 +84,11 @@ export default function ReportsPage() {
         { id: 'expenses', title: 'Expenses Report', description: 'Export all expenses', icon: '💸', color: 'bg-primary/10' }
     ];
 
-    // Dynamic Chart Colors based on Theme
-    const getChartColors = () => {
-        switch (theme) {
-            case 'light':
-                return {
-                    grid: '#e5e7eb',
-                    text: '#6b7280',
-                    tooltipBg: '#ffffff',
-                    tooltipText: '#1f2937',
-                    primary: '#2563eb',
-                    secondary: '#3b82f6',
-                    colors: ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe']
-                };
-            case 'stranger':
-                return {
-                    grid: '#4b004b',
-                    text: '#d1d5db',
-                    tooltipBg: '#1a0505',
-                    tooltipText: '#ffffff',
-                    primary: '#d00000',
-                    secondary: '#ff0000',
-                    colors: ['#d00000', '#ff0000', '#ff4d4d', '#ff8080', '#ffb3b3']
-                };
-            case 'christmas':
-                return {
-                    grid: '#d4a017',
-                    text: '#161e19',
-                    tooltipBg: '#ffffff',
-                    tooltipText: '#161e19',
-                    primary: '#0f6a4d',
-                    secondary: '#c62828',
-                    colors: ['#0f6a4d', '#c62828', '#d4a017', '#1b5e20', '#b71c1c']
-                };
-            default: // dark
-                return {
-                    grid: '#333333',
-                    text: '#a3a3a3',
-                    tooltipBg: '#000000',
-                    tooltipText: '#ffffff',
-                    primary: '#00e5ff',
-                    secondary: '#ffffff',
-                    colors: ['#00e5ff', '#ffffff', '#a3a3a3', '#737373', '#404040']
-                };
-        }
+    // Helper to calculate total from array data
+    const calculateTotal = (data: any[], key: string) => {
+        if (!data) return 0;
+        return data.reduce((acc: number, item: any) => acc + (item[key] || 0), 0);
     };
-
-    const chartColors = getChartColors();
 
     return (
         <DashboardLayout>
@@ -141,7 +96,7 @@ export default function ReportsPage() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold text-foreground">Reports & Analytics</h1>
-                        <p className="mt-1 text-sm text-muted-foreground">Visual insights and data exports</p>
+                        <p className="mt-1 text-sm text-muted-foreground">Detailed financial and operational insights</p>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
                         <input
@@ -160,143 +115,131 @@ export default function ReportsPage() {
                     </div>
                 </div>
 
-                {/* Charts Grid */}
+                {/* Analytics Cards Grid */}
                 {chartsLoading ? (
                     <div className="h-64 flex items-center justify-center text-muted-foreground">Loading analytics...</div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Sales Trend */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Sales Summary */}
                         <div className="bg-card border border-border p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-foreground">Sales Trend (Last 30 Days)</h3>
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={salesData?.daily_sales || []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                                        <XAxis dataKey="date" tickFormatter={(str) => new Date(str).toLocaleDateString()} stroke={chartColors.text} />
-                                        <YAxis stroke={chartColors.text} />
-                                        <Tooltip contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
-                                        <Legend />
-                                        <Line type="monotone" dataKey="total" stroke={chartColors.primary} name="Sales (₹)" />
-                                    </LineChart>
-                                </ResponsiveContainer>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-foreground">Total Sales</h3>
+                                <div className="p-2 bg-primary/10 rounded-full text-primary">
+                                    <DollarSign className="w-5 h-5" />
+                                </div>
+                            </div>
+                            <div className="text-3xl font-bold text-foreground mb-1">
+                                ₹{calculateTotal(salesData?.daily_sales, 'total').toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total revenue for selected period</p>
+                        </div>
+
+                        {/* Inventory Value */}
+                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-foreground">Inventory Value</h3>
+                                <div className="p-2 bg-blue-500/10 rounded-full text-blue-500">
+                                    <Package className="w-5 h-5" />
+                                </div>
+                            </div>
+                            <div className="text-3xl font-bold text-foreground mb-1">
+                                ₹{calculateTotal(inventoryData, 'value').toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total value of current stock</p>
+                            <div className="mt-4 space-y-2">
+                                {(inventoryData || []).slice(0, 3).map((item: any, idx: number) => (
+                                    <div key={idx} className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">{item.name}</span>
+                                        <span className="font-medium">₹{item.value.toLocaleString()}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Profit & Loss */}
+                        {/* Expenses Summary */}
                         <div className="bg-card border border-border p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-foreground">Profit & Loss Overview</h3>
-                            {profitLossData && (
-                                <div className="h-64">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={[
-                                            { name: 'Revenue', value: profitLossData.revenue },
-                                            { name: 'COGS', value: profitLossData.cost_of_goods_sold },
-                                            { name: 'Expenses', value: profitLossData.operating_expenses },
-                                            { name: 'Net Profit', value: profitLossData.net_profit }
-                                        ]}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                                            <XAxis dataKey="name" stroke={chartColors.text} />
-                                            <YAxis stroke={chartColors.text} />
-                                            <Tooltip contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
-                                            <Bar dataKey="value" fill={chartColors.primary}>
-                                                {
-                                                    [
-                                                        { name: 'Revenue', value: profitLossData.revenue },
-                                                        { name: 'COGS', value: profitLossData.cost_of_goods_sold },
-                                                        { name: 'Expenses', value: profitLossData.operating_expenses },
-                                                        { name: 'Net Profit', value: profitLossData.net_profit }
-                                                    ].map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={entry.value >= 0 ? chartColors.colors[index % chartColors.colors.length] : '#333333'} stroke={entry.value < 0 ? chartColors.primary : 'none'} />
-                                                    ))
-                                                }
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-foreground">Total Expenses</h3>
+                                <div className="p-2 bg-red-500/10 rounded-full text-red-500">
+                                    <CreditCard className="w-5 h-5" />
                                 </div>
-                            )}
+                            </div>
+                            <div className="text-3xl font-bold text-foreground mb-1">
+                                ₹{calculateTotal(expenseData, 'value').toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Operational costs</p>
+                            <div className="mt-4 space-y-2">
+                                {(expenseData || []).slice(0, 3).map((item: any, idx: number) => (
+                                    <div key={idx} className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">{item.name}</span>
+                                        <span className="font-medium">₹{item.value.toLocaleString()}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Tax Report */}
-                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-foreground">Tax Report</h3>
-                            {taxData && (
-                                <div className="h-64 flex flex-col justify-center">
-                                    <div className="grid grid-cols-3 gap-4 text-center mb-6">
-                                        <div className="p-3 bg-muted border border-border rounded">
+                        {/* Profit & Loss Summary */}
+                        {profitLossData && (
+                            <div className="bg-card border border-border p-6 rounded-lg shadow-none md:col-span-2 lg:col-span-3">
+                                <h3 className="text-lg font-semibold mb-4 text-foreground">Profit & Loss Overview</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                                        <p className="text-sm text-muted-foreground mb-1">Revenue</p>
+                                        <p className="text-xl font-bold text-foreground">₹{profitLossData.revenue.toLocaleString('en-IN')}</p>
+                                    </div>
+                                    <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                                        <p className="text-sm text-muted-foreground mb-1">COGS</p>
+                                        <p className="text-xl font-bold text-foreground">₹{profitLossData.cost_of_goods_sold.toLocaleString('en-IN')}</p>
+                                    </div>
+                                    <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                                        <p className="text-sm text-muted-foreground mb-1">Expenses</p>
+                                        <p className="text-xl font-bold text-foreground">₹{profitLossData.operating_expenses.toLocaleString('en-IN')}</p>
+                                    </div>
+                                    <div className={`p-4 rounded-lg border ${profitLossData.net_profit >= 0 ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                                        <p className="text-sm text-muted-foreground mb-1">Net Profit</p>
+                                        <p className={`text-xl font-bold ${profitLossData.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            ₹{profitLossData.net_profit.toLocaleString('en-IN')}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tax Report Card */}
+                        {taxData && (
+                            <div className="bg-card border border-border p-6 rounded-lg shadow-none md:col-span-2 lg:col-span-3">
+                                <h3 className="text-lg font-semibold mb-4 text-foreground">Tax Summary</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
+                                        <div>
                                             <p className="text-sm text-muted-foreground">Input Tax (Purchases)</p>
-                                            <p className="text-xl font-bold text-foreground">₹{taxData.input_tax.toLocaleString('en-IN')}</p>
+                                            <p className="text-xl font-bold text-foreground mt-1">₹{taxData.input_tax.toLocaleString('en-IN')}</p>
                                         </div>
-                                        <div className="p-3 bg-muted border border-border rounded">
-                                            <p className="text-sm text-muted-foreground">Output Tax (Sales)</p>
-                                            <p className="text-xl font-bold text-foreground">₹{taxData.output_tax.toLocaleString('en-IN')}</p>
-                                        </div>
-                                        <div className="p-3 bg-muted border border-border rounded">
-                                            <p className="text-sm text-muted-foreground">Net Payable</p>
-                                            <p className={`text-xl font-bold text-foreground`}>
-                                                ₹{taxData.net_tax_payable.toLocaleString('en-IN')}
-                                            </p>
+                                        <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                                            <TrendingDown className="w-4 h-4" />
                                         </div>
                                     </div>
-                                    <ResponsiveContainer width="100%" height="50%">
-                                        <BarChart layout="vertical" data={[
-                                            { name: 'Input Tax', value: taxData.input_tax },
-                                            { name: 'Output Tax', value: taxData.output_tax }
-                                        ]}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                                            <XAxis type="number" stroke={chartColors.text} />
-                                            <YAxis dataKey="name" type="category" width={100} stroke={chartColors.text} />
-                                            <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
-                                            <Bar dataKey="value" fill={chartColors.primary}>
-                                                <Cell fill={chartColors.secondary} /> {/* Input */}
-                                                <Cell fill={chartColors.primary} /> {/* Output */}
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
+                                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Output Tax (Sales)</p>
+                                            <p className="text-xl font-bold text-foreground mt-1">₹{taxData.output_tax.toLocaleString('en-IN')}</p>
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+                                            <TrendingUp className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Net Payable</p>
+                                            <p className="text-xl font-bold text-foreground mt-1">₹{taxData.net_tax_payable.toLocaleString('en-IN')}</p>
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                            <Activity className="w-4 h-4" />
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Inventory by Category */}
-                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-foreground">Inventory Value by Category</h3>
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={inventoryData || []}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            {(inventoryData || []).map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={chartColors.colors[index % chartColors.colors.length]} stroke={chartColors.tooltipBg} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
                             </div>
-                        </div>
-
-                        {/* Expenses by Category */}
-                        <div className="bg-card border border-border p-6 rounded-lg shadow-none">
-                            <h3 className="text-lg font-semibold mb-4 text-foreground">Expenses by Category</h3>
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={expenseData || []} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                                        <XAxis type="number" stroke={chartColors.text} />
-                                        <YAxis dataKey="name" type="category" width={100} stroke={chartColors.text} />
-                                        <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} contentStyle={{ backgroundColor: chartColors.tooltipBg, borderColor: chartColors.grid, color: chartColors.tooltipText }} />
-                                        <Bar dataKey="value" fill={chartColors.primary} name="Amount (₹)" />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 
