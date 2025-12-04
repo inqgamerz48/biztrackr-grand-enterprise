@@ -37,7 +37,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                     <meta name="description" content="Enterprise Business Management Platform" />
                 </Head>
                 {loading && <ArcReactorLoader />}
-                <AnimatePresence exitBeforeEnter>
+                <AnimatePresence mode="wait">
                     <PageTransition key={router.route}>
                         <Component {...pageProps} />
                     </PageTransition>
