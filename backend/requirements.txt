@@ -13,7 +13,7 @@ python-multipart
 pandas
 openpyxl
 reportlab
-prophet
+
 httpx
 email-validator
 python-dotenv

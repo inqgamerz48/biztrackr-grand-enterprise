@@ -5,12 +5,6 @@ import pandas as pd
 from datetime import datetime, timedelta
 import re
 
-try:
-    from prophet import Prophet
-    PROPHET_AVAILABLE = True
-except ImportError:
-    PROPHET_AVAILABLE = False
-
 async def generate_forecast(db: AsyncSession, tenant_id: int, days: int = 30):
     # Fetch historical sales
     result = await db.execute(
@@ -29,21 +23,7 @@ async def generate_forecast(db: AsyncSession, tenant_id: int, days: int = 30):
 
     df = pd.DataFrame(sales_data, columns=["ds", "y"])
     
-    # Try using Prophet if available
-    if PROPHET_AVAILABLE:
-        try:
-            m = Prophet()
-            m.fit(df)
-            
-            future = m.make_future_dataframe(periods=days)
-            forecast = m.predict(future)
-            
-            return forecast.tail(days)[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_dict(orient="records")
-        except Exception as e:
-            print(f"Prophet forecast failed: {e}. Falling back to simple forecast.")
-            # Fall through to simple forecast
-    
-    # Fallback: Simple Linear Regression
+    # Simple Linear Regression
     # Use last 60 days of data for trend
     df_subset = df.tail(60).copy()
     df_subset['x'] = range(len(df_subset))
