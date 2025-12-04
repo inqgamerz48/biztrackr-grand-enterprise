@@ -30,12 +30,12 @@ export const initializeDataLayer = (): void => {
 /**
  * gtag helper function
  */
-export const gtag = (...args: any[]): void => {
+export function gtag(...args: any[]): void {
     if (typeof window !== 'undefined') {
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push(arguments);
     }
-};
+}
 
 /**
  * Track a pageview
