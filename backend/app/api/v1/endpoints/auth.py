@@ -73,7 +73,11 @@ async def login_access_token(
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     
-    return {"message": "Login successful", "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": "Login successful"
+    }
 
 @router.post("/login/google", response_model=schemas.Token)
 async def login_google(token: str, db: AsyncSession = Depends(database.get_db)):
