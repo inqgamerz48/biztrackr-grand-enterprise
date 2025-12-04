@@ -4,9 +4,11 @@ Handles PayPal checkout, order creation, and webhook processing.
 """
 import os
 import paypalrestsdk
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.core.config import settings
 from app.models.tenant import Tenant
+import asyncio
 
 # Configure PayPal SDK
 paypalrestsdk.configure({
@@ -16,7 +18,7 @@ paypalrestsdk.configure({
 })
 
 
-def create_paypal_order(tenant_id: int, plan_type: str, amount: float):
+async def create_paypal_order(tenant_id: int, plan_type: str, amount: float):
     """
     Create a PayPal payment for subscription.
     
@@ -29,35 +31,47 @@ def create_paypal_order(tenant_id: int, plan_type: str, amount: float):
         dict: PayPal payment details with approval URL
     """
     try:
-        payment = paypalrestsdk.Payment({
-            "intent": "sale",
-            "payer": {
-                "payment_method": "paypal"
-            },
-            "redirect_urls": {
-                "return_url": "http://localhost:3000/dashboard/settings?payment=success",
-                "cancel_url": "http://localhost:3000/dashboard/settings?payment=cancel"
-            },
-            "transactions": [{
-                "item_list": {
-                    "items": [{
-                        "name": f"{plan_type.title()} Plan Subscription",
-                        "sku": f"plan_{plan_type}",
-                        "price": str(amount),
-                        "currency": "USD",
-                        "quantity": 1
-                    }]
-                },
-                "amount": {
-                    "total": str(amount),
-                    "currency": "USD"
-                },
-                "description": f"BizTrackr {plan_type.title()} Monthly Subscription",
-                "custom": str(tenant_id)  # Store tenant_id for webhook
-            }]
-        })
+        # Run synchronous PayPal SDK call in a thread pool
+        loop = asyncio.get_event_loop()
         
-        if payment.create():
+        def _create_payment():
+            payment = paypalrestsdk.Payment({
+                "intent": "sale",
+                "payer": {
+                    "payment_method": "paypal"
+                },
+                "redirect_urls": {
+                    "return_url": "http://localhost:3000/dashboard/settings?payment=success",
+                    "cancel_url": "http://localhost:3000/dashboard/settings?payment=cancel"
+                },
+                "transactions": [{
+                    "item_list": {
+                        "items": [{
+                            "name": f"{plan_type.title()} Plan Subscription",
+                            "sku": f"plan_{plan_type}",
+                            "price": str(amount),
+                            "currency": "USD",
+                            "quantity": 1
+                        }]
+                    },
+                    "amount": {
+                        "total": str(amount),
+                        "currency": "USD"
+                    },
+                    "description": f"BizTrackr {plan_type.title()} Monthly Subscription",
+                    "custom": str(tenant_id)  # Store tenant_id for webhook
+                }]
+            })
+            
+            if payment.create():
+                return payment
+            else:
+                print(f"PayPal error: {payment.error}")
+                return None
+
+        payment = await loop.run_in_executor(None, _create_payment)
+        
+        if payment:
             # Get approval URL
             for link in payment.links:
                 if link.rel == "approval_url":
@@ -66,16 +80,14 @@ def create_paypal_order(tenant_id: int, plan_type: str, amount: float):
                         "approval_url": link.href,
                         "status": payment.state
                     }
-        else:
-            print(f"PayPal error: {payment.error}")
-            return None
+        return None
             
     except Exception as e:
         print(f"PayPal order creation error: {e}")
         return None
 
 
-def capture_paypal_payment(db: Session, payment_id: str, payer_id: str):
+async def capture_paypal_payment(db: AsyncSession, payment_id: str, payer_id: str):
     """
     Execute a PayPal payment after user approval.
     
@@ -88,14 +100,25 @@ def capture_paypal_payment(db: Session, payment_id: str, payer_id: str):
         dict: Payment execution details
     """
     try:
-        payment = paypalrestsdk.Payment.find(payment_id)
+        loop = asyncio.get_event_loop()
         
-        if payment.execute({"payer_id": payer_id}):
+        def _execute_payment():
+            payment = paypalrestsdk.Payment.find(payment_id)
+            if payment.execute({"payer_id": payer_id}):
+                return payment
+            else:
+                print(f"Payment execution failed: {payment.error}")
+                return None
+
+        payment = await loop.run_in_executor(None, _execute_payment)
+        
+        if payment:
             # Extract tenant_id from custom field
             tenant_id = payment.transactions[0].custom if payment.transactions else None
             
             if tenant_id:
-                tenant = db.query(Tenant).filter(Tenant.id == int(tenant_id)).first()
+                result = await db.execute(select(Tenant).filter(Tenant.id == int(tenant_id)))
+                tenant = result.scalars().first()
                 if tenant:
                     # Determine plan from SKU or description
                     sku = payment.transactions[0].item_list.items[0].sku
@@ -105,7 +128,7 @@ def capture_paypal_payment(db: Session, payment_id: str, payer_id: str):
                     tenant.subscription_status = "active"
                     # For PayPal, we might store payer_id as subscription_id or similar
                     tenant.subscription_id = f"paypal_{payment_id}"
-                    db.commit()
+                    await db.commit()
             
             return {
                 "status": "completed",
@@ -114,16 +137,15 @@ def capture_paypal_payment(db: Session, payment_id: str, payer_id: str):
                 "payer_email": payment.payer.payer_info.email if hasattr(payment.payer, 'payer_info') else None,
                 "amount": payment.transactions[0].amount.total if payment.transactions else None
             }
-        else:
-            print(f"Payment execution failed: {payment.error}")
-            return None
+        
+        return None
             
     except Exception as e:
         print(f"PayPal capture error: {e}")
         return None
 
 
-def handle_paypal_webhook(db: Session, payload: dict, headers: dict):
+async def handle_paypal_webhook(db: AsyncSession, payload: dict, headers: dict):
     """
     Handle PayPal webhook events.
     
@@ -144,10 +166,11 @@ def handle_paypal_webhook(db: Session, payload: dict, headers: dict):
             custom_id = resource.get('custom')
             
             if custom_id:
-                tenant = db.query(Tenant).filter(Tenant.id == int(custom_id)).first()
+                result = await db.execute(select(Tenant).filter(Tenant.id == int(custom_id)))
+                tenant = result.scalars().first()
                 if tenant:
                     tenant.subscription_status = "active"
-                    db.commit()
+                    await db.commit()
                     print(f"Payment completed for tenant: {custom_id}")
             return True
             

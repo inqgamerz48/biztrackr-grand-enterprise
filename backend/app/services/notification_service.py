@@ -1,11 +1,13 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy import func
 from app.models.notification import Notification
 from typing import List, Optional
 
 class NotificationService:
-    def create_notification(
+    async def create_notification(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         tenant_id: int, 
         title: str, 
         message: str, 
@@ -21,45 +23,52 @@ class NotificationService:
             is_read=False
         )
         db.add(notification)
-        db.commit()
-        db.refresh(notification)
+        await db.commit()
+        await db.refresh(notification)
         return notification
 
-    def get_unread_notifications(self, db: Session, tenant_id: int, user_id: int) -> List[Notification]:
-        return db.query(Notification).filter(
+    async def get_unread_notifications(self, db: AsyncSession, tenant_id: int, user_id: int) -> List[Notification]:
+        result = await db.execute(select(Notification).filter(
             Notification.tenant_id == tenant_id,
             Notification.user_id == user_id,
             Notification.is_read == False
-        ).order_by(Notification.created_at.desc()).all()
+        ).order_by(Notification.created_at.desc()))
+        return result.scalars().all()
 
-    def get_unread_count(self, db: Session, tenant_id: int, user_id: int) -> int:
-        return db.query(Notification).filter(
+    async def get_unread_count(self, db: AsyncSession, tenant_id: int, user_id: int) -> int:
+        result = await db.execute(select(func.count(Notification.id)).filter(
             Notification.tenant_id == tenant_id,
             Notification.user_id == user_id,
             Notification.is_read == False
-        ).count()
+        ))
+        return result.scalar()
 
-    def mark_as_read(self, db: Session, notification_id: int, tenant_id: int, user_id: int) -> bool:
-        notification = db.query(Notification).filter(
+    async def mark_as_read(self, db: AsyncSession, notification_id: int, tenant_id: int, user_id: int) -> bool:
+        result = await db.execute(select(Notification).filter(
             Notification.id == notification_id,
             Notification.tenant_id == tenant_id,
             Notification.user_id == user_id
-        ).first()
+        ))
+        notification = result.scalars().first()
         
         if notification:
             notification.is_read = True
-            db.commit()
+            await db.commit()
             return True
         return False
 
-    def mark_all_as_read(self, db: Session, tenant_id: int, user_id: int) -> int:
-        result = db.query(Notification).filter(
+    async def mark_all_as_read(self, db: AsyncSession, tenant_id: int, user_id: int) -> int:
+        # Note: update() with synchronize_session=False is not directly supported in async execution the same way
+        # We use an update statement
+        from sqlalchemy import update
+        stmt = update(Notification).where(
             Notification.tenant_id == tenant_id,
             Notification.user_id == user_id,
             Notification.is_read == False
-        ).update({Notification.is_read: True}, synchronize_session=False)
+        ).values(is_read=True)
         
-        db.commit()
-        return result
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.rowcount
 
 notification_service = NotificationService()

@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.core import database, security
 from app.services import inventory_service
 from app.schemas import item as schemas
@@ -12,42 +13,44 @@ from app.models import User, InventoryItem
 from app.core.rbac import check_plan_limits
 
 # Import centralized auth dependencies
-from app.api.dependencies import get_current_user, require_manager_or_above
+from app.api.dependencies import get_current_user, require_manager_or_above, get_tenant_scoped_stmt
 
 router = APIRouter()
 
 @router.get("/", response_model=List[schemas.Item])
-def read_items(
+async def read_items(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    items = inventory_service.get_items(db, tenant_id=current_user.tenant_id, skip=skip, limit=limit)
+    items = await inventory_service.get_items(db, tenant_id=current_user.tenant_id, skip=skip, limit=limit)
     return items
 
 @router.get("/scan/{barcode}", response_model=schemas.Item)
-def scan_item(
+async def scan_item(
     barcode: str,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     Scan an item by barcode or QR code.
     """
     # First try exact barcode match
-    item = db.query(InventoryItem).filter(
+    result = await db.execute(select(InventoryItem).filter(
         InventoryItem.tenant_id == current_user.tenant_id,
         InventoryItem.barcode == barcode
-    ).first()
+    ))
+    item = result.scalars().first()
     
     if not item:
         # Fallback: Try ID match if barcode is numeric (for legacy support or direct ID scanning)
         if barcode.isdigit():
-            item = db.query(InventoryItem).filter(
+            result = await db.execute(select(InventoryItem).filter(
                 InventoryItem.tenant_id == current_user.tenant_id,
                 InventoryItem.id == int(barcode)
-            ).first()
+            ))
+            item = result.scalars().first()
             
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -55,98 +58,111 @@ def scan_item(
     return item
 
 @router.post("/", response_model=schemas.Item)
-def create_item(
+async def create_item(
     item_in: schemas.ItemCreate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above),  # Manager+ only
 ):
     """Create inventory item - Manager+ access"""
     # Check Plan Limits
     # Enforce isolation using helper
-    from app.api.dependencies import get_tenant_scoped_query
-    current_count = get_tenant_scoped_query(db, InventoryItem, current_user).count()
+    from sqlalchemy import func
+    stmt = get_tenant_scoped_stmt(InventoryItem, current_user)
+    # We need to count. get_tenant_scoped_stmt returns a select statement.
+    # We can wrap it in a subquery or just use func.count
+    # A cleaner way with the new dependency returning a stmt:
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    result = await db.execute(count_stmt)
+    current_count = result.scalar()
+
     if not check_plan_limits(current_user.tenant.plan, "items", current_count):
         raise HTTPException(
             status_code=403, 
             detail=f"Item limit reached for your '{current_user.tenant.plan}' plan. Please upgrade to add more items."
         )
 
-    return inventory_service.create_item(db, item=item_in, tenant_id=current_user.tenant_id, user_id=current_user.id)
+    return await inventory_service.create_item(db, item=item_in, tenant_id=current_user.tenant_id, user_id=current_user.id)
 
 @router.put("/{item_id}", response_model=schemas.Item)
-def update_item(
+async def update_item(
     item_id: int,
     item_in: schemas.ItemUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above),  # Manager+ only
 ):
     """Update inventory item - Manager+ access"""
-    item = inventory_service.update_item(db, item_id=item_id, item_in=item_in, tenant_id=current_user.tenant_id, user_id=current_user.id)
+    item = await inventory_service.update_item(db, item_id=item_id, item_in=item_in, tenant_id=current_user.tenant_id, user_id=current_user.id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
 @router.delete("/{item_id}")
-def delete_item(
+async def delete_item(
     item_id: int,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above),  # Manager+ only
 ):
     """Delete inventory item - Manager+ access"""
-    success = inventory_service.delete_item(db, item_id=item_id, tenant_id=current_user.tenant_id, user_id=current_user.id)
+    success = await inventory_service.delete_item(db, item_id=item_id, tenant_id=current_user.tenant_id, user_id=current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"message": "Item deleted successfully"}
 
 # Image Upload
 @router.post("/upload-image")
-def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+async def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
     file_extension = file.filename.split(".")[-1]
     file_name = f"{uuid.uuid4()}.{file_extension}"
     file_path = f"static/images/{file_name}"
     
+    # Use aiofiles for async file writing if possible, but standard open() in a thread is okay for small files.
+    # For strict async, we should use aiofiles. But to keep it simple and standard:
+    # We can read async and write sync (fast enough for local) or use run_in_executor.
+    # Here we will read async content.
+    
+    content = await file.read()
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        buffer.write(content)
         
     return {"url": f"/static/images/{file_name}"}
 
 # Category Endpoints
 @router.get("/categories", response_model=List[cat_schemas.Category])
-def read_categories(
+async def read_categories(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return inventory_service.get_categories(db, tenant_id=current_user.tenant_id, skip=skip, limit=limit)
+    return await inventory_service.get_categories(db, tenant_id=current_user.tenant_id, skip=skip, limit=limit)
 
 @router.post("/categories", response_model=cat_schemas.Category)
-def create_category(
+async def create_category(
     category_in: cat_schemas.CategoryCreate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return inventory_service.create_category(db, category=category_in, tenant_id=current_user.tenant_id)
+    return await inventory_service.create_category(db, category=category_in, tenant_id=current_user.tenant_id)
 
 @router.put("/categories/{category_id}", response_model=cat_schemas.Category)
-def update_category(
+async def update_category(
     category_id: int,
     category_in: cat_schemas.CategoryUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    category = inventory_service.update_category(db, category_id=category_id, category_in=category_in, tenant_id=current_user.tenant_id)
+    category = await inventory_service.update_category(db, category_id=category_id, category_in=category_in, tenant_id=current_user.tenant_id)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     return category
 
 @router.delete("/categories/{category_id}")
-def delete_category(
+async def delete_category(
     category_id: int,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    success = inventory_service.delete_category(db, category_id=category_id, tenant_id=current_user.tenant_id)
+    success = await inventory_service.delete_category(db, category_id=category_id, tenant_id=current_user.tenant_id)
     if not success:
         raise HTTPException(status_code=404, detail="Category not found")
     return {"message": "Category deleted successfully"}
@@ -155,7 +171,7 @@ def delete_category(
 @router.post("/bulk-import")
 async def bulk_import_items(
     file: UploadFile = File(...),
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
     import pandas as pd
@@ -190,7 +206,7 @@ async def bulk_import_items(
         category_cache = {}  # Cache to avoid repeated DB queries
         
         # Get existing categories
-        existing_categories = inventory_service.get_categories(db, tenant_id=current_user.tenant_id)
+        existing_categories = await inventory_service.get_categories(db, tenant_id=current_user.tenant_id)
         for cat in existing_categories:
             category_cache[cat.name.lower()] = cat.id
         
@@ -205,7 +221,7 @@ async def bulk_import_items(
                     
                     if category_key not in category_cache:
                         # Create new category
-                        new_category = inventory_service.create_category(
+                        new_category = await inventory_service.create_category(
                             db,
                             cat_schemas.CategoryCreate(name=category_name),
                             tenant_id=current_user.tenant_id
@@ -226,7 +242,7 @@ async def bulk_import_items(
                     'image_url': str(row['image_url']).strip() if 'image_url' in df.columns and pd.notna(row['image_url']) else None
                 }
                 
-                inventory_service.create_item(
+                await inventory_service.create_item(
                     db,
                     schemas.ItemCreate(**item_data),
                     tenant_id=current_user.tenant_id

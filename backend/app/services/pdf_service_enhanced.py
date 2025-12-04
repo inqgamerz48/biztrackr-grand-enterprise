@@ -63,13 +63,13 @@ def generate_qr_code(data: str) -> BytesIO:
     buffer.seek(0)
     return buffer
 
-def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
+def generate_sale_receipt_pdf(sale_data: Dict, settings_dict: Dict = None) -> BytesIO:
     """
     Generate an enhanced professional PDF receipt for a sale.
     
     Args:
         sale_data: Dictionary containing sale information
-        db_session: Optional database session to fetch settings
+        settings_dict: Optional dictionary containing company settings
     
     Returns:
         BytesIO: PDF file in memory
@@ -86,23 +86,14 @@ def generate_sale_receipt_pdf(sale_data: Dict, db_session=None) -> BytesIO:
     footer_text = "Thank you for your business!"
     terms = None
     
-    if db_session:
-        try:
-            from app.models.settings import Settings
-            query = db_session.query(Settings)
-            if 'tenant_id' in sale_data:
-                query = query.filter(Settings.tenant_id == sale_data['tenant_id'])
-            settings = query.first()
-            if settings:
-                company_name = settings.company_name or company_name
-                company_address = settings.company_address or company_address
-                company_phone = settings.company_phone or company_phone
-                company_email = settings.company_email or company_email
-                company_website = settings.company_website or company_website
-                footer_text = settings.footer_text or footer_text
-                terms = settings.terms_and_conditions
-        except Exception:
-            pass  # Use defaults if settings not available
+    if settings_dict:
+        company_name = settings_dict.get('company_name') or company_name
+        company_address = settings_dict.get('company_address') or company_address
+        company_phone = settings_dict.get('company_phone') or company_phone
+        company_email = settings_dict.get('company_email') or company_email
+        company_website = settings_dict.get('company_website') or company_website
+        footer_text = settings_dict.get('footer_text') or footer_text
+        terms = settings_dict.get('terms_and_conditions')
     
     # Create PDF document
     doc = SimpleDocTemplate(

@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from app.models.security import SecurityEvent, BlockedIP, SecurityEventType
@@ -6,8 +7,8 @@ from typing import Optional, Dict
 
 class SecurityService:
     @staticmethod
-    def log_event(
-        db: Session, 
+    async def log_event(
+        db: AsyncSession, 
         event_type: str, 
         ip_address: str, 
         description: str = None, 
@@ -22,35 +23,39 @@ class SecurityService:
             user_email=user_email
         )
         db.add(event)
-        db.commit()
-        db.refresh(event)
+        await db.commit()
+        await db.refresh(event)
         return event
 
     @staticmethod
-    def is_ip_blocked(db: Session, ip_address: str) -> bool:
-        blocked = db.query(BlockedIP).filter(
-            BlockedIP.ip_address == ip_address,
-            BlockedIP.is_active == True
-        ).first()
+    async def is_ip_blocked(db: AsyncSession, ip_address: str) -> bool:
+        result = await db.execute(
+            select(BlockedIP).filter(
+                BlockedIP.ip_address == ip_address,
+                BlockedIP.is_active == True
+            )
+        )
+        blocked = result.scalars().first()
         
         if blocked:
             if blocked.expires_at and blocked.expires_at < datetime.utcnow():
                 # Ban expired
                 blocked.is_active = False
-                db.commit()
+                await db.commit()
                 return False
             return True
         return False
 
     @staticmethod
-    def ban_ip(
-        db: Session, 
+    async def ban_ip(
+        db: AsyncSession, 
         ip_address: str, 
         reason: str, 
         duration_minutes: int = 60
     ) -> BlockedIP:
         # Check if already banned
-        existing = db.query(BlockedIP).filter(BlockedIP.ip_address == ip_address).first()
+        result = await db.execute(select(BlockedIP).filter(BlockedIP.ip_address == ip_address))
+        existing = result.scalars().first()
         expires_at = datetime.utcnow() + timedelta(minutes=duration_minutes)
         
         if existing:
@@ -58,8 +63,8 @@ class SecurityService:
             existing.reason = reason
             existing.expires_at = expires_at
             existing.blocked_at = datetime.utcnow()
-            db.commit()
-            db.refresh(existing)
+            await db.commit()
+            await db.refresh(existing)
             return existing
         
         blocked = BlockedIP(
@@ -68,12 +73,12 @@ class SecurityService:
             expires_at=expires_at
         )
         db.add(blocked)
-        db.commit()
-        db.refresh(blocked)
+        await db.commit()
+        await db.refresh(blocked)
         return blocked
 
     @staticmethod
-    def check_login_failures(db: Session, ip_address: str) -> bool:
+    async def check_login_failures(db: AsyncSession, ip_address: str) -> bool:
         """
         Check if IP has exceeded failed login threshold in the last 5 minutes.
         Returns True if IP was just banned, False otherwise.
@@ -83,14 +88,17 @@ class SecurityService:
         
         since = datetime.utcnow() - timedelta(minutes=WINDOW_MINUTES)
         
-        count = db.query(SecurityEvent).filter(
-            SecurityEvent.ip_address == ip_address,
-            SecurityEvent.event_type == SecurityEventType.LOGIN_FAILED,
-            SecurityEvent.created_at >= since
-        ).count()
+        result = await db.execute(
+            select(func.count(SecurityEvent.id)).filter(
+                SecurityEvent.ip_address == ip_address,
+                SecurityEvent.event_type == SecurityEventType.LOGIN_FAILED,
+                SecurityEvent.created_at >= since
+            )
+        )
+        count = result.scalar()
         
         if count >= THRESHOLD:
-            SecurityService.ban_ip(
+            await SecurityService.ban_ip(
                 db, 
                 ip_address, 
                 reason=f"Too many failed login attempts ({count} in {WINDOW_MINUTES}m)"
@@ -99,17 +107,19 @@ class SecurityService:
         return False
 
     @staticmethod
-    def get_stats(db: Session) -> Dict:
-        total_events = db.query(SecurityEvent).count()
-        blocked_ips = db.query(BlockedIP).filter(BlockedIP.is_active == True).count()
-        recent_attacks = db.query(SecurityEvent).filter(
-            SecurityEvent.created_at >= datetime.utcnow() - timedelta(hours=24)
-        ).count()
+    async def get_stats(db: AsyncSession) -> Dict:
+        total_events = await db.execute(select(func.count(SecurityEvent.id)))
+        blocked_ips = await db.execute(select(func.count(BlockedIP.id)).filter(BlockedIP.is_active == True))
+        recent_attacks = await db.execute(
+            select(func.count(SecurityEvent.id)).filter(
+                SecurityEvent.created_at >= datetime.utcnow() - timedelta(hours=24)
+            )
+        )
         
         return {
-            "total_events": total_events,
-            "active_bans": blocked_ips,
-            "attacks_last_24h": recent_attacks
+            "total_events": total_events.scalar(),
+            "active_bans": blocked_ips.scalar(),
+            "attacks_last_24h": recent_attacks.scalar()
         }
 
 security_service = SecurityService()

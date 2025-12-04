@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app.core import database
 from app.api.dependencies import get_current_user
@@ -22,35 +22,35 @@ class NotificationResponse(BaseModel):
         orm_mode = True
 
 @router.get("/", response_model=List[NotificationResponse])
-def get_notifications(
-    db: Session = Depends(database.get_db),
+async def get_notifications(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return notification_service.get_unread_notifications(db, current_user.tenant_id, current_user.id)
+    return await notification_service.get_unread_notifications(db, current_user.tenant_id, current_user.id)
 
 @router.get("/unread-count")
-def get_unread_count(
-    db: Session = Depends(database.get_db),
+async def get_unread_count(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    count = notification_service.get_unread_count(db, current_user.tenant_id, current_user.id)
+    count = await notification_service.get_unread_count(db, current_user.tenant_id, current_user.id)
     return {"count": count}
 
 @router.put("/{notification_id}/read")
-def mark_as_read(
+async def mark_as_read(
     notification_id: int,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    success = notification_service.mark_as_read(db, notification_id, current_user.tenant_id, current_user.id)
+    success = await notification_service.mark_as_read(db, notification_id, current_user.tenant_id, current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Notification not found")
     return {"status": "success"}
 
 @router.put("/read-all")
-def mark_all_as_read(
-    db: Session = Depends(database.get_db),
+async def mark_all_as_read(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
-    count = notification_service.mark_all_as_read(db, current_user.tenant_id, current_user.id)
+    count = await notification_service.mark_all_as_read(db, current_user.tenant_id, current_user.id)
     return {"status": "success", "count": count}

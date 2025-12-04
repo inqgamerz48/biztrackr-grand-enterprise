@@ -2,18 +2,12 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
-    withCredentials: false,
+    withCredentials: true,
 });
 
-// ✅ Always attach latest token before every request
+// ✅ Cookies are automatically sent withCredentials: true
 api.interceptors.request.use(
     (config) => {
-        if (typeof window !== "undefined") {
-            const token = localStorage.getItem("token");
-            if (token && config.headers) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-        }
         return config;
     },
     (error) => {

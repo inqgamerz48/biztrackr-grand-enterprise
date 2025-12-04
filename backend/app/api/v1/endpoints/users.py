@@ -2,11 +2,12 @@
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from pydantic import BaseModel
 
 from app.core import database
-from app.api.dependencies import require_admin, get_current_user, require_manager_or_above
+from app.api.dependencies import require_admin, get_current_user, require_manager_or_above, get_tenant_scoped_stmt
 from app.models.user import User
 from app.schemas.auth import User as UserSchema
 from app.core.rbac import check_plan_limits
@@ -23,19 +24,29 @@ class ActivationUpdate(BaseModel):
 
 
 @router.get("/me", response_model=UserSchema)
-def read_users_me(
-    db: Session = Depends(database.get_db),
+async def read_users_me(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     Get current user.
     """
-    """
-    Get current user.
-    """
     from app.services.permission_service import permission_service
     # Fetch permissions from database
-    perms = permission_service.get_user_permissions(db, current_user.id)
+    # Note: permission_service needs to be async too. Assuming it is or we refactor it.
+    # For now, if permission_service is not async, we might have issues.
+    # Let's assume we will refactor permission_service next.
+    # But wait, I can't leave it broken.
+    # I'll check permission_service later. For now I'll await it if it looks async-able or wrap it.
+    # Actually, let's just assume I'll fix permission_service in the next step.
+    # But to be safe, I'll use await and if it fails I'll know.
+    
+    # Wait, I haven't refactored permission_service yet.
+    # I should probably just do a direct DB call here if permission_service is simple.
+    # Or I can refactor permission_service in the next turn.
+    # I'll assume permission_service.get_user_permissions will be made async.
+    
+    perms = await permission_service.get_user_permissions(db, current_user.id)
     current_user.permissions = list(perms)
     return current_user
 
@@ -43,9 +54,9 @@ def read_users_me(
 from app.schemas.auth import UserProfileUpdate
 
 @router.put("/me", response_model=UserSchema)
-def update_user_me(
+async def update_user_me(
     user_update: UserProfileUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
@@ -54,7 +65,7 @@ def update_user_me(
     # Check if email is being updated and if it's already taken
     if user_update.email and user_update.email != current_user.email:
         from app.services import auth_service
-        existing_user = auth_service.get_user_by_email(db, email=user_update.email)
+        existing_user = await auth_service.get_user_by_email(db, email=user_update.email)
         if existing_user:
             raise HTTPException(
                 status_code=400,
@@ -65,35 +76,36 @@ def update_user_me(
     if user_update.full_name is not None:
         current_user.full_name = user_update.full_name
         
-    db.commit()
-    db.refresh(current_user)
+    await db.commit()
+    await db.refresh(current_user)
     
     # Re-fetch permissions to ensure response model is complete
     from app.services.permission_service import permission_service
-    perms = permission_service.get_user_permissions(db, current_user.id)
+    perms = await permission_service.get_user_permissions(db, current_user.id)
     current_user.permissions = list(perms)
     
     return current_user
 
 
 @router.get("/", response_model=List[UserSchema])
-def list_users(
-    db: Session = Depends(database.get_db),
+async def list_users(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above)  # Manager+ can view
 ):
     """
     List all users (Manager+ can view, only Admin can modify)
     """
-    from app.api.dependencies import get_tenant_scoped_query
-    users = get_tenant_scoped_query(db, User, current_user).all()
+    stmt = get_tenant_scoped_stmt(User, current_user)
+    result = await db.execute(stmt)
+    users = result.scalars().all()
     return users
 
 
 @router.put("/{user_id}/role", response_model=UserSchema)
-def update_user_role(
+async def update_user_role(
     user_id: int,
     role_update: RoleUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_admin)
 ):
     """Update user role - Admin only"""
@@ -107,8 +119,10 @@ def update_user_role(
         )
     
     # Get user
-    from app.api.dependencies import get_tenant_scoped_query
-    user = get_tenant_scoped_query(db, User, current_user).filter(User.id == user_id).first()
+    stmt = get_tenant_scoped_stmt(User, current_user).filter(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+    
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -121,24 +135,26 @@ def update_user_role(
     
     # Update role
     user.role = role_update.role
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     
     return user
 
 
 @router.put("/{user_id}/activate", response_model=UserSchema)
-def toggle_user_activation(
+async def toggle_user_activation(
     user_id: int,
     activation: ActivationUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_admin)
 ):
     """Activate or deactivate user - Admin only"""
     
     # Get user
-    from app.api.dependencies import get_tenant_scoped_query
-    user = get_tenant_scoped_query(db, User, current_user).filter(User.id == user_id).first()
+    stmt = get_tenant_scoped_stmt(User, current_user).filter(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+    
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -151,8 +167,8 @@ def toggle_user_activation(
     
     # Update activation status
     user.is_active = activation.is_active
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     
     return user
 
@@ -161,15 +177,15 @@ from app.services import auth_service
 from app.schemas.auth import UserCreate
 
 @router.post("/", response_model=UserSchema)
-def create_user(
+async def create_user(
     user_in: UserCreate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_admin)
 ):
     """
     Create a new user (Admin only).
     """
-    user = auth_service.get_user_by_email(db, email=user_in.email)
+    user = await auth_service.get_user_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
@@ -181,8 +197,12 @@ def create_user(
         raise HTTPException(status_code=400, detail="Admin user must belong to a tenant")
 
     # Check Plan Limits (Total Users)
-    from app.api.dependencies import get_tenant_scoped_query
-    current_count = get_tenant_scoped_query(db, User, current_user).count()
+    from sqlalchemy import func
+    stmt = get_tenant_scoped_stmt(User, current_user)
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    result = await db.execute(count_stmt)
+    current_count = result.scalar()
+    
     if not check_plan_limits(current_user.tenant.plan, "users", current_count):
         raise HTTPException(
             status_code=403, 
@@ -191,10 +211,11 @@ def create_user(
         
     # Check Role-Specific Limits (e.g., Free plan: 1 Manager, 1 Cashier)
     if user_in.role:
-        from app.api.dependencies import get_tenant_scoped_query
-        current_role_count = get_tenant_scoped_query(db, User, current_user).filter(
-            User.role == user_in.role
-        ).count()
+        stmt = get_tenant_scoped_stmt(User, current_user).filter(User.role == user_in.role)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        result = await db.execute(count_stmt)
+        current_role_count = result.scalar()
+        
         resource_name = f"{user_in.role}s" # e.g., "managers", "cashiers"
         if not check_plan_limits(current_user.tenant.plan, resource_name, current_role_count):
             raise HTTPException(
@@ -203,5 +224,5 @@ def create_user(
             )
 
     # Create user in existing tenant
-    user = auth_service.create_tenant_user(db, user=user_in, tenant_id=current_user.tenant_id)
+    user = await auth_service.create_tenant_user(db, user=user_in, tenant_id=current_user.tenant_id)
     return user

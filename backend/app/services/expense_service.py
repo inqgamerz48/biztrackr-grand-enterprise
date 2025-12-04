@@ -1,4 +1,6 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy import func, extract
 from typing import List, Optional
 from datetime import datetime, timedelta
 from app.models import Expense, ExpenseCategory
@@ -21,16 +23,16 @@ class ExpenseSummary(BaseModel):
     total: float
     count: int
 
-def create_expense(db: Session, expense: ExpenseCreate, tenant_id: int):
+async def create_expense(db: AsyncSession, expense: ExpenseCreate, tenant_id: int):
     """Create a new expense"""
     db_obj = Expense(**expense.dict(), tenant_id=tenant_id)
     db.add(db_obj)
-    db.commit()
-    db.refresh(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
     return db_obj
 
-def get_expenses(
-    db: Session, 
+async def get_expenses(
+    db: AsyncSession, 
     tenant_id: int, 
     category: Optional[ExpenseCategory] = None,
     start_date: Optional[datetime] = None,
@@ -39,29 +41,31 @@ def get_expenses(
     limit: int = 100
 ):
     """Get expenses with optional filters"""
-    query = db.query(Expense).filter(Expense.tenant_id == tenant_id)
+    stmt = select(Expense).filter(Expense.tenant_id == tenant_id)
     
     if category:
-        query = query.filter(Expense.category == category)
+        stmt = stmt.filter(Expense.category == category)
     
     if start_date:
-        query = query.filter(Expense.date >= start_date)
+        stmt = stmt.filter(Expense.date >= start_date)
     
     if end_date:
-        query = query.filter(Expense.date <= end_date)
+        stmt = stmt.filter(Expense.date <= end_date)
     
-    return query.order_by(Expense.date.desc()).offset(skip).limit(limit).all()
+    result = await db.execute(stmt.order_by(Expense.date.desc()).offset(skip).limit(limit))
+    return result.scalars().all()
 
-def get_expense_by_id(db: Session, expense_id: int, tenant_id: int):
+async def get_expense_by_id(db: AsyncSession, expense_id: int, tenant_id: int):
     """Get a single expense by ID"""
-    return db.query(Expense).filter(
+    result = await db.execute(select(Expense).filter(
         Expense.id == expense_id,
         Expense.tenant_id == tenant_id
-    ).first()
+    ))
+    return result.scalars().first()
 
-def update_expense(db: Session, expense_id: int, expense_update: ExpenseUpdate, tenant_id: int):
+async def update_expense(db: AsyncSession, expense_id: int, expense_update: ExpenseUpdate, tenant_id: int):
     """Update an expense"""
-    db_expense = get_expense_by_id(db, expense_id, tenant_id)
+    db_expense = await get_expense_by_id(db, expense_id, tenant_id)
     if not db_expense:
         return None
     
@@ -69,76 +73,75 @@ def update_expense(db: Session, expense_id: int, expense_update: ExpenseUpdate, 
     for field, value in update_data.items():
         setattr(db_expense, field, value)
     
-    db.commit()
-    db.refresh(db_expense)
+    await db.commit()
+    await db.refresh(db_expense)
     return db_expense
 
-def delete_expense(db: Session, expense_id: int, tenant_id: int):
+async def delete_expense(db: AsyncSession, expense_id: int, tenant_id: int):
     """Delete an expense"""
-    db_expense = get_expense_by_id(db, expense_id, tenant_id)
+    db_expense = await get_expense_by_id(db, expense_id, tenant_id)
     if not db_expense:
         return False
     
-    db.delete(db_expense)
-    db.commit()
+    await db.delete(db_expense)
+    await db.commit()
     return True
 
-def get_expense_summary(
-    db: Session,
+async def get_expense_summary(
+    db: AsyncSession,
     tenant_id: int,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None
 ) -> List[ExpenseSummary]:
     """Get expense summary grouped by category"""
-    from sqlalchemy import func
     
-    query = db.query(
+    stmt = select(
         Expense.category,
         func.sum(Expense.amount).label('total'),
         func.count(Expense.id).label('count')
     ).filter(Expense.tenant_id == tenant_id)
     
     if start_date:
-        query = query.filter(Expense.date >= start_date)
+        stmt = stmt.filter(Expense.date >= start_date)
     
     if end_date:
-        query = query.filter(Expense.date <= end_date)
+        stmt = stmt.filter(Expense.date <= end_date)
     
-    results = query.group_by(Expense.category).all()
+    result = await db.execute(stmt.group_by(Expense.category))
+    results = result.all()
     
     return [
         ExpenseSummary(category=cat.value, total=total, count=count)
         for cat, total, count in results
     ]
 
-def get_total_expenses(
-    db: Session,
+async def get_total_expenses(
+    db: AsyncSession,
     tenant_id: int,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None
 ) -> float:
     """Get total expenses for a period"""
-    from sqlalchemy import func
     
-    query = db.query(func.sum(Expense.amount)).filter(Expense.tenant_id == tenant_id)
+    stmt = select(func.sum(Expense.amount)).filter(Expense.tenant_id == tenant_id)
     
     if start_date:
-        query = query.filter(Expense.date >= start_date)
+        stmt = stmt.filter(Expense.date >= start_date)
     
     if end_date:
-        query = query.filter(Expense.date <= end_date)
+        stmt = stmt.filter(Expense.date <= end_date)
     
-    result = query.scalar()
-    return result if result else 0.0
+    result = await db.execute(stmt)
+    total = result.scalar()
+    return total if total else 0.0
 
-def get_monthly_expense_trend(db: Session, tenant_id: int, months: int = 6):
+async def get_monthly_expense_trend(db: AsyncSession, tenant_id: int, months: int = 6):
     """Get monthly expense totals for the last N months"""
-    from sqlalchemy import func, extract
     
     end_date = datetime.now()
     start_date = end_date - timedelta(days=months * 30)
     
-    results = db.query(
+    stmt = select(
         extract('year', Expense.date).label('year'),
         extract('month', Expense.date).label('month'),
         func.sum(Expense.amount).label('total')
@@ -146,7 +149,10 @@ def get_monthly_expense_trend(db: Session, tenant_id: int, months: int = 6):
         Expense.tenant_id == tenant_id,
         Expense.date >= start_date,
         Expense.date <= end_date
-    ).group_by('year', 'month').order_by('year', 'month').all()
+    ).group_by('year', 'month').order_by('year', 'month')
+    
+    result = await db.execute(stmt)
+    results = result.all()
     
     return [
         {

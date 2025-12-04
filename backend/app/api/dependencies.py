@@ -3,7 +3,8 @@
 from typing import List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from jose import jwt, JWTError
 
 from app.core import database
@@ -15,22 +16,12 @@ from app.models.user import User
 # OAuth2 scheme for token authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login/access-token")
 
-def get_current_user(
+async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(database.get_db)
+    db: AsyncSession = Depends(database.get_db)
 ) -> User:
     """
     Dependency to get the current authenticated user from JWT token.
-    
-    Args:
-        token: JWT access token from Authorization header
-        db: Database session
-        
-    Returns:
-        User: Current authenticated user
-        
-    Raises:
-        HTTPException: If token is invalid or user not found
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,7 +37,9 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
     
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    result = await db.execute(select(User).filter(User.id == int(user_id)))
+    user = result.scalars().first()
+    
     if user is None:
         raise credentials_exception
     
@@ -62,19 +55,8 @@ def get_current_user(
 def require_role(allowed_roles: List[str]):
     """
     Dependency factory to check if user has required role.
-    
-    Args:
-        allowed_roles: List of roles that are allowed (e.g., ['admin', 'manager'])
-        
-    Returns:
-        Dependency function that validates user role
-        
-    Example:
-        @router.get("/admin-only")
-        def admin_endpoint(user: User = Depends(require_role(['admin']))):
-            ...
     """
-    def role_checker(current_user: User = Depends(get_current_user)) -> User:
+    async def role_checker(current_user: User = Depends(get_current_user)) -> User:
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -93,14 +75,8 @@ require_any_role = require_role(["admin", "manager", "cashier"])
 def require_permission(permission: str):
     """
     Dependency factory to check if user has required permission.
-    
-    Args:
-        permission: Permission string (e.g., 'inventory:read')
-        
-    Returns:
-        Dependency function that validates user permission
     """
-    def permission_checker(current_user: User = Depends(get_current_user)) -> User:
+    async def permission_checker(current_user: User = Depends(get_current_user)) -> User:
         user_permissions = get_role_permissions(current_user.role)
         if permission not in user_permissions:
             raise HTTPException(
@@ -111,9 +87,9 @@ def require_permission(permission: str):
     
     return permission_checker
 
-def get_tenant_scoped_query(db: Session, model, user: User):
+def get_tenant_scoped_stmt(model, user: User):
     """
-    Returns a query filtered by the current user's tenant_id.
+    Returns a SQLAlchemy Select statement filtered by the current user's tenant_id.
     Enforces strict isolation.
     """
     if not user.tenant_id:
@@ -121,4 +97,4 @@ def get_tenant_scoped_query(db: Session, model, user: User):
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="User does not belong to any organization (Tenant ID missing)"
         )
-    return db.query(model).filter(model.tenant_id == user.tenant_id)
+    return select(model).filter(model.tenant_id == user.tenant_id)

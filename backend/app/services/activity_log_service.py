@@ -1,12 +1,13 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.models.activity_log import ActivityLog
 from typing import Optional, Dict, Any
 import json
 
 class ActivityLogService:
-    def log_action(
+    async def log_action(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         tenant_id: int, 
         user_id: int, 
         action: str, 
@@ -27,17 +28,17 @@ class ActivityLogService:
                 details=details
             )
             db.add(log_entry)
-            db.commit()
+            await db.commit()
             return log_entry
         except Exception as e:
             # Fallback to prevent logging failure from blocking main action
             print(f"Failed to create activity log: {e}")
-            db.rollback()
+            await db.rollback()
             return None
 
-    def get_logs(
+    async def get_logs(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         tenant_id: int, 
         skip: int = 0, 
         limit: int = 50,
@@ -47,7 +48,7 @@ class ActivityLogService:
         """
         Retrieve activity logs with optional filtering.
         """
-        query = db.query(ActivityLog).filter(ActivityLog.tenant_id == tenant_id)
+        query = select(ActivityLog).filter(ActivityLog.tenant_id == tenant_id)
         
         if user_id:
             query = query.filter(ActivityLog.user_id == user_id)
@@ -55,6 +56,7 @@ class ActivityLogService:
         if entity_type:
             query = query.filter(ActivityLog.entity_type == entity_type)
             
-        return query.order_by(ActivityLog.created_at.desc()).offset(skip).limit(limit).all()
+        result = await db.execute(query.order_by(ActivityLog.created_at.desc()).offset(skip).limit(limit))
+        return result.scalars().all()
 
 activity_log_service = ActivityLogService()

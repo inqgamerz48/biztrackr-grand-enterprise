@@ -1,13 +1,17 @@
 import pandas as pd
 import io
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timedelta
 from typing import Optional
 from app.models import InventoryItem as Item, Sale, Purchase, Expense, SaleItem, PurchaseItem, Category, ExpenseCategory
 from fastapi import UploadFile, HTTPException
+from sqlalchemy import func
 
-def export_inventory_csv(db: Session, tenant_id: int):
-    items = db.query(Item).filter(Item.tenant_id == tenant_id).all()
+async def export_inventory_csv(db: AsyncSession, tenant_id: int):
+    result = await db.execute(select(Item).filter(Item.tenant_id == tenant_id))
+    items = result.scalars().all()
     df = pd.DataFrame([vars(i) for i in items])
     if '_sa_instance_state' in df.columns:
         del df['_sa_instance_state']
@@ -16,7 +20,7 @@ def export_inventory_csv(db: Session, tenant_id: int):
     df.to_csv(stream, index=False)
     return stream.getvalue()
 
-async def import_inventory(db: Session, file: UploadFile, tenant_id: int):
+async def import_inventory(db: AsyncSession, file: UploadFile, tenant_id: int):
     contents = await file.read()
     try:
         if file.filename.endswith('.csv'):
@@ -38,21 +42,22 @@ async def import_inventory(db: Session, file: UploadFile, tenant_id: int):
             db.add(item)
             added_count += 1
         
-        db.commit()
+        await db.commit()
         return {"message": f"Imported {added_count} items"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-def export_sales_csv(db: Session, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+async def export_sales_csv(db: AsyncSession, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
     """Export sales data to CSV"""
-    query = db.query(Sale).filter(Sale.tenant_id == tenant_id)
+    stmt = select(Sale).options(selectinload(Sale.customer)).filter(Sale.tenant_id == tenant_id)
     
     if start_date:
-        query = query.filter(Sale.date >= start_date)
+        stmt = stmt.filter(Sale.date >= start_date)
     if end_date:
-        query = query.filter(Sale.date <= end_date)
+        stmt = stmt.filter(Sale.date <= end_date)
     
-    sales = query.all()
+    result = await db.execute(stmt)
+    sales = result.scalars().all()
     
     data = []
     for sale in sales:
@@ -70,16 +75,17 @@ def export_sales_csv(db: Session, tenant_id: int, start_date: Optional[datetime]
     df.to_csv(stream, index=False)
     return stream.getvalue()
 
-def export_purchases_csv(db: Session, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+async def export_purchases_csv(db: AsyncSession, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
     """Export purchases data to CSV"""
-    query = db.query(Purchase).filter(Purchase.tenant_id == tenant_id)
+    stmt = select(Purchase).options(selectinload(Purchase.supplier)).filter(Purchase.tenant_id == tenant_id)
     
     if start_date:
-        query = query.filter(Purchase.date >= start_date)
+        stmt = stmt.filter(Purchase.date >= start_date)
     if end_date:
-        query = query.filter(Purchase.date <= end_date)
+        stmt = stmt.filter(Purchase.date <= end_date)
     
-    purchases = query.all()
+    result = await db.execute(stmt)
+    purchases = result.scalars().all()
     
     data = []
     for purchase in purchases:
@@ -96,16 +102,17 @@ def export_purchases_csv(db: Session, tenant_id: int, start_date: Optional[datet
     df.to_csv(stream, index=False)
     return stream.getvalue()
 
-def export_expenses_csv(db: Session, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+async def export_expenses_csv(db: AsyncSession, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
     """Export expenses data to CSV"""
-    query = db.query(Expense).filter(Expense.tenant_id == tenant_id)
+    stmt = select(Expense).filter(Expense.tenant_id == tenant_id)
     
     if start_date:
-        query = query.filter(Expense.date >= start_date)
+        stmt = stmt.filter(Expense.date >= start_date)
     if end_date:
-        query = query.filter(Expense.date <= end_date)
+        stmt = stmt.filter(Expense.date <= end_date)
     
-    expenses = query.all()
+    result = await db.execute(stmt)
+    expenses = result.scalars().all()
     
     data = []
     for expense in expenses:
@@ -121,23 +128,25 @@ def export_expenses_csv(db: Session, tenant_id: int, start_date: Optional[dateti
     df.to_csv(stream, index=False)
     return stream.getvalue()
 
-def get_sales_analytics(db: Session, tenant_id: int, days: int = 30):
+async def get_sales_analytics(db: AsyncSession, tenant_id: int, days: int = 30):
     """Get sales analytics for the last N days"""
-    from sqlalchemy import func
     
     end_date = datetime.now()
     start_date = end_date - timedelta(days=days)
     
     # Daily sales
-    daily_sales = db.query(
-        func.date(Sale.date).label('date'),
-        func.sum(Sale.total_amount).label('total'),
-        func.count(Sale.id).label('count')
-    ).filter(
-        Sale.tenant_id == tenant_id,
-        Sale.date >= start_date,
-        Sale.date <= end_date
-    ).group_by(func.date(Sale.date)).all()
+    result = await db.execute(
+        select(
+            func.date(Sale.date).label('date'),
+            func.sum(Sale.total_amount).label('total'),
+            func.count(Sale.id).label('count')
+        ).filter(
+            Sale.tenant_id == tenant_id,
+            Sale.date >= start_date,
+            Sale.date <= end_date
+        ).group_by(func.date(Sale.date))
+    )
+    daily_sales = result.all()
     
     return {
         'daily_sales': [
@@ -150,27 +159,28 @@ def get_sales_analytics(db: Session, tenant_id: int, days: int = 30):
         ]
     }
 
-def get_inventory_valuation(db: Session, tenant_id: int):
+async def get_inventory_valuation(db: AsyncSession, tenant_id: int):
     """Calculate total inventory value"""
-    from sqlalchemy import func
     
-    result = db.query(
-        func.sum(Item.quantity * Item.purchase_price).label('purchase_value'),
-        func.sum(Item.quantity * Item.selling_price).label('selling_value'),
-        func.count(Item.id).label('total_items'),
-        func.sum(Item.quantity).label('total_quantity')
-    ).filter(Item.tenant_id == tenant_id).first()
+    result = await db.execute(
+        select(
+            func.sum(Item.quantity * Item.purchase_price).label('purchase_value'),
+            func.sum(Item.quantity * Item.selling_price).label('selling_value'),
+            func.count(Item.id).label('total_items'),
+            func.sum(Item.quantity).label('total_quantity')
+        ).filter(Item.tenant_id == tenant_id)
+    )
+    res = result.first()
     
     return {
-        'purchase_value': float(result.purchase_value) if result.purchase_value else 0.0,
-        'selling_value': float(result.selling_value) if result.selling_value else 0.0,
-        'total_items': result.total_items or 0,
-        'total_quantity': result.total_quantity or 0
+        'purchase_value': float(res.purchase_value) if res.purchase_value else 0.0,
+        'selling_value': float(res.selling_value) if res.selling_value else 0.0,
+        'total_items': res.total_items or 0,
+        'total_quantity': res.total_quantity or 0
     }
 
-def get_profit_loss_data(db: Session, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+async def get_profit_loss_data(db: AsyncSession, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
     """Calculate profit and loss metrics"""
-    from sqlalchemy import func
     
     if not start_date:
         start_date = datetime.now() - timedelta(days=30)
@@ -178,25 +188,34 @@ def get_profit_loss_data(db: Session, tenant_id: int, start_date: Optional[datet
         end_date = datetime.now()
     
     # Total Revenue (Sales)
-    revenue = db.query(func.sum(Sale.total_amount)).filter(
-        Sale.tenant_id == tenant_id,
-        Sale.date >= start_date,
-        Sale.date <= end_date
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Sale.total_amount)).filter(
+            Sale.tenant_id == tenant_id,
+            Sale.date >= start_date,
+            Sale.date <= end_date
+        )
+    )
+    revenue = result.scalar() or 0.0
     
     # Cost of Goods Sold (Purchases)
-    cogs = db.query(func.sum(Purchase.total_amount)).filter(
-        Purchase.tenant_id == tenant_id,
-        Purchase.date >= start_date,
-        Purchase.date <= end_date
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Purchase.total_amount)).filter(
+            Purchase.tenant_id == tenant_id,
+            Purchase.date >= start_date,
+            Purchase.date <= end_date
+        )
+    )
+    cogs = result.scalar() or 0.0
     
     # Operating Expenses
-    expenses = db.query(func.sum(Expense.amount)).filter(
-        Expense.tenant_id == tenant_id,
-        Expense.date >= start_date,
-        Expense.date <= end_date
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Expense.amount)).filter(
+            Expense.tenant_id == tenant_id,
+            Expense.date >= start_date,
+            Expense.date <= end_date
+        )
+    )
+    expenses = result.scalar() or 0.0
     
     gross_profit = revenue - cogs
     net_profit = gross_profit - expenses
@@ -211,17 +230,19 @@ def get_profit_loss_data(db: Session, tenant_id: int, start_date: Optional[datet
         'end_date': end_date.isoformat()
     }
 
-def get_inventory_category_analytics(db: Session, tenant_id: int):
+async def get_inventory_category_analytics(db: AsyncSession, tenant_id: int):
     """Get inventory distribution by category"""
-    from sqlalchemy import func
     
-    results = db.query(
-        Category.name,
-        func.count(Item.id).label('count'),
-        func.sum(Item.quantity * Item.selling_price).label('value')
-    ).join(Item, Item.category_id == Category.id)\
-    .filter(Item.tenant_id == tenant_id)\
-    .group_by(Category.name).all()
+    result = await db.execute(
+        select(
+            Category.name,
+            func.count(Item.id).label('count'),
+            func.sum(Item.quantity * Item.selling_price).label('value')
+        ).join(Item, Item.category_id == Category.id)\
+        .filter(Item.tenant_id == tenant_id)\
+        .group_by(Category.name)
+    )
+    results = result.all()
     
     return [
         {
@@ -232,23 +253,25 @@ def get_inventory_category_analytics(db: Session, tenant_id: int):
         for name, count, value in results
     ]
 
-def get_expense_category_analytics(db: Session, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+async def get_expense_category_analytics(db: AsyncSession, tenant_id: int, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
     """Get expense distribution by category"""
-    from sqlalchemy import func
     
     if not start_date:
         start_date = datetime.now() - timedelta(days=30)
     if not end_date:
         end_date = datetime.now()
         
-    results = db.query(
-        Expense.category,
-        func.sum(Expense.amount).label('total')
-    ).filter(
-        Expense.tenant_id == tenant_id,
-        Expense.date >= start_date,
-        Expense.date <= end_date
-    ).group_by(Expense.category).all()
+    result = await db.execute(
+        select(
+            Expense.category,
+            func.sum(Expense.amount).label('total')
+        ).filter(
+            Expense.tenant_id == tenant_id,
+            Expense.date >= start_date,
+            Expense.date <= end_date
+        ).group_by(Expense.category)
+    )
+    results = result.all()
     
     return [
         {

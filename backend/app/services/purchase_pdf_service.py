@@ -45,13 +45,13 @@ class NumberedCanvas(canvas.Canvas):
         self.drawCentredString(A4[0] / 2, 15*mm, page_num)
         self.restoreState()
 
-def generate_purchase_receipt_pdf(purchase_data: Dict, db_session=None) -> BytesIO:
+def generate_purchase_receipt_pdf(purchase_data: Dict, settings_dict: Dict = None) -> BytesIO:
     """
     Generate a professional PDF receipt for a purchase.
     
     Args:
         purchase_data: Dictionary containing purchase information
-        db_session: Optional database session to fetch settings
+        settings_dict: Optional dictionary containing company settings
     
     Returns:
         BytesIO: PDF file in memory
@@ -67,22 +67,13 @@ def generate_purchase_receipt_pdf(purchase_data: Dict, db_session=None) -> Bytes
     company_website = "www.biztrackerpro.com"
     footer_text = "Purchase Order Confirmed"
     
-    if db_session:
-        try:
-            from app.models.settings import Settings
-            query = db_session.query(Settings)
-            if 'tenant_id' in purchase_data:
-                query = query.filter(Settings.tenant_id == purchase_data['tenant_id'])
-            settings = query.first()
-            if settings:
-                company_name = settings.company_name or company_name
-                company_address = settings.company_address or company_address
-                company_phone = settings.company_phone or company_phone
-                company_email = settings.company_email or company_email
-                company_website = settings.company_website or company_website
-                # footer_text = settings.footer_text or footer_text # Keep specific PO footer or append?
-        except Exception:
-            pass
+    if settings_dict:
+        company_name = settings_dict.get('company_name') or company_name
+        company_address = settings_dict.get('company_address') or company_address
+        company_phone = settings_dict.get('company_phone') or company_phone
+        company_email = settings_dict.get('company_email') or company_email
+        company_website = settings_dict.get('company_website') or company_website
+        # footer_text = settings_dict.get('footer_text') or footer_text
 
     # Create PDF document with custom canvas
     doc = SimpleDocTemplate(

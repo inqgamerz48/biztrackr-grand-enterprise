@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy import func
 from datetime import datetime, timedelta, date
 from app.core import database
@@ -9,8 +10,8 @@ from app.models import User, Sale, InventoryItem
 router = APIRouter()
 
 @router.get("/stats")
-def get_dashboard_stats(
-    db: Session = Depends(database.get_db),
+async def get_dashboard_stats(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(get_current_user),
 ):
     tenant_id = current_user.tenant_id
@@ -18,26 +19,38 @@ def get_dashboard_stats(
     yesterday = today - timedelta(days=1)
 
     # 1. Sales Today
-    sales_today = db.query(func.sum(Sale.total_amount)).filter(
-        Sale.tenant_id == tenant_id,
-        func.date(Sale.date) == today
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Sale.total_amount)).filter(
+            Sale.tenant_id == tenant_id,
+            func.date(Sale.date) == today
+        )
+    )
+    sales_today = result.scalar() or 0.0
 
     # 2. Sales Yesterday
-    sales_yesterday = db.query(func.sum(Sale.total_amount)).filter(
-        Sale.tenant_id == tenant_id,
-        func.date(Sale.date) == yesterday
-    ).scalar() or 0.0
+    result = await db.execute(
+        select(func.sum(Sale.total_amount)).filter(
+            Sale.tenant_id == tenant_id,
+            func.date(Sale.date) == yesterday
+        )
+    )
+    sales_yesterday = result.scalar() or 0.0
 
     # 3. Inventory Stats
-    total_items = db.query(func.count(InventoryItem.id)).filter(
-        InventoryItem.tenant_id == tenant_id
-    ).scalar() or 0
+    result = await db.execute(
+        select(func.count(InventoryItem.id)).filter(
+            InventoryItem.tenant_id == tenant_id
+        )
+    )
+    total_items = result.scalar() or 0
 
-    low_stock_items = db.query(func.count(InventoryItem.id)).filter(
-        InventoryItem.tenant_id == tenant_id,
-        InventoryItem.quantity <= InventoryItem.min_stock
-    ).scalar() or 0
+    result = await db.execute(
+        select(func.count(InventoryItem.id)).filter(
+            InventoryItem.tenant_id == tenant_id,
+            InventoryItem.quantity <= InventoryItem.min_stock
+        )
+    )
+    low_stock_items = result.scalar() or 0
 
     # Calculate trend
     trend_percent = 0.0

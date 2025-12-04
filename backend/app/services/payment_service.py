@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from typing import Optional
 from app.models import Payment, Customer, Supplier
 from pydantic import BaseModel
@@ -13,7 +14,7 @@ class PaymentCreate(BaseModel):
     customer_id: Optional[int] = None
     supplier_id: Optional[int] = None
 
-def create_payment(db: Session, payment_in: PaymentCreate, tenant_id: int):
+async def create_payment(db: AsyncSession, payment_in: PaymentCreate, tenant_id: int):
     # Create Payment Record
     db_payment = Payment(
         **payment_in.dict(),
@@ -26,37 +27,42 @@ def create_payment(db: Session, payment_in: PaymentCreate, tenant_id: int):
     
     # Update Balance
     if payment_in.customer_id:
-        customer = db.query(Customer).filter(Customer.id == payment_in.customer_id, Customer.tenant_id == tenant_id).first()
+        result = await db.execute(select(Customer).filter(Customer.id == payment_in.customer_id, Customer.tenant_id == tenant_id))
+        customer = result.scalars().first()
         if customer:
             # Payment from customer reduces their debt (outstanding balance)
             customer.outstanding_balance -= payment_in.amount
             
     if payment_in.supplier_id:
-        supplier = db.query(Supplier).filter(Supplier.id == payment_in.supplier_id, Supplier.tenant_id == tenant_id).first()
+        result = await db.execute(select(Supplier).filter(Supplier.id == payment_in.supplier_id, Supplier.tenant_id == tenant_id))
+        supplier = result.scalars().first()
         if supplier:
             # Payment to supplier reduces our debt to them (outstanding balance)
             supplier.outstanding_balance -= payment_in.amount
             
-    db.commit()
-    db.refresh(db_payment)
+    await db.commit()
+    await db.refresh(db_payment)
     return db_payment
 
-def delete_payment(db: Session, payment_id: int, tenant_id: int):
-    payment = db.query(Payment).filter(Payment.id == payment_id, Payment.tenant_id == tenant_id).first()
+async def delete_payment(db: AsyncSession, payment_id: int, tenant_id: int):
+    result = await db.execute(select(Payment).filter(Payment.id == payment_id, Payment.tenant_id == tenant_id))
+    payment = result.scalars().first()
     if not payment:
         return False
         
     # Revert Balance
     if payment.customer_id:
-        customer = db.query(Customer).filter(Customer.id == payment.customer_id, Customer.tenant_id == tenant_id).first()
+        result = await db.execute(select(Customer).filter(Customer.id == payment.customer_id, Customer.tenant_id == tenant_id))
+        customer = result.scalars().first()
         if customer:
             customer.outstanding_balance += payment.amount
             
     if payment.supplier_id:
-        supplier = db.query(Supplier).filter(Supplier.id == payment.supplier_id, Supplier.tenant_id == tenant_id).first()
+        result = await db.execute(select(Supplier).filter(Supplier.id == payment.supplier_id, Supplier.tenant_id == tenant_id))
+        supplier = result.scalars().first()
         if supplier:
             supplier.outstanding_balance += payment.amount
             
-    db.delete(payment)
-    db.commit()
+    await db.delete(payment)
+    await db.commit()
     return True

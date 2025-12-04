@@ -27,11 +27,19 @@ class Settings(BaseSettings):
     PAYPAL_MODE: str = "sandbox"
     PAYPAL_WEBHOOK_ID: str = ""
 
+    # Redis Cache
+    REDIS_URL: str = "redis://localhost:6379/0"
+
     # Social Auth
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
+
+    # Cookies & Security
+    DOMAIN: str = "localhost"
+    SECURE_COOKIES: bool = False  # Set to True in Production
+    SAME_SITE: str = "lax"  # 'strict' in prod if frontend is on same domain
 
     # CORS / Hosts
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []

@@ -1,7 +1,10 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from typing import List, Optional
 from app.models import Customer, Supplier, Sale, Purchase, Payment
 from pydantic import BaseModel
+from sqlalchemy import func
 
 class CustomerCreate(BaseModel):
     name: str
@@ -28,24 +31,26 @@ class SupplierUpdate(BaseModel):
     address: Optional[str] = None
 
 # Customer Functions
-def create_customer(db: Session, customer: CustomerCreate, tenant_id: int):
+async def create_customer(db: AsyncSession, customer: CustomerCreate, tenant_id: int):
     db_obj = Customer(**customer.dict(), tenant_id=tenant_id)
     db.add(db_obj)
-    db.commit()
-    db.refresh(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
     return db_obj
 
-def get_customers(db: Session, tenant_id: int):
-    return db.query(Customer).filter(Customer.tenant_id == tenant_id).all()
+async def get_customers(db: AsyncSession, tenant_id: int):
+    result = await db.execute(select(Customer).filter(Customer.tenant_id == tenant_id))
+    return result.scalars().all()
 
-def get_customer_by_id(db: Session, customer_id: int, tenant_id: int):
-    return db.query(Customer).filter(
+async def get_customer_by_id(db: AsyncSession, customer_id: int, tenant_id: int):
+    result = await db.execute(select(Customer).filter(
         Customer.id == customer_id,
         Customer.tenant_id == tenant_id
-    ).first()
+    ))
+    return result.scalars().first()
 
-def update_customer(db: Session, customer_id: int, customer_update: CustomerUpdate, tenant_id: int):
-    db_customer = get_customer_by_id(db, customer_id, tenant_id)
+async def update_customer(db: AsyncSession, customer_id: int, customer_update: CustomerUpdate, tenant_id: int):
+    db_customer = await get_customer_by_id(db, customer_id, tenant_id)
     if not db_customer:
         return None
     
@@ -53,30 +58,32 @@ def update_customer(db: Session, customer_id: int, customer_update: CustomerUpda
     for field, value in update_data.items():
         setattr(db_customer, field, value)
     
-    db.commit()
-    db.refresh(db_customer)
+    await db.commit()
+    await db.refresh(db_customer)
     return db_customer
 
-def delete_customer(db: Session, customer_id: int, tenant_id: int):
-    db_customer = get_customer_by_id(db, customer_id, tenant_id)
+async def delete_customer(db: AsyncSession, customer_id: int, tenant_id: int):
+    db_customer = await get_customer_by_id(db, customer_id, tenant_id)
     if not db_customer:
         return False
     
-    db.delete(db_customer)
-    db.commit()
+    await db.delete(db_customer)
+    await db.commit()
     return True
 
-def get_customer_ledger(db: Session, customer_id: int, tenant_id: int):
+async def get_customer_ledger(db: AsyncSession, customer_id: int, tenant_id: int):
     """Get all sales and payments for a customer with running balance"""
-    sales = db.query(Sale).filter(
+    result = await db.execute(select(Sale).filter(
         Sale.customer_id == customer_id,
         Sale.tenant_id == tenant_id
-    ).all()
+    ))
+    sales = result.scalars().all()
     
-    payments = db.query(Payment).filter(
+    result = await db.execute(select(Payment).filter(
         Payment.customer_id == customer_id,
         Payment.tenant_id == tenant_id
-    ).all()
+    ))
+    payments = result.scalars().all()
     
     # Combine and Sort
     transactions = []
@@ -117,21 +124,23 @@ def get_customer_ledger(db: Session, customer_id: int, tenant_id: int):
         
     return result
 
-def get_top_customers(db: Session, tenant_id: int, limit: int = 10):
+async def get_top_customers(db: AsyncSession, tenant_id: int, limit: int = 10):
     """Get top customers by total sales"""
-    from sqlalchemy import func
     
-    results = db.query(
-        Customer.id,
-        Customer.name,
-        Customer.phone,
-        func.count(Sale.id).label('transaction_count'),
-        func.sum(Sale.total_amount).label('total_sales')
-    ).join(Sale).filter(
-        Customer.tenant_id == tenant_id
-    ).group_by(Customer.id, Customer.name, Customer.phone).order_by(
-        func.sum(Sale.total_amount).desc()
-    ).limit(limit).all()
+    result = await db.execute(
+        select(
+            Customer.id,
+            Customer.name,
+            Customer.phone,
+            func.count(Sale.id).label('transaction_count'),
+            func.sum(Sale.total_amount).label('total_sales')
+        ).join(Sale).filter(
+            Customer.tenant_id == tenant_id
+        ).group_by(Customer.id, Customer.name, Customer.phone).order_by(
+            func.sum(Sale.total_amount).desc()
+        ).limit(limit)
+    )
+    results = result.all()
     
     return [
         {
@@ -145,24 +154,26 @@ def get_top_customers(db: Session, tenant_id: int, limit: int = 10):
     ]
 
 # Supplier Functions
-def create_supplier(db: Session, supplier: SupplierCreate, tenant_id: int):
+async def create_supplier(db: AsyncSession, supplier: SupplierCreate, tenant_id: int):
     db_obj = Supplier(**supplier.dict(), tenant_id=tenant_id)
     db.add(db_obj)
-    db.commit()
-    db.refresh(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
     return db_obj
 
-def get_suppliers(db: Session, tenant_id: int):
-    return db.query(Supplier).filter(Supplier.tenant_id == tenant_id).all()
+async def get_suppliers(db: AsyncSession, tenant_id: int):
+    result = await db.execute(select(Supplier).filter(Supplier.tenant_id == tenant_id))
+    return result.scalars().all()
 
-def get_supplier_by_id(db: Session, supplier_id: int, tenant_id: int):
-    return db.query(Supplier).filter(
+async def get_supplier_by_id(db: AsyncSession, supplier_id: int, tenant_id: int):
+    result = await db.execute(select(Supplier).filter(
         Supplier.id == supplier_id,
         Supplier.tenant_id == tenant_id
-    ).first()
+    ))
+    return result.scalars().first()
 
-def update_supplier(db: Session, supplier_id: int, supplier_update: SupplierUpdate, tenant_id: int):
-    db_supplier = get_supplier_by_id(db, supplier_id, tenant_id)
+async def update_supplier(db: AsyncSession, supplier_id: int, supplier_update: SupplierUpdate, tenant_id: int):
+    db_supplier = await get_supplier_by_id(db, supplier_id, tenant_id)
     if not db_supplier:
         return None
     
@@ -170,30 +181,32 @@ def update_supplier(db: Session, supplier_id: int, supplier_update: SupplierUpda
     for field, value in update_data.items():
         setattr(db_supplier, field, value)
     
-    db.commit()
-    db.refresh(db_supplier)
+    await db.commit()
+    await db.refresh(db_supplier)
     return db_supplier
 
-def delete_supplier(db: Session, supplier_id: int, tenant_id: int):
-    db_supplier = get_supplier_by_id(db, supplier_id, tenant_id)
+async def delete_supplier(db: AsyncSession, supplier_id: int, tenant_id: int):
+    db_supplier = await get_supplier_by_id(db, supplier_id, tenant_id)
     if not db_supplier:
         return False
     
-    db.delete(db_supplier)
-    db.commit()
+    await db.delete(db_supplier)
+    await db.commit()
     return True
 
-def get_supplier_ledger(db: Session, supplier_id: int, tenant_id: int):
+async def get_supplier_ledger(db: AsyncSession, supplier_id: int, tenant_id: int):
     """Get all purchases and payments for a supplier with running balance"""
-    purchases = db.query(Purchase).filter(
+    result = await db.execute(select(Purchase).filter(
         Purchase.supplier_id == supplier_id,
         Purchase.tenant_id == tenant_id
-    ).all()
+    ))
+    purchases = result.scalars().all()
     
-    payments = db.query(Payment).filter(
+    result = await db.execute(select(Payment).filter(
         Payment.supplier_id == supplier_id,
         Payment.tenant_id == tenant_id
-    ).all()
+    ))
+    payments = result.scalars().all()
     
     # Combine and Sort
     transactions = []
@@ -234,21 +247,23 @@ def get_supplier_ledger(db: Session, supplier_id: int, tenant_id: int):
         
     return result
 
-def get_top_suppliers(db: Session, tenant_id: int, limit: int = 10):
+async def get_top_suppliers(db: AsyncSession, tenant_id: int, limit: int = 10):
     """Get top suppliers by total purchase volume"""
-    from sqlalchemy import func
     
-    results = db.query(
-        Supplier.id,
-        Supplier.name,
-        Supplier.phone,
-        func.count(Purchase.id).label('transaction_count'),
-        func.sum(Purchase.total_amount).label('total_purchases')
-    ).join(Purchase).filter(
-        Supplier.tenant_id == tenant_id
-    ).group_by(Supplier.id, Supplier.name, Supplier.phone).order_by(
-        func.sum(Purchase.total_amount).desc()
-    ).limit(limit).all()
+    result = await db.execute(
+        select(
+            Supplier.id,
+            Supplier.name,
+            Supplier.phone,
+            func.count(Purchase.id).label('transaction_count'),
+            func.sum(Purchase.total_amount).label('total_purchases')
+        ).join(Purchase).filter(
+            Supplier.tenant_id == tenant_id
+        ).group_by(Supplier.id, Supplier.name, Supplier.phone).order_by(
+            func.sum(Purchase.total_amount).desc()
+        ).limit(limit)
+    )
+    results = result.all()
     
     return [
         {

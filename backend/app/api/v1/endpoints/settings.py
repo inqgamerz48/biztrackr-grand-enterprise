@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.core import database
 from app.models.settings import Settings
 from app.schemas import settings as schemas
@@ -9,28 +10,30 @@ from app.models.user import User
 router = APIRouter()
 
 @router.get("/", response_model=schemas.Settings)
-def get_settings(
-    db: Session = Depends(database.get_db),
+async def get_settings(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_manager_or_above),  # Manager+ can view
 ):
     """Get tenant settings - Manager+ access"""
-    settings = db.query(Settings).filter(Settings.tenant_id == current_user.tenant_id).first()
+    result = await db.execute(select(Settings).filter(Settings.tenant_id == current_user.tenant_id))
+    settings = result.scalars().first()
     if not settings:
         # Create default settings if none exist for this tenant
         settings = Settings(tenant_id=current_user.tenant_id)
         db.add(settings)
-        db.commit()
-        db.refresh(settings)
+        await db.commit()
+        await db.refresh(settings)
     return settings
 
 @router.put("/", response_model=schemas.Settings)
-def update_settings(
+async def update_settings(
     settings_in: schemas.SettingsUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_admin),  # Admin only
 ):
     """Update tenant settings - Admin only"""
-    settings = db.query(Settings).filter(Settings.tenant_id == current_user.tenant_id).first()
+    result = await db.execute(select(Settings).filter(Settings.tenant_id == current_user.tenant_id))
+    settings = result.scalars().first()
     if not settings:
         settings = Settings(tenant_id=current_user.tenant_id)
         db.add(settings)
@@ -49,8 +52,8 @@ def update_settings(
         setattr(settings, field, value)
         
     db.add(settings)
-    db.commit()
-    db.refresh(settings)
+    await db.commit()
+    await db.refresh(settings)
     
     # Send notification if critical settings changed
     if changes:
@@ -64,6 +67,6 @@ def update_settings(
             type="info",
             user_id=None # System-wide notification
         )
-        notification_service.create_notification(db, notification)
+        await notification_service.create_notification(db, notification)
         
     return settings

@@ -1,4 +1,6 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from typing import List, Optional
 import datetime
 from pydantic import BaseModel
@@ -16,9 +18,10 @@ class SaleCreate(BaseModel):
     discount: float = 0.0
     account_id: Optional[int] = None
 
-def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optional[int] = None):
+async def create_sale(db: AsyncSession, sale_in: SaleCreate, tenant_id: int, user_id: Optional[int] = None):
     # Fetch global settings for tax rate
-    settings = db.query(Settings).first()
+    result = await db.execute(select(Settings).filter(Settings.tenant_id == tenant_id))
+    settings = result.scalars().first()
     tax_rate = settings.tax_rate if settings else 0.0
     
     # 1. Calculate Total
@@ -26,7 +29,8 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
     sale_items_data = []
     
     for item_data in sale_in.items:
-        db_item = db.query(Item).filter(Item.id == item_data['item_id'], Item.tenant_id == tenant_id).first()
+        result = await db.execute(select(Item).filter(Item.id == item_data['item_id'], Item.tenant_id == tenant_id))
+        db_item = result.scalars().first()
         if not db_item:
             continue # Or raise error
         
@@ -75,7 +79,7 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
         tenant_id=tenant_id
     )
     db.add(new_sale)
-    db.flush()
+    await db.flush()
 
     # 3. Items & Stock Update
     for data in sale_items_data:
@@ -92,34 +96,37 @@ def create_sale(db: Session, sale_in: SaleCreate, tenant_id: int, user_id: Optio
         
         # Reduce Stock
         data['db_item'].quantity -= data['quantity']
-        inventory_service.check_low_stock(db, data['db_item'].id, tenant_id)
+        await inventory_service.check_low_stock(db, data['db_item'].id, tenant_id)
 
     # Update Customer Balance
     if sale_in.customer_id:
-        customer = db.query(Customer).filter(Customer.id == sale_in.customer_id, Customer.tenant_id == tenant_id).first()
+        result = await db.execute(select(Customer).filter(Customer.id == sale_in.customer_id, Customer.tenant_id == tenant_id))
+        customer = result.scalars().first()
         if customer and sale_in.payment_method == "Credit":
             customer.outstanding_balance += new_sale.total_amount
 
     # Update Payment Account Balance
     if sale_in.account_id and sale_in.payment_method != "Credit":
-        payment_account = db.query(PaymentAccount).filter(PaymentAccount.id == sale_in.account_id, PaymentAccount.tenant_id == tenant_id).first()
+        result = await db.execute(select(PaymentAccount).filter(PaymentAccount.id == sale_in.account_id, PaymentAccount.tenant_id == tenant_id))
+        payment_account = result.scalars().first()
         if payment_account:
             payment_account.balance += new_sale.total_amount
 
-    db.commit()
-    db.refresh(new_sale)
+    await db.commit()
+    await db.refresh(new_sale)
     
     if user_id:
-        activity_log_service.log_action(
+        await activity_log_service.log_action(
             db, tenant_id, user_id, "CREATE_SALE", "sale", new_sale.id, 
             {"invoice": new_sale.invoice_number, "total": new_sale.total_amount}
         )
         
     return new_sale
 
-def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, user_id: Optional[int] = None, invoice_number: Optional[str] = None):
+async def create_purchase(db: AsyncSession, purchase_in: PurchaseCreate, tenant_id: int, user_id: Optional[int] = None, invoice_number: Optional[str] = None):
     # Fetch global settings for tax rate
-    settings = db.query(Settings).first()
+    result = await db.execute(select(Settings).filter(Settings.tenant_id == tenant_id))
+    settings = result.scalars().first()
     tax_rate = settings.tax_rate if settings else 0.0
 
     # Handle Pydantic model access (dot notation)
@@ -141,10 +148,11 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, us
         status="Ordered"
     )
     db.add(new_purchase)
-    db.flush()
+    await db.flush()
 
     for item_data in purchase_in.items:
-        db_item = db.query(Item).filter(Item.id == item_data.item_id, Item.tenant_id == tenant_id).first()
+        result = await db.execute(select(Item).filter(Item.id == item_data.item_id, Item.tenant_id == tenant_id))
+        db_item = result.scalars().first()
         if not db_item:
             continue
         
@@ -159,19 +167,24 @@ def create_purchase(db: Session, purchase_in: PurchaseCreate, tenant_id: int, us
         
         # NOTE: Stock is NOT updated here anymore. It happens on "Receive".
 
-    db.commit()
-    db.refresh(new_purchase)
+    await db.commit()
+    await db.refresh(new_purchase)
     
     if user_id:
-        activity_log_service.log_action(
+        await activity_log_service.log_action(
             db, tenant_id, user_id, "CREATE_PURCHASE", "purchase", new_purchase.id, 
             {"invoice": new_purchase.invoice_number, "total": new_purchase.total_amount}
         )
         
     return new_purchase
 
-def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Optional[int] = None):
-    purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id).first()
+async def receive_purchase(db: AsyncSession, purchase_id: int, tenant_id: int, user_id: Optional[int] = None):
+    result = await db.execute(
+        select(Purchase)
+        .options(selectinload(Purchase.items), selectinload(Purchase.supplier))
+        .filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id)
+    )
+    purchase = result.scalars().first()
     if not purchase:
         return None
     
@@ -180,7 +193,8 @@ def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Opt
         
     # Update Stock
     for p_item in purchase.items:
-        db_item = db.query(Item).filter(Item.id == p_item.item_id).first()
+        result = await db.execute(select(Item).filter(Item.id == p_item.item_id))
+        db_item = result.scalars().first()
         if db_item:
             db_item.quantity += p_item.quantity
             db_item.purchase_price = p_item.price
@@ -190,19 +204,20 @@ def receive_purchase(db: Session, purchase_id: int, tenant_id: int, user_id: Opt
         purchase.supplier.outstanding_balance += purchase.total_amount
         
     purchase.status = "Received"
-    db.commit()
-    db.refresh(purchase)
+    await db.commit()
+    await db.refresh(purchase)
     
     if user_id:
-        activity_log_service.log_action(
+        await activity_log_service.log_action(
             db, tenant_id, user_id, "RECEIVE_PURCHASE", "purchase", purchase.id, 
             {"invoice": purchase.invoice_number, "status": "Received"}
         )
         
     return purchase
 
-def record_payment(db: Session, purchase_id: int, amount: float, payment_method: str, tenant_id: int, user_id: Optional[int] = None, account_id: Optional[int] = None):
-    purchase = db.query(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id).first()
+async def record_payment(db: AsyncSession, purchase_id: int, amount: float, payment_method: str, tenant_id: int, user_id: Optional[int] = None, account_id: Optional[int] = None):
+    result = await db.execute(select(Purchase).filter(Purchase.id == purchase_id, Purchase.tenant_id == tenant_id))
+    purchase = result.scalars().first()
     if not purchase:
         # Raise exception or return None
         return None
@@ -215,21 +230,23 @@ def record_payment(db: Session, purchase_id: int, amount: float, payment_method:
     purchase.payment_status = "paid" if purchase.amount_paid >= purchase.total_amount else "partial"
         
     # Update Supplier Balance
-    supplier = db.query(Supplier).filter(Supplier.id == purchase.supplier_id).first()
+    result = await db.execute(select(Supplier).filter(Supplier.id == purchase.supplier_id))
+    supplier = result.scalars().first()
     if supplier:
         supplier.outstanding_balance -= amount
         
     # Update Payment Account Balance (if account_id provided)
     if account_id:
-        payment_account = db.query(PaymentAccount).filter(PaymentAccount.id == account_id, PaymentAccount.tenant_id == tenant_id).first()
+        result = await db.execute(select(PaymentAccount).filter(PaymentAccount.id == account_id, PaymentAccount.tenant_id == tenant_id))
+        payment_account = result.scalars().first()
         if payment_account:
             payment_account.balance -= amount # Payment is an outflow from our account
     
-    db.commit()
-    db.refresh(purchase)
+    await db.commit()
+    await db.refresh(purchase)
     
     if user_id:
-        activity_log_service.log_action(
+        await activity_log_service.log_action(
             db, tenant_id, user_id, "PAY_PURCHASE", "purchase", purchase.id, 
             {"invoice": purchase.invoice_number, "amount": amount, "method": payment_method}
         )

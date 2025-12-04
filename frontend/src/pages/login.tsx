@@ -21,7 +21,7 @@ export default function LoginPage() {
             // Send access token to backend
             api.post('/auth/login/google', null, { params: { token: tokenResponse.access_token } })
                 .then((res: any) => {
-                    localStorage.setItem('token', res.data.access_token);
+                    // Cookie handled by backend
                     window.location.href = '/dashboard';
                 })
                 .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
@@ -135,7 +135,7 @@ export default function LoginPage() {
                                 const mockCode = "mock_github_code_testuser";
                                 api.post('/auth/login/github', null, { params: { code: mockCode } })
                                     .then((res: any) => {
-                                        localStorage.setItem('token', res.data.access_token);
+                                        // Cookie handled by backend
                                         window.location.href = '/dashboard';
                                     })
                                     .catch((err: any) => setError(err.response?.data?.detail || 'GitHub Login Failed'));
@@ -167,6 +167,6 @@ export default function LoginPage() {
                     </div>
                 </form>
             </motion.div>
-        </div>
+        </div >
     );
 }
