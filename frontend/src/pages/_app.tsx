@@ -10,9 +10,19 @@ import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from '../context/ThemeContext';
 
+// ==========================================
+// ANALYTICS INTEGRATION
+// ==========================================
+import GoogleAnalytics from '../components/analytics/GoogleAnalytics';
+import GoogleTagManager, { GoogleTagManagerNoScript } from '../components/analytics/GoogleTagManager';
+import { useAnalytics } from '../hooks/useAnalytics';
+
 function MyApp({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+
+    // Enable automatic pageview tracking
+    useAnalytics();
 
     useEffect(() => {
         const handleStart = () => setLoading(true);
@@ -30,20 +40,31 @@ function MyApp({ Component, pageProps }: AppProps) {
     }, [router]);
 
     return (
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-            <ThemeProvider>
-                <Head>
-                    <title>BizTracker PRO SaaS</title>
-                    <meta name="description" content="Enterprise Business Management Platform" />
-                </Head>
-                {loading && <ArcReactorLoader />}
-                <AnimatePresence mode="wait">
-                    <PageTransition key={router.route}>
-                        <Component {...pageProps} />
-                    </PageTransition>
-                </AnimatePresence>
-            </ThemeProvider>
-        </GoogleOAuthProvider>
+        <>
+            {/* Google Analytics 4 (GA4) */}
+            <GoogleAnalytics />
+
+            {/* Google Tag Manager (GTM) */}
+            <GoogleTagManager />
+
+            {/* GTM NoScript Fallback */}
+            <GoogleTagManagerNoScript />
+
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+                <ThemeProvider>
+                    <Head>
+                        <title>BizTracker PRO SaaS</title>
+                        <meta name="description" content="Enterprise Business Management Platform" />
+                    </Head>
+                    {loading && <ArcReactorLoader />}
+                    <AnimatePresence mode="wait">
+                        <PageTransition key={router.route}>
+                            <Component {...pageProps} />
+                        </PageTransition>
+                    </AnimatePresence>
+                </ThemeProvider>
+            </GoogleOAuthProvider>
+        </>
     );
 }
 
