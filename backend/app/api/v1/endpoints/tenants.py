@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.core import database
 from app.models.tenant import Tenant
 from app.schemas import tenant as schemas
@@ -9,8 +10,8 @@ from app.models.user import User
 router = APIRouter()
 
 @router.get("/me", response_model=schemas.Tenant)
-def read_tenant_me(
-    db: Session = Depends(database.get_db),
+async def read_tenant_me(
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_admin),
 ):
     """
@@ -19,15 +20,16 @@ def read_tenant_me(
     if not current_user.tenant_id:
         raise HTTPException(status_code=404, detail="User does not belong to a tenant")
         
-    tenant = db.query(Tenant).filter(Tenant.id == current_user.tenant_id).first()
+    result = await db.execute(select(Tenant).filter(Tenant.id == current_user.tenant_id))
+    tenant = result.scalar_one_or_none()
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
     return tenant
 
 @router.put("/me", response_model=schemas.Tenant)
-def update_tenant_me(
+async def update_tenant_me(
     tenant_in: schemas.TenantUpdate,
-    db: Session = Depends(database.get_db),
+    db: AsyncSession = Depends(database.get_db),
     current_user: User = Depends(require_admin),
 ):
     """
@@ -36,7 +38,8 @@ def update_tenant_me(
     if not current_user.tenant_id:
         raise HTTPException(status_code=404, detail="User does not belong to a tenant")
         
-    tenant = db.query(Tenant).filter(Tenant.id == current_user.tenant_id).first()
+    result = await db.execute(select(Tenant).filter(Tenant.id == current_user.tenant_id))
+    tenant = result.scalar_one_or_none()
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
         
@@ -47,6 +50,6 @@ def update_tenant_me(
     # But for now, we'll allow it for admin flexibility or disable it if strict
     # tenant.plan = tenant_in.plan 
         
-    db.commit()
-    db.refresh(tenant)
+    await db.commit()
+    await db.refresh(tenant)
     return tenant
