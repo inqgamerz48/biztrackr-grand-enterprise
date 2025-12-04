@@ -13,8 +13,37 @@ from app.core import security
 from app.core.rbac import get_role_permissions
 from app.models.user import User
 
-# OAuth2 scheme for token authentication
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login/access-token")
+from fastapi import Request
+from fastapi.security.utils import get_authorization_scheme_param
+
+class OAuth2BearerCookie(OAuth2PasswordBearer):
+    """
+    Custom OAuth2 class to extract token from HttpOnly cookie.
+    Falls back to Authorization header if cookie is missing.
+    """
+    async def __call__(self, request: Request) -> str:
+        # 1. Try to get token from cookie
+        authorization: str = request.cookies.get("access_token")
+        
+        # 2. If no cookie, try header (fallback for API clients)
+        if not authorization:
+            authorization = request.headers.get("Authorization")
+            
+        scheme, param = get_authorization_scheme_param(authorization)
+        
+        if not authorization or scheme.lower() != "bearer":
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
+        return param
+
+# OAuth2 scheme for token authentication (Cookie-first)
+oauth2_scheme = OAuth2BearerCookie(tokenUrl=f"{settings.API_V1_STR}/auth/login/access-token")
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
