@@ -1,6 +1,0 @@
-item_id,supplier_id,quantity_received,bin_id,quality_check_status,notes
-5,1,100,1,approved,First batch - Electronics
-8,2,200,2,approved,Office supplies shipment
-12,1,50,3,pending,Awaiting quality check
-15,3,75,4,approved,Bulk order - Winter collection
-20,2,150,5,approved,Monthly restock

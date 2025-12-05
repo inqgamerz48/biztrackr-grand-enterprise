@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.api.v1.endpoints import (
-    auth, users, inventory, sales, dashboard, reports, crm, expenses, billing, settings as settings_endpoint, super_admin, notifications, ai, aging, activity_logs, backup, branches, analytics, roles, purchases, tax_report, banking, upgrade, tenants, wms
+    auth, users, inventory, sales, dashboard, reports, crm, expenses, billing, settings as settings_endpoint, super_admin, notifications, ai, aging, activity_logs, backup, branches, analytics, roles, purchases, tax_report, banking, upgrade, tenants
 )
 from app.core.database import engine, Base
 from app.core.ratelimit import limiter
@@ -106,7 +106,6 @@ app.include_router(purchases.router, prefix="/api/v1/purchases", tags=["purchase
 app.include_router(tax_report.router, prefix="/api/v1/tax", tags=["tax"])
 app.include_router(banking.router, prefix="/api/v1/banking", tags=["banking"])
 app.include_router(tenants.router, prefix="/api/v1/tenants", tags=["tenants"])
-app.include_router(wms.router, prefix="/api/v1/wms", tags=["wms"])
 
 
 
