@@ -86,7 +86,7 @@ export default function WMSPage() {
     const fetchIntelligenceReport = async () => {
         setLoading(true);
         try {
-            const res = await axiosInstance.get(`/api/v1/wms/intelligence?days_history=${selectedDays}`);
+            const res = await axiosInstance.get(`/wms/intelligence?days_history=${selectedDays}`);
             setReport(res.data);
         } catch (error) {
             console.error('Failed to fetch WMS intelligence:', error);
@@ -236,8 +236,8 @@ export default function WMSPage() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
-                                            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-                                            : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
+                                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
                                         }`}
                                 >
                                     <IconComponent className="w-5 h-5" />
@@ -458,8 +458,8 @@ function ReorderTab({ suggestions }: { suggestions: ReorderSuggestion[] }) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     className={`p-6 rounded-xl border backdrop-blur-sm ${suggestion.reorder_immediately
-                            ? 'bg-gradient-to-r from-red-600/20 to-orange-600/20 border-red-500/40'
-                            : 'bg-slate-800/50 border-slate-700/50'
+                        ? 'bg-gradient-to-r from-red-600/20 to-orange-600/20 border-red-500/40'
+                        : 'bg-slate-800/50 border-slate-700/50'
                         }`}
                 >
                     <div className="flex items-start justify-between mb-4">
