@@ -3,7 +3,7 @@ import axiosInstance from '@/lib/axios';
 
 export default function ImportStockForm() {
     const [formData, setFormData] = useState({
-        warehouse_id: 1,
+        warehouse_id: '1',
         supplier_id: '',
         item_id: '',
         quantity_received: '',
@@ -35,7 +35,7 @@ export default function ImportStockForm() {
 
             // Reset form
             setFormData({
-                warehouse_id: 1,
+                warehouse_id: '1',
                 supplier_id: '',
                 item_id: '',
                 quantity_received: '',
