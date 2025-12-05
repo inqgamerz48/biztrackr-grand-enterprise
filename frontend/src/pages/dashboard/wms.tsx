@@ -129,7 +129,7 @@ export default function WMSPage() {
     };
 
     const downloadTemplate = () => {
-        const csvContent = 'item_id,supplier_id,quantity_received,bin_id,quality_check_status,notes\\n5,1,100,1,approved,First batch\\n8,1,200,2,approved,Second batch';
+        const csvContent = 'item_id,supplier_id,quantity_received,bin_id,quality_check_status,notes\n5,1,100,1,approved,First batch - Electronics\n8,2,200,2,approved,Office supplies shipment\n12,1,50,3,pending,Awaiting quality check';
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
