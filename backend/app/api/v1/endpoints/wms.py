@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from typing import List, Optional
@@ -477,3 +477,137 @@ async def get_stock_overview(
         })
     
     return list(stock_summary.values())
+
+
+# ============================================================
+# BULK IMPORT
+# ============================================================
+
+@router.post("/bulk-import")
+async def bulk_import_inward_stock(
+    file: UploadFile = File(...),
+    warehouse_id: int = 1,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Bulk import inward stock from CSV/Excel file
+    
+    Required columns: item_id, supplier_id, quantity_received, bin_id
+    Optional columns: purchase_order_id, quality_check_status, notes
+    """
+    import pandas as pd
+    import io
+    
+    # Validate file type
+    if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
+        raise HTTPException(status_code=400, detail="Only CSV and XLSX files are supported")
+    
+    try:
+        # Read file content
+        contents = await file.read()
+        
+        # Parse file based on extension
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents))
+        else:  # xlsx
+            df = pd.read_excel(io.BytesIO(contents))
+        
+        # Validate required columns
+        required_columns = ['item_id', 'supplier_id', 'quantity_received', 'bin_id']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing required columns: {', '.join(missing_columns)}"
+            )
+        
+        items_imported = 0
+        inventory_updated = 0
+        errors = []
+        
+        # Process each row
+        for index, row in df.iterrows():
+            try:
+                # Prepare inward log data
+                inward_data = InwardLogCreate(
+                    warehouse_id=warehouse_id,
+                    supplier_id=int(row['supplier_id']),
+                    item_id=int(row['item_id']),
+                    quantity_received=int(row['quantity_received']),
+                    bin_id=int(row['bin_id']),
+                    purchase_order_id=int(row['purchase_order_id']) if 'purchase_order_id' in df.columns and pd.notna(row['purchase_order_id']) else None,
+                    quality_check_status=str(row['quality_check_status']) if 'quality_check_status' in df.columns and pd.notna(row['quality_check_status']) else 'approved',
+                    notes=str(row['notes']) if 'notes' in df.columns and pd.notna(row['notes']) else None
+                )
+                
+                # Create inward log
+                new_log = InwardLog(
+                    warehouse_id=inward_data.warehouse_id,
+                    supplier_id=inward_data.supplier_id,
+                    item_id=inward_data.item_id,
+                    quantity_received=inward_data.quantity_received,
+                    bin_id=inward_data.bin_id,
+                    purchase_order_id=inward_data.purchase_order_id,
+                    quality_check_status=inward_data.quality_check_status,
+                    notes=inward_data.notes,
+                    tenant_id=current_user.tenant_id
+                )
+                db.add(new_log)
+                
+                # Update inventory
+                result = await db.execute(
+                    select(InventoryItem).where(InventoryItem.id == inward_data.item_id)
+                )
+                item = result.scalar_one_or_none()
+                if item:
+                    item.quantity += inward_data.quantity_received
+                    inventory_updated += 1
+                
+                # Update bin stock
+                if inward_data.bin_id:
+                    result = await db.execute(
+                        select(BinStock).where(
+                            and_(
+                                BinStock.bin_id == inward_data.bin_id,
+                                BinStock.item_id == inward_data.item_id
+                            )
+                        )
+                    )
+                    bin_stock = result.scalar_one_or_none()
+                    
+                    if bin_stock:
+                        bin_stock.quantity += inward_data.quantity_received
+                    else:
+                        bin_stock = BinStock(
+                            bin_id=inward_data.bin_id,
+                            item_id=inward_data.item_id,
+                            quantity=inward_data.quantity_received,
+                            tenant_id=current_user.tenant_id
+                        )
+                        db.add(bin_stock)
+                
+                items_imported += 1
+                
+            except Exception as e:
+                errors.append({
+                    'row': index + 2,  # +2 because index starts at 0 and header is row 1
+                    'error': str(e),
+                    'data': row.to_dict()
+                })
+        
+        await db.commit()
+        
+        return {
+            'items_imported': items_imported,
+            'inventory_updated': inventory_updated,
+            'total_rows': len(df),
+            'errors': errors,
+            'message': f'Successfully imported {items_imported} stock entries'
+        }
+        
+    except pd.errors.EmptyDataError:
+        raise HTTPException(status_code=400, detail="The uploaded file is empty")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+

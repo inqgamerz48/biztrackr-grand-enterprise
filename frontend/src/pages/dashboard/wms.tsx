@@ -79,6 +79,12 @@ export default function WMSPage() {
     const [activeTab, setActiveTab] = useState('overview');
     const [selectedDays, setSelectedDays] = useState(30);
 
+    // Bulk Import State
+    const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+    const [bulkImportFile, setBulkImportFile] = useState<File | null>(null);
+    const [bulkImportResults, setBulkImportResults] = useState<any>(null);
+    const [bulkImportLoading, setBulkImportLoading] = useState(false);
+
     useEffect(() => {
         fetchIntelligenceReport();
     }, [selectedDays]);
@@ -93,6 +99,44 @@ export default function WMSPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleBulkImport = async () => {
+        if (!bulkImportFile) {
+            alert('Please select a file');
+            return;
+        }
+
+        setBulkImportLoading(true);
+        setBulkImportResults(null);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', bulkImportFile);
+
+            const response = await axiosInstance.post('/wms/bulk-import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setBulkImportResults(response.data);
+            setBulkImportFile(null);
+            await fetchIntelligenceReport(); // Refresh  report
+        } catch (error: any) {
+            alert(`Bulk import failed: ${error.response?.data?.detail || error.message}`);
+        } finally {
+            setBulkImportLoading(false);
+        }
+    };
+
+    const downloadTemplate = () => {
+        const csvContent = 'item_id,supplier_id,quantity_received,bin_id,quality_check_status,notes\\n5,1,100,1,approved,First batch\\n8,1,200,2,approved,Second batch';
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'wms_import_template.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
     };
 
     const getStatusColor = (status: string) => {
@@ -162,6 +206,16 @@ export default function WMSPage() {
                                 <option value={60}>Last 60 Days</option>
                                 <option value={90}>Last 90 Days</option>
                             </select>
+
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setShowBulkImportModal(true)}
+                                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-purple-500/50 transition-all flex items-center gap-2"
+                            >
+                                <Download className="w-4 h-4" />
+                                Import Stock
+                            </motion.button>
 
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -266,6 +320,115 @@ export default function WMSPage() {
                         <AnomaliesTab anomalies={report.anomalies_detected} getStatusColor={getStatusColor} />
                     )}
                 </AnimatePresence>
+
+                {/* Bulk Import Modal */}
+                {showBulkImportModal && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                                <Download className="text-cyan-400" />
+                                Bulk Import Inward Stock
+                            </h2>
+
+                            {!bulkImportResults ? (
+                                <>
+                                    <div className="mb-4">
+                                        <p className="text-sm text-gray-400 mb-2">Upload a CSV or XLSX file to import multiple stock entries at once.</p>
+                                        <button
+                                            onClick={downloadTemplate}
+                                            className="text-sm text-cyan-400 hover:text-cyan-300 underline mb-4"
+                                        >
+                                            📥 Download Template
+                                        </button>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Select File</label>
+                                        <input
+                                            type="file"
+                                            accept=".csv,.xlsx"
+                                            onChange={(e) => setBulkImportFile(e.target.files?.[0] || null)}
+                                            className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 cursor-pointer"
+                                        />
+                                        {bulkImportFile && (
+                                            <p className="mt-2 text-sm text-gray-400">Selected: {bulkImportFile.name}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 mb-4">
+                                        <h3 className="text-sm font-semibold text-cyan-400 mb-2">📋 Required Columns:</h3>
+                                        <ul className="text-xs text-gray-400 space-y-1">
+                                            <li>• <strong>item_id</strong> - Product ID from inventory</li>
+                                            <li>• <strong>supplier_id</strong> - Supplier ID from CRM</li>
+                                            <li>• <strong>quantity_received</strong> - Quantity to import</li>
+                                            <li>• <strong>bin_id</strong> - Storage bin location</li>
+                                            <li>• <strong>quality_check_status</strong> (optional) - approved/pending/rejected</li>
+                                            <li>• <strong>notes</strong> (optional) - Additional notes</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="flex justify-end space-x-2">
+                                        <button
+                                            onClick={() => {
+                                                setShowBulkImportModal(false);
+                                                setBulkImportFile(null);
+                                                setBulkImportResults(null);
+                                            }}
+                                            className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-all"
+                                            disabled={bulkImportLoading}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkImport}
+                                            disabled={!bulkImportFile || bulkImportLoading}
+                                            className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            {bulkImportLoading ? '⏳ Importing...' : '📦 Import Stock'}
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="mb-4">
+                                        <div className="bg-green-500/20 border border-green-500/40 rounded-lg p-4 mb-3">
+                                            <h3 className="font-semibold text-green-400 mb-2">✅ Import Successful!</h3>
+                                            <p className="text-sm text-gray-300">📦 Items imported: {bulkImportResults.items_imported}</p>
+                                            <p className="text-sm text-gray-300">📊 Inventory updated: {bulkImportResults.inventory_updated}</p>
+                                            <p className="text-sm text-gray-300">📋 Total rows processed: {bulkImportResults.total_rows}</p>
+                                        </div>
+
+                                        {bulkImportResults.errors && bulkImportResults.errors.length > 0 && (
+                                            <div className="bg-red-500/20 border border-red-500/40 rounded-lg p-4">
+                                                <h3 className="font-semibold text-red-400 mb-2">Errors ({bulkImportResults.errors.length}):</h3>
+                                                <div className="max-h-40 overflow-y-auto">
+                                                    {bulkImportResults.errors.map((err: any, idx: number) => (
+                                                        <p key={idx} className="text-xs text-gray-300 mb-1">
+                                                            Row {err.row}: {err.error}
+                                                        </p>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={() => {
+                                                setShowBulkImportModal(false);
+                                                setBulkImportFile(null);
+                                                setBulkImportResults(null);
+                                            }}
+                                            className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );
