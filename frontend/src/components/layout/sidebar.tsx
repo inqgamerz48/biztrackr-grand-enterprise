@@ -18,7 +18,8 @@ import {
     Bell,
     Shield,
     TrendingUp,
-    Building2
+    Building2,
+    Warehouse
 } from 'lucide-react';
 
 interface NavItem {
@@ -37,6 +38,7 @@ const navigation: NavItem[] = [
     { name: 'Sales', href: '/dashboard/sales', icon: ShoppingCart, permission: 'view_sales' },
     { name: 'Inventory', href: '/dashboard/inventory', icon: Package, permission: 'view_inventory' },
     { name: 'Purchases', href: '/dashboard/purchases', icon: ShoppingBag, permission: 'view_inventory' }, // Assuming inventory permission covers purchases for now, or add 'view_purchases'
+    { name: 'Warehouse (WMS)', href: '/dashboard/wms', icon: Warehouse, permission: 'view_inventory' },
     { name: 'CRM', href: '/dashboard/crm', icon: Users, permission: 'view_sales' }, // CRM usually linked to sales
     { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt, permission: 'view_reports' }, // Expenses often with reports
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, permission: 'view_reports' },
