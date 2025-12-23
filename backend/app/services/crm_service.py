@@ -98,6 +98,18 @@ async def get_customer_ledger(db: AsyncSession, customer_id: int, tenant_id: int
             "ref_id": sale.id
         })
         
+        # Synthesize payment if sale was paid (partially or fully) at creation
+        if sale.amount_paid and sale.amount_paid > 0:
+             transactions.append({
+                "id": sale.id, # Use sale ID for ref
+                "type": "PAYMENT",
+                "date": sale.date,
+                "description": f"Payment (Invoice #{sale.invoice_number})",
+                "debit": 0.0,
+                "credit": sale.amount_paid, # Decrease in debt
+                "ref_id": sale.id
+            })
+
     for payment in payments:
         transactions.append({
             "id": payment.id,
@@ -221,6 +233,19 @@ async def get_supplier_ledger(db: AsyncSession, supplier_id: int, tenant_id: int
             "ref_id": purchase.id
         })
         
+        # Synthesize payment if purchase was paid
+        # Note: Purchase model must have amount_paid. Assuming it does based on sales_service usage.
+        if hasattr(purchase, 'amount_paid') and purchase.amount_paid and purchase.amount_paid > 0:
+             transactions.append({
+                "id": purchase.id, 
+                "type": "PAYMENT",
+                "date": purchase.date,
+                "description": f"Payment (PO #{purchase.invoice_number})",
+                "debit": purchase.amount_paid, # Decrease in debt
+                "credit": 0.0,
+                "ref_id": purchase.id
+            })
+
     for payment in payments:
         transactions.append({
             "id": payment.id,
