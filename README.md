@@ -489,7 +489,9 @@ npm run dev
 
 <br/>
 
-[![📚 View Full Docs](https://img.shields.io/badge/📚_FULL_DOCUMENTATION-Read_Now-8B5CF6?style=for-the-badge)](http://localhost:8000/docs)
+[![📚 View Full Docs](https://img.shields.io/badge/📚_FULL_DOCUMENTATION-Read_Now-8B5CF6?style=for-the-badge)](./docs/FEATURES.md)
+[![📊 Technical Proof](https://img.shields.io/badge/📊_TECHNICAL_PROOF-Due_Diligence-blue?style=for-the-badge)](./docs/GRAND_TECHNICAL_PROOF.md)
+[![💰 Valuation Report](https://img.shields.io/badge/💰_VALUATION_REPORT-Audit_Result-green?style=for-the-badge)](./docs/FINAL_AUDIT_REPORT.md)
 [![💬 Join Discord](https://img.shields.io/badge/💬_DISCORD_COMMUNITY-Join_Now-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg)
 
 </div>
