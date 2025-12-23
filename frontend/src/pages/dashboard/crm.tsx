@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
+import toast from 'react-hot-toast';
 
 export default function CRMPage() {
     const [activeTab, setActiveTab] = useState('customers');
@@ -61,8 +62,9 @@ export default function CRMPage() {
             setEditingItem(null);
             setFormData({ name: '', phone: '', email: '', address: '' });
             fetchData();
+            toast.success('Saved successfully');
         } catch (error) {
-            alert('Failed to save');
+            toast.error('Failed to save');
         }
     };
 
@@ -84,8 +86,9 @@ export default function CRMPage() {
         try {
             await api.delete(endpoint);
             fetchData();
+            toast.success('Deleted successfully');
         } catch (error) {
-            alert('Failed to delete');
+            toast.error('Failed to delete');
         }
     };
 
@@ -99,7 +102,7 @@ export default function CRMPage() {
             setShowLedgerModal(true);
             setShowPaymentForm(false); // Reset form visibility
         } catch (error) {
-            alert('Failed to load ledger');
+            toast.error('Failed to load ledger');
         }
     };
 
@@ -130,8 +133,9 @@ export default function CRMPage() {
             });
             setShowPaymentForm(false);
             fetchData(); // Refresh main list to update balances if shown
+            toast.success('Payment recorded');
         } catch (error) {
-            alert('Failed to record payment');
+            toast.error('Failed to record payment');
         }
     };
 
@@ -358,6 +362,17 @@ export default function CRMPage() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+                                    <button
+                                        onClick={() => {
+                                            setCurrentLedgerId(item.id);
+                                            setLedgerTitle(item.name);
+                                            setShowLedgerModal(true);
+                                            setShowPaymentForm(true);
+                                        }}
+                                        className="flex-1 sm:flex-none bg-green-600/20 text-green-400 px-3 py-1.5 rounded hover:bg-green-600/30 text-sm font-medium border border-green-600/30 whitespace-nowrap flex items-center justify-center gap-1"
+                                    >
+                                        ₹ Pay
+                                    </button>
                                     <button
                                         onClick={() => viewLedger(item.id, item.name)}
                                         className="flex-1 sm:flex-none bg-white/10 text-white px-3 py-1.5 rounded hover:bg-white/20 text-sm font-medium border border-white/20 whitespace-nowrap"

@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code';
 import { QrReader } from 'react-qr-reader';
 import { Scan, QrCode } from 'lucide-react';
 import { AnimeButton } from '@/components/ui/AnimeButton';
+import toast from 'react-hot-toast';
 
 export default function InventoryPage() {
     const [items, setItems] = useState<any[]>([]);
@@ -72,7 +73,7 @@ export default function InventoryPage() {
                     setNewItem({ ...newItem, image_url: res.data.url });
                 }
             } catch (error) {
-                alert('Image upload failed');
+                toast.error('Image upload failed');
             }
         }
     };
@@ -85,7 +86,7 @@ export default function InventoryPage() {
                 const item = items.find(i => i.barcode === code || i.id.toString() === code);
                 if (item) {
                     // Highlight or filter item
-                    alert(`Found item: ${item.name}`);
+                    toast.success(`Found item: ${item.name}`);
                     // Optional: Set search filter if we had one, or scroll to item
                 } else {
                     // Ask to add new item
@@ -110,8 +111,9 @@ export default function InventoryPage() {
             setShowAddModal(false);
             setNewItem({ name: '', quantity: 0, selling_price: 0, purchase_price: 0, category_id: '', image_url: '', min_stock: 5, barcode: '' });
             fetchData();
+            toast.success('Item added successfully');
         } catch (error) {
-            alert('Failed to add item');
+            toast.error('Failed to add item');
         }
     };
 
@@ -126,8 +128,9 @@ export default function InventoryPage() {
             setShowEditModal(false);
             setEditItem(null);
             fetchData();
+            toast.success('Item updated successfully');
         } catch (error) {
-            alert('Failed to update item');
+            toast.error('Failed to update item');
         }
     };
 
@@ -147,7 +150,7 @@ export default function InventoryPage() {
                 await fetchData();
             } catch (error: any) {
                 console.error('Delete error:', error);
-                alert(`Failed to delete item: ${error.response?.data?.detail || error.message}`);
+                toast.error(`Failed to delete item: ${error.response?.data?.detail || error.message}`);
             }
         }
     };
@@ -166,8 +169,9 @@ export default function InventoryPage() {
             await api.post('/inventory/categories', newCategory);
             setNewCategory({ name: '' });
             fetchData();
+            toast.success('Category added');
         } catch (error) {
-            alert('Failed to add category');
+            toast.error('Failed to add category');
         }
     };
 
@@ -184,14 +188,14 @@ export default function InventoryPage() {
                 setCategoryToDelete(null);
                 await fetchData();
             } catch (error) {
-                alert('Failed to delete category');
+                toast.error('Failed to delete category');
             }
         }
     };
 
     const handleBulkImport = async () => {
         if (!bulkImportFile) {
-            alert('Please select a file');
+            toast.error('Please select a file');
             return;
         }
 
@@ -209,8 +213,9 @@ export default function InventoryPage() {
             setBulkImportResults(response.data);
             setBulkImportFile(null);
             await fetchData(); // Refresh inventory list
+            toast.success('Bulk import check completed');
         } catch (error: any) {
-            alert(`Bulk import failed: ${error.response?.data?.detail || error.message}`);
+            toast.error(`Bulk import failed: ${error.response?.data?.detail || error.message}`);
         } finally {
             setBulkImportLoading(false);
         }

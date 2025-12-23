@@ -3,6 +3,7 @@ import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { QrReader } from 'react-qr-reader';
 import { Search, ShoppingCart, Save, RotateCcw, Barcode, Trash2, Plus, Minus, CreditCard, Scan } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function SalesPage() {
     const [items, setItems] = useState<any[]>([]);
@@ -111,7 +112,7 @@ export default function SalesPage() {
 
     const addToCart = (item: any) => {
         if (item.quantity <= 0) {
-            alert(`Item "${item.name}" is out of stock!`);
+            toast.error(`Item "${item.name}" is out of stock!`);
             return;
         }
 
@@ -119,7 +120,7 @@ export default function SalesPage() {
             const existing = prevCart.find((c) => c.item_id === item.id);
             if (existing) {
                 if (existing.quantity + 1 > item.quantity) {
-                    alert(`Cannot add more. Only ${item.quantity} in stock.`);
+                    toast.error(`Cannot add more. Only ${item.quantity} in stock.`);
                     return prevCart;
                 }
                 return prevCart.map((c) => c.item_id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
@@ -137,7 +138,7 @@ export default function SalesPage() {
             if (c.item_id === itemId) {
                 const newQty = c.quantity + delta;
                 if (newQty > item.quantity) {
-                    alert(`Cannot add more. Only ${item.quantity} in stock.`);
+                    toast.error(`Cannot add more. Only ${item.quantity} in stock.`);
                     return c;
                 }
                 return { ...c, quantity: Math.max(1, newQty) };
@@ -167,7 +168,7 @@ export default function SalesPage() {
         localStorage.setItem('biztrackr_held_carts', JSON.stringify(updatedHeldCarts));
         setCart([]);
         setTotalDiscount(0);
-        alert('Cart placed on hold.');
+        toast.success('Cart placed on hold.');
     };
 
     const handleRecallCart = (heldCart: any) => {
@@ -220,12 +221,12 @@ export default function SalesPage() {
             }
 
             setShowCheckoutModal(false);
-            alert(`Sale created! Invoice: ${res.data.invoice_number}`);
+            toast.success(`Sale created! Invoice: ${res.data.invoice_number}`);
             setCart([]);
             setTotalDiscount(0);
         } catch (error: any) {
             console.error('Checkout failed:', error);
-            alert(`Checkout failed: ${error.response?.data?.detail || error.message}`);
+            toast.error(`Checkout failed: ${error.response?.data?.detail || error.message}`);
         }
     };
 

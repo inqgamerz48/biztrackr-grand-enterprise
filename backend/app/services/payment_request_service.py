@@ -166,8 +166,14 @@ def mark_as_paid(
     db.commit()
     db.refresh(payment_request)
     
-    # TODO: Activate tenant subscription here
-    # activate_tenant_subscription(payment_request.tenant_id, payment_request.plan_type)
+    # Activate tenant subscription
+    from app.models.tenant import Tenant
+    tenant = db.query(Tenant).filter(Tenant.id == payment_request.tenant_id).first()
+    if tenant:
+        tenant.plan = payment_request.plan_type
+        tenant.subscription_status = 'active'
+        # Note: Tenant model currently lacks subscription_end date column.
+        # Ideally we should add it in future migrations.
     
     return payment_request
 
