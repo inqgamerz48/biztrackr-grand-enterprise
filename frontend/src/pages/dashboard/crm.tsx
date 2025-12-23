@@ -25,6 +25,7 @@ export default function CRMPage() {
         reference_number: '',
         notes: ''
     });
+    const [currentBalance, setCurrentBalance] = useState(0);
 
     const fetchData = async () => {
         if (activeTab === 'customers') {
@@ -92,8 +93,9 @@ export default function CRMPage() {
         }
     };
 
-    const viewLedger = async (id: number, name: string) => {
+    const viewLedger = async (id: number, name: string, balance: number) => {
         setCurrentLedgerId(id);
+        setCurrentBalance(balance);
         const endpoint = activeTab === 'customers' ? `/crm/customers/${id}/ledger` : `/crm/suppliers/${id}/ledger`;
         try {
             const res = await api.get(endpoint);
@@ -216,6 +218,24 @@ export default function CRMPage() {
                         {showPaymentForm && (
                             <div className="mb-6 bg-white/5 p-4 rounded border border-white/10">
                                 <h3 className="text-sm font-semibold mb-2 text-white">Record New Payment</h3>
+                                <div className="mb-4 flex flex-col sm:flex-row gap-4 bg-black/20 p-3 rounded">
+                                    <div>
+                                        <p className="text-xs text-gray-400">Current Credit</p>
+                                        <p className="text-lg font-bold text-red-400">₹{currentBalance.toLocaleString('en-IN')}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Payment Amount</p>
+                                        <p className="text-lg font-bold text-green-400">
+                                            - ₹{parseFloat(paymentData.amount || '0').toLocaleString('en-IN')}
+                                        </p>
+                                    </div>
+                                    <div className="border-t sm:border-t-0 sm:border-l border-white/10 pt-2 sm:pt-0 sm:pl-4">
+                                        <p className="text-xs text-gray-400">Resulting Balance</p>
+                                        <p className="text-lg font-bold text-white">
+                                            ₹{(currentBalance - parseFloat(paymentData.amount || '0')).toLocaleString('en-IN')}
+                                        </p>
+                                    </div>
+                                </div>
                                 <form onSubmit={handlePaymentSubmit} className="grid grid-cols-2 gap-4">
                                     <input
                                         type="number"
@@ -359,22 +379,30 @@ export default function CRMPage() {
                                     <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
                                         <p className="flex items-center text-sm text-gray-400">{item.phone}</p>
                                         {item.email && <p className="flex items-center text-sm text-gray-400">{item.email}</p>}
+                                        {item.outstanding_balance > 0 && (
+                                            <p className="text-sm font-bold text-red-400 bg-red-400/10 px-2 py-0.5 rounded border border-red-400/20">
+                                                Credit: ₹{item.outstanding_balance.toLocaleString('en-IN')}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+                                    {item.outstanding_balance > 0 && (
+                                        <button
+                                            onClick={() => {
+                                                setCurrentLedgerId(item.id);
+                                                setLedgerTitle(item.name);
+                                                setCurrentBalance(item.outstanding_balance);
+                                                setShowLedgerModal(true);
+                                                setShowPaymentForm(true);
+                                            }}
+                                            className="flex-1 sm:flex-none bg-green-600/20 text-green-400 px-3 py-1.5 rounded hover:bg-green-600/30 text-sm font-medium border border-green-600/30 whitespace-nowrap flex items-center justify-center gap-1"
+                                        >
+                                            ₹ Pay
+                                        </button>
+                                    )}
                                     <button
-                                        onClick={() => {
-                                            setCurrentLedgerId(item.id);
-                                            setLedgerTitle(item.name);
-                                            setShowLedgerModal(true);
-                                            setShowPaymentForm(true);
-                                        }}
-                                        className="flex-1 sm:flex-none bg-green-600/20 text-green-400 px-3 py-1.5 rounded hover:bg-green-600/30 text-sm font-medium border border-green-600/30 whitespace-nowrap flex items-center justify-center gap-1"
-                                    >
-                                        ₹ Pay
-                                    </button>
-                                    <button
-                                        onClick={() => viewLedger(item.id, item.name)}
+                                        onClick={() => viewLedger(item.id, item.name, item.outstanding_balance)}
                                         className="flex-1 sm:flex-none bg-white/10 text-white px-3 py-1.5 rounded hover:bg-white/20 text-sm font-medium border border-white/20 whitespace-nowrap"
                                     >
                                         Ledger
