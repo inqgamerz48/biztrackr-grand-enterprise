@@ -82,3 +82,5 @@ docker-compose.override.yml
 test.db
 test_receipt.pdf
 data/*.db
+
+docs/REAL_TALK_REVIEW.md

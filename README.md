@@ -27,10 +27,7 @@ An overview of the system's service-oriented design, async database handling, an
 ### 2. [Feature Specification](./docs/FEATURES.md)
 A catalog of functional capabilities including CRM ledgers, Inventory tracking, and PDF invoicing.
 
-### 3. [Real Talk Review](./docs/REAL_TALK_REVIEW.md)
-**Recommended Read**: An unfiltered, honest assessment of the codebase's strengths (Architecture, Speed) and weaknesses (Automation gaps, Hardcoded values).
-
-### 4. [Deployment Manual](./docs/DEPLOYMENT_GUIDE.md)
+### 3. [Deployment Manual](./docs/DEPLOYMENT_GUIDE.md)
 Standard operating procedures for setting up the environment locally (Docker) or deploying to production infrastructure.
 
 ---
