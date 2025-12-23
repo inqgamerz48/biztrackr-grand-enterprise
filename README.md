@@ -19,22 +19,19 @@ The platform is built on a strictly typed, service-oriented foundation designed 
 
 ## 📚 Technical Documentation
 
-We maintain rigorous documentation to prove system stability and architectural integrity. Refer to the `docs/` directory for detailed reports:
+Documentation is available in the `docs/` directory:
 
-### 1. [Grand Technical Proof](./docs/GRAND_TECHNICAL_PROOF.md)
-A comprehensive deep-dive into the system's internal logic. This document validates the "Double-Entry" ledger accuracy, the concurrency handling of the Inventory module, and the proprietary Licensing Engine. **Recommended for CTOs and Technical Leads.**
+### 1. [Technical Architecture](./docs/TECHNICAL_ARCHITECTURE.md)
+An overview of the system's service-oriented design, async database handling, and concurrency model.
 
-### 2. [Final Audit Report](./docs/FINAL_AUDIT_REPORT.md)
-An independent assessment of the codebase quality. It details the extensive module coverage (CRM, Sales, Banking), code metrics (~15,000 LOC), and the professional "Production-Grade" rating (9.3/10) assigned by senior auditors.
+### 2. [Feature Specification](./docs/FEATURES.md)
+A catalog of functional capabilities including CRM ledgers, Inventory tracking, and PDF invoicing.
 
-### 3. [Feature Specification](./docs/FEATURES.md)
-A complete catalog of the functional capabilities, including:
-*   **Smart CRM**: Partial payment handling and credit/debit running balances.
-*   **Advanced Inventory**: Real-time stock alerts, barcode scanning, and bulk CSV imports.
-*   **Financial Suite**: Multi-account expense tracking and PDF invoice generation.
+### 3. [Real Talk Review](./docs/REAL_TALK_REVIEW.md)
+**Recommended Read**: An unfiltered, honest assessment of the codebase's strengths (Architecture, Speed) and weaknesses (Automation gaps, Hardcoded values).
 
 ### 4. [Deployment Manual](./docs/DEPLOYMENT_GUIDE.md)
-Standard operating procedures for setting up the environment locally (Docker) or deploying to production infrastructure (AWS/Render/Vercel).
+Standard operating procedures for setting up the environment locally (Docker) or deploying to production infrastructure.
 
 ---
 
