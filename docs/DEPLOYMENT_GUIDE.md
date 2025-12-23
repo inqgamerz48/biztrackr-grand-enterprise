@@ -84,3 +84,6 @@ When transferring this asset to a new owner:
 
 ## 🤝 Support
 For detailed architectural proofs and audit reports, refer to `GRAND_TECHNICAL_PROOF.md`.
+
+---
+**INQ**

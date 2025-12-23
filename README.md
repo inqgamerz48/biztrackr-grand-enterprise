@@ -89,3 +89,6 @@ BizTrackr PRO adheres to modern security standards suitable for enterprise deplo
 This software is licensed under the **MIT License**. You are free to modify, distribute, and use this codebase for commercial applications.
 
 *Maintained by the BizTrackr Engineering Team.*
+
+---
+**INQ**
