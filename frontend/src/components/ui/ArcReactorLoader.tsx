@@ -7,51 +7,48 @@ const ArcReactorLoader = () => {
     useEffect(() => {
         if (!reactorRef.current) return;
 
-        // Core Pulse - Neon Blue & Green
+        // Core Pulse - Neon Lime
         anime({
             targets: '.reactor-core',
             opacity: [0.6, 1],
             boxShadow: [
-                '0 0 10px #00f3ff',
-                '0 0 20px #00f3ff',
-                '0 0 40px #0aff0a',
-                '0 0 20px #00f3ff'
+                '0 0 10px #ccff00',
+                '0 0 20px #ccff00',
+                '0 0 40px #ccff00',
+                '0 0 20px #ccff00'
             ],
-            fill: ['#00f3ff', '#0aff0a'], // Cycle colors
+            fill: ['#ccff00', '#ffffff'],
             easing: 'easeInOutSine',
             duration: 2000,
             direction: 'alternate',
             loop: true
         });
 
-        // Inner Ring Rotation - Neon Yellow
+        // Inner Ring Rotation - White
         anime({
             targets: '.reactor-inner-ring',
             rotate: 360,
-            stroke: ['#fdfc00', '#ffffff'], // Pulse yellow to white
+            stroke: ['#ffffff', '#ccff00'],
             duration: 3000,
             easing: 'linear',
             loop: true
         });
 
-        // Outer Ring Rotation (Counter-clockwise) - Neon Red
+        // Outer Ring Rotation (Counter-clockwise) - White
         anime({
             targets: '.reactor-outer-ring',
             rotate: -360,
-            stroke: ['#ff003c', '#ffffff'], // Pulse red to white
+            stroke: ['#ffffff', '#ffffff'],
             duration: 8000,
             easing: 'linear',
             loop: true
         });
 
-        // Mechanical Bits Slide - Multi-color
+        // Mechanical Bits Slide
         anime({
             targets: '.mech-bit',
             translateX: [0, 5, 0],
-            fill: function (el: any, i: number) {
-                const colors = ['#fdfc00', '#ff003c', '#0aff0a', '#00f3ff']; // Yellow, Red, Green, Blue
-                return colors[i % colors.length];
-            },
+            fill: '#ccff00',
             duration: 2000,
             delay: anime.stagger(200),
             easing: 'easeInOutQuad',
@@ -86,7 +83,7 @@ const ArcReactorLoader = () => {
 
                 {/* Outer Ring */}
                 <g className="reactor-outer-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="75" fill="none" stroke="#ff003c" strokeWidth="2" strokeOpacity="0.8" />
+                    <circle cx="100" cy="100" r="75" fill="none" stroke="#ffffff" strokeWidth="2" strokeOpacity="0.8" />
                     {[0, 60, 120, 180, 240, 300].map((angle, i) => (
                         <rect
                             key={i}
@@ -94,7 +91,7 @@ const ArcReactorLoader = () => {
                             y="20"
                             width="10"
                             height="15"
-                            fill="#fff"
+                            fill="#ccff00"
                             transform={`rotate(${angle} 100 100)`}
                             className="mech-bit"
                         />
@@ -103,7 +100,7 @@ const ArcReactorLoader = () => {
 
                 {/* Inner Ring */}
                 <g className="reactor-inner-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="50" fill="none" stroke="#fdfc00" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
+                    <circle cx="100" cy="100" r="50" fill="none" stroke="#ccff00" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
                     <circle cx="100" cy="100" r="45" fill="none" stroke="#fff" strokeWidth="1" />
                 </g>
 
@@ -112,7 +109,7 @@ const ArcReactorLoader = () => {
                     cx="100"
                     cy="100"
                     r="30"
-                    fill="#00f3ff"
+                    fill="#ccff00"
                     className="reactor-core"
                     filter="url(#glow)"
                 />
@@ -124,8 +121,8 @@ const ArcReactorLoader = () => {
                     transform="rotate(180 100 100)"
                 />
             </svg>
-            <div className="absolute mt-64 text-foreground font-mono text-sm tracking-widest animate-pulse">
-                INITIALIZING SYSTEMS...
+            <div className="absolute mt-64 text-neon-lime font-display text-sm tracking-widest animate-pulse font-bold">
+                SYSTEM INITIALIZATION...
             </div>
         </div>
     );

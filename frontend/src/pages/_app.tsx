@@ -10,6 +10,19 @@ import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from '../context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
+import { Syne, Manrope } from 'next/font/google';
+
+const syne = Syne({
+    subsets: ['latin'],
+    variable: '--font-syne',
+    display: 'swap',
+});
+
+const manrope = Manrope({
+    subsets: ['latin'],
+    variable: '--font-manrope',
+    display: 'swap',
+});
 
 // ==========================================
 // ANALYTICS INTEGRATION
@@ -53,23 +66,32 @@ function MyApp({ Component, pageProps }: AppProps) {
 
             <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
                 <ThemeProvider>
-                    <Head>
-                        <title>BizTracker PRO SaaS</title>
-                        <meta name="description" content="Enterprise Business Management Platform" />
-                    </Head>
-                    {loading && <ArcReactorLoader />}
-                    <AnimatePresence mode="wait">
-                        <PageTransition key={router.route}>
-                            <Component {...pageProps} />
-                        </PageTransition>
-                    </AnimatePresence>
-                    <Toaster position="top-right" toastOptions={{
-                        style: {
-                            background: '#1a1a1a',
-                            color: '#fff',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                        },
-                    }} />
+                    <main className={`${syne.variable} ${manrope.variable} font-sans`}>
+                        <Head>
+                            <title>BizTrackr PRO: Onyx Enterprise</title>
+                            <meta name="description" content="High-Frequency Commerce OS" />
+                        </Head>
+                        {loading && <ArcReactorLoader />}
+                        <AnimatePresence mode="wait">
+                            <PageTransition key={router.route}>
+                                <Component {...pageProps} />
+                            </PageTransition>
+                        </AnimatePresence>
+                        <Toaster position="bottom-right" toastOptions={{
+                            style: {
+                                background: '#0F0F0F',
+                                color: '#EDEDED',
+                                border: '1px solid #333',
+                                fontFamily: 'var(--font-manrope)',
+                            },
+                            success: {
+                                iconTheme: {
+                                    primary: '#CCFF00',
+                                    secondary: '#000',
+                                },
+                            },
+                        }} />
+                    </main>
                 </ThemeProvider>
             </GoogleOAuthProvider>
         </>

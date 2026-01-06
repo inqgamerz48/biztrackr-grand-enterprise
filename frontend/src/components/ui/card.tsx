@@ -9,13 +9,16 @@ const Card = React.forwardRef<
     <motion.div
         ref={ref}
         className={cn(
-            "rounded-lg border bg-card text-card-foreground shadow-sm",
+            "rounded-xl border border-white/5 bg-charcoal/50 backdrop-blur-xl text-card-foreground shadow-2xl shadow-black/50 relative overflow-hidden",
+            "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:to-transparent before:pointer-events-none before:z-0",
             className
         )}
-        whileHover={hoverEffect ? { y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.2)" } : {}}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        whileHover={hoverEffect ? { y: -4, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)" } : {}}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
         {...(props as HTMLMotionProps<"div">)}
-    />
+    >
+        <div className="relative z-10">{props.children as React.ReactNode}</div>
+    </motion.div>
 ))
 Card.displayName = "Card"
 
