@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { Save, User, Lock, Bell, Globe, Palette } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function SettingsPage() {
-    const { theme, setTheme } = useTheme();
     const { user, updateProfile } = useAuth();
     const [loading, setLoading] = useState(false);
     const [settings, setSettings] = useState({
@@ -48,12 +46,7 @@ export default function SettingsPage() {
         }
     };
 
-    const themes = [
-        { id: 'light', name: 'Light Mode', color: 'bg-gray-100 border-gray-300' },
-        { id: 'dark', name: 'Dark Mode', color: 'bg-gray-900 border-gray-700' },
-        { id: 'stranger', name: 'Stranger Things', color: 'bg-black border-red-900' },
-        { id: 'christmas', name: 'Christmas', color: 'bg-green-900 border-red-700' },
-    ];
+
 
     return (
         <DashboardLayout>
@@ -71,36 +64,6 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    {/* Theme Settings */}
-                    <div className="lg:col-span-3">
-                        <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">
-                            <div className="p-6 border-b border-border">
-                                <div className="flex items-center">
-                                    <Palette className="h-6 w-6 text-primary mr-3" />
-                                    <h2 className="text-lg font-medium text-foreground">Theme Preference</h2>
-                                </div>
-                                <p className="mt-1 text-sm text-muted-foreground">Customize the look and feel of your dashboard.</p>
-                            </div>
-                            <div className="p-6">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {themes.map((t) => (
-                                        <button
-                                            key={t.id}
-                                            onClick={() => setTheme(t.id as any)}
-                                            className={`relative rounded-lg border-2 p-4 flex flex-col items-center space-y-2 transition-all ${theme === t.id ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-border hover:border-primary/50'
-                                                }`}
-                                        >
-                                            <div className={`w-full h-12 rounded-md ${t.color} shadow-inner`}></div>
-                                            <span className={`text-sm font-medium ${theme === t.id ? 'text-primary' : 'text-muted-foreground'}`}>
-                                                {t.name}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Profile Settings */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-card border border-border shadow-none rounded-lg overflow-hidden">

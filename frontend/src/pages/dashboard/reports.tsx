@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { useTheme } from '@/context/ThemeContext';
 import { TrendingUp, TrendingDown, DollarSign, Package, CreditCard, Activity, Landmark } from 'lucide-react';
 
 export default function ReportsPage() {
-    const { theme } = useTheme();
     const [loading, setLoading] = useState<string | null>(null);
     const [dateRange, setDateRange] = useState({
         start: '',
