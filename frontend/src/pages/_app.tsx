@@ -69,7 +69,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <ThemeProvider>
                     <main className={`${fraunces.variable} ${inter.variable} font-sans`}>
                         <Head>
-                            <title>BizTrackr: Analog Enterprise</title>
+                            <title>BizTrackr</title>
                             <meta name="description" content="Human-Centric Commerce OS" />
                         </Head>
                         {loading && <ArcReactorLoader />}
