@@ -9,28 +9,29 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                default: "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(204,255,0,0.2)] hover:shadow-[0_0_25px_rgba(204,255,0,0.4)] hover:scale-[1.02] active:scale-[0.98] font-display uppercase tracking-wider font-bold border-2 border-transparent",
-                destructive:
-                    "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20",
-                outline:
-                    "border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground font-display uppercase tracking-wider font-bold",
-                secondary:
-                    "bg-secondary text-secondary-foreground hover:bg-white/10 border border-white/5",
-                ghost: "hover:bg-white/5 hover:text-white",
-                link: "text-primary underline-offset-4 hover:underline",
+                variant: {
+                    default: "bg-primary text-primary-foreground hover:bg-white hover:text-black hover:scale-[1.02] active:scale-[0.98] font-sans font-medium tracking-wide transition-all duration-300 rounded-none",
+                    destructive:
+                        "bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-none",
+                    outline:
+                        "border border-white/20 text-white bg-transparent hover:bg-white hover:text-black font-sans font-medium tracking-wide rounded-none transition-all duration-300",
+                    secondary:
+                        "bg-secondary text-secondary-foreground hover:bg-white/10 border border-white/5",
+                    ghost: "hover:bg-white/5 hover:text-white",
+                    link: "text-primary underline-offset-4 hover:underline",
+                },
+                size: {
+                    default: "h-11 px-6 py-2",
+                    sm: "h-9 rounded-md px-3 text-xs",
+                    lg: "h-14 rounded-md px-10 text-base",
+                    icon: "h-10 w-10",
+                },
             },
-            size: {
-                default: "h-11 px-6 py-2",
-                sm: "h-9 rounded-md px-3 text-xs",
-                lg: "h-14 rounded-md px-10 text-base",
-                icon: "h-10 w-10",
+            defaultVariants: {
+                variant: "default",
+                size: "default",
             },
-        },
-        defaultVariants: {
-            variant: "default",
-            size: "default",
-        },
-    }
+        }
 )
 
 export interface ButtonProps

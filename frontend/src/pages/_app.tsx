@@ -10,17 +10,18 @@ import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from '../context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
-import { Syne, Manrope } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 
-const syne = Syne({
+const fraunces = Fraunces({
     subsets: ['latin'],
-    variable: '--font-syne',
+    variable: '--font-serif',
     display: 'swap',
+    // Fraunces is a variable font, weights are automatic
 });
 
-const manrope = Manrope({
+const inter = Inter({
     subsets: ['latin'],
-    variable: '--font-manrope',
+    variable: '--font-sans',
     display: 'swap',
 });
 
@@ -66,10 +67,10 @@ function MyApp({ Component, pageProps }: AppProps) {
 
             <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
                 <ThemeProvider>
-                    <main className={`${syne.variable} ${manrope.variable} font-sans`}>
+                    <main className={`${fraunces.variable} ${inter.variable} font-sans`}>
                         <Head>
-                            <title>BizTrackr PRO: Onyx Enterprise</title>
-                            <meta name="description" content="High-Frequency Commerce OS" />
+                            <title>BizTrackr: Analog Enterprise</title>
+                            <meta name="description" content="Human-Centric Commerce OS" />
                         </Head>
                         {loading && <ArcReactorLoader />}
                         <AnimatePresence mode="wait">
@@ -79,16 +80,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                         </AnimatePresence>
                         <Toaster position="bottom-right" toastOptions={{
                             style: {
-                                background: '#0F0F0F',
-                                color: '#EDEDED',
+                                background: '#121212',
+                                color: '#F4F4F0',
                                 border: '1px solid #333',
-                                fontFamily: 'var(--font-manrope)',
-                            },
-                            success: {
-                                iconTheme: {
-                                    primary: '#CCFF00',
-                                    secondary: '#000',
-                                },
+                                fontFamily: 'var(--font-sans)',
                             },
                         }} />
                     </main>

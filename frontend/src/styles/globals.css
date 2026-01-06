@@ -4,67 +4,77 @@
 
 @layer base {
   :root {
-    /* Onyx Enterprise Identity */
-    --background: 5 5 5;
-    --foreground: 237 237 237;
-    
-    --card: 15 15 15;
-    --card-foreground: 237 237 237;
- 
-    --popover: 15 15 15;
-    --popover-foreground: 237 237 237;
- 
-    --primary: 204 255 0; /* Neon Lime */
-    --primary-foreground: 5 5 5;
- 
-    --secondary: 15 15 15;
-    --secondary-foreground: 237 237 237;
- 
-    --muted: 26 26 26;
-    --muted-foreground: 163 163 163;
- 
-    --accent: 26 26 26;
-    --accent-foreground: 237 237 237;
- 
-    --destructive: 220 38 38; /* Keep standard error red */
-    --destructive-foreground: 237 237 237;
+    /* Analog Enterprise Identity */
+    --background: 8 8 8;
+    /* Ink */
+    --foreground: 244 244 240;
+    /* Paper */
 
-    --border: 26 26 26;
-    --input: 26 26 26;
-    --ring: 204 255 0;
-    
-    --radius: 0.5rem;
+    --card: 18 18 18;
+    --card-foreground: 244 244 240;
+
+    --popover: 18 18 18;
+    --popover-foreground: 244 244 240;
+
+    --primary: 255 51 0;
+    /* International Orange */
+    --primary-foreground: 255 255 255;
+
+    --secondary: 24 24 24;
+    --secondary-foreground: 244 244 240;
+
+    --muted: 36 36 36;
+    --muted-foreground: 136 136 136;
+
+    --accent: 36 36 36;
+    --accent-foreground: 244 244 240;
+
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+
+    --border: 42 42 42;
+    --input: 42 42 42;
+    --ring: 255 51 0;
+
+    --radius: 0rem;
+    /* Sharp corners for editorial look */
   }
- 
-  /* Force Dark Mode - No Light Mode Allowed for Enterprise Onyx */
+
+  /* Force Dark Mode */
   .dark {
-    --background: 5 5 5;
-    --foreground: 237 237 237;
+    --background: 8 8 8;
+    --foreground: 244 244 240;
   }
 
   body {
-    @apply bg-obsidian text-mist font-sans antialiased selection:bg-neon-lime selection:text-obsidian;
-    /* Noise texture overlay is applied via tailwind config now, but we can enforce it here if needed */
+    @apply bg-ink text-paper font-sans antialiased selection:bg-intl-orange selection:text-white;
     background-image: theme('backgroundImage.noise');
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-white;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif tracking-tight text-white;
   }
-  
+
   /* Utilities */
   .glass-panel {
-    @apply bg-charcoal/80 backdrop-blur-md border border-white/5;
+    @apply bg-ash border border-white/10;
+    /* Solid, not glass */
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-black border border-white/20 shadow-none;
+    @apply bg-ash border border-white/10 shadow-none;
   }
 
   .glass-card {
-    @apply bg-black border border-white/20 shadow-none rounded-2xl;
+    @apply bg-ash border border-white/10 shadow-none rounded-none;
+    /* Sharp */
   }
 
   .text-gradient {
