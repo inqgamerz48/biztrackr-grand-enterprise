@@ -5,7 +5,7 @@ from app.api.dependencies import get_current_user
 from app.models.user import User
 from app.models.upgrade_request import UpgradeRequest
 from app.models.tenant import Tenant
-from app.services.email_service import send_upgrade_request_notification
+from app.core.tasks import send_upgrade_request_notification_task
 import shutil
 import os
 from datetime import datetime
@@ -53,8 +53,7 @@ async def request_upgrade(
     
     db.refresh(upgrade_request)
     
-    # Trigger Email Notification to Super Admin
-    # Assuming super admin email is fixed or fetched from DB
-    send_upgrade_request_notification("srivatsananduri4@gmail.com", current_user.email, "My Company", plan, upgrade_request.id)
+    # Trigger Email Notification to Super Admin (Background Task)
+    await send_upgrade_request_notification_task.kiwi("srivatsananduri4@gmail.com", current_user.email, "My Company", plan, upgrade_request.id)
     
     return {"status": "success", "message": "Upgrade request submitted", "request_id": upgrade_request.id}

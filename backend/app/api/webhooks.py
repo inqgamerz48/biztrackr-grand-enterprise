@@ -6,7 +6,8 @@ Processes Instamojo payment webhooks and triggers license generation + email sen
 from fastapi import APIRouter, Request, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
-from app.services import license_service, email_service
+from app.services import license_service
+from app.core.tasks import send_event_email_task
 import logging
 
 logger = logging.getLogger(__name__)
@@ -87,8 +88,8 @@ async def instamojo_webhook(
         
         logger.info(f"License created: {license_obj.key} for {buyer_email}")
         
-        # Send license issued email
-        email_service.send_event_email(
+        # Send license issued email (Background Task)
+        await send_event_email_task.kiwi(
             event_type="license_issued",
             user_email=buyer_email,
             metadata={
@@ -98,8 +99,8 @@ async def instamojo_webhook(
             }
         )
         
-        # Send payment success email
-        email_service.send_event_email(
+        # Send payment success email (Background Task)
+        await send_event_email_task.kiwi(
             event_type="payment_success",
             user_email=buyer_email,
             metadata={
@@ -188,8 +189,8 @@ async def paypal_webhook(
             
             logger.info(f"License created for PayPal: {license_obj.key}")
             
-            # Send emails
-            email_service.send_event_email(
+            # Send emails (Background Tasks)
+            await send_event_email_task.kiwi(
                 event_type="license_issued",
                 user_email=payer_email,
                 metadata={
@@ -199,7 +200,7 @@ async def paypal_webhook(
                 }
             )
             
-            email_service.send_event_email(
+            await send_event_email_task.kiwi(
                 event_type="payment_success",
                 user_email=payer_email,
                 metadata={

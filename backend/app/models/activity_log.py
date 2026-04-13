@@ -15,6 +15,10 @@ class ActivityLog(Base):
     entity_id = Column(Integer, nullable=True)
     details = Column(JSON, nullable=True) # Store old/new values or other metadata
     
+    # Enterprise Immutable Audit Trail fields
+    signature = Column(String, nullable=True) # SHA-256 hash of the log
+    previous_hash = Column(String, nullable=True) # Hash of the previous log entry for chaining
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     tenant = relationship("Tenant")

@@ -27,8 +27,9 @@ class Settings(BaseSettings):
     PAYPAL_MODE: str = "sandbox"
     PAYPAL_WEBHOOK_ID: str = ""
 
-    # Redis Cache
+    # Redis Cache & Taskiq
     REDIS_URL: str = "redis://localhost:6379/0"
+    TASKIQ_ENABLED: bool = True
 
     # Social Auth
     GOOGLE_CLIENT_ID: str = ""
