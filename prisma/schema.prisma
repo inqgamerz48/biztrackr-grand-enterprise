@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../frontend/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -28,6 +29,7 @@ model Tenant {
   payments            Payment[]
   notifications       Notification[]
   upgrade_requests    UpgradeRequest[]
+  activity_logs       ActivityLog[]
 
   @@map("tenants")
   @@index([id])
@@ -227,10 +229,12 @@ model User {
   tenant          Tenant?          @relation(fields: [tenant_id], references: [id])
   branch_id       Int?
   branch          Branch?          @relation(fields: [branch_id], references: [id])
-  export_logs     ExportLog[]
+  export_logs      ExportLog[]
   upgrade_requests UpgradeRequest[]
-  notifications   Notification[]
+  notifications    Notification[]
   payment_requests PaymentRequest[]
+  activity_logs    ActivityLog[]
+  licenses         License[]
 
   @@map("users")
   @@index([full_name])
@@ -436,4 +440,47 @@ model UpgradeRequest {
   @@index([user_id])
   @@index([company_id])
   @@index([status])
+}
+
+model ActivityLog {
+  id            Int       @id @default(autoincrement())
+  tenant_id     Int
+  tenant        Tenant    @relation(fields: [tenant_id], references: [id])
+  user_id       Int?
+  user          User?     @relation(fields: [user_id], references: [id])
+  action        String
+  entity_type   String
+  entity_id     Int?
+  details       Json?
+  signature     String?
+  previous_hash String?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("activity_logs")
+  @@index([id])
+  @@index([tenant_id])
+  @@index([user_id])
+}
+
+model License {
+  id               Int       @id @default(autoincrement())
+  key              String    @unique
+  email            String
+  used             Boolean   @default(false)
+  payment_id       String    @unique
+  plan             String    @default("PRO")
+  payment_provider String
+  payment_amount   String?
+  payment_currency String?
+  user_id          Int?
+  user             User?     @relation(fields: [user_id], references: [id])
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  activated_at     DateTime? @db.Timestamptz(6)
+  buyer_name       String?
+  buyer_phone      String?
+
+  @@map("licenses")
+  @@index([id])
+  @@index([key])
+  @@index([email])
 }
