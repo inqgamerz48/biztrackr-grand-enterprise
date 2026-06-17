@@ -141,5 +141,20 @@ export function useAuth() {
         }
     };
 
-    return { user, loading, login, register, logout, hasPermission, updateProfile };
+    const loginWithOAuth = async (provider: 'google') => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`
+                }
+            });
+            if (error) throw error;
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error.message || 'OAuth login failed' };
+        }
+    };
+
+    return { user, loading, login, register, logout, hasPermission, updateProfile, loginWithOAuth };
 }

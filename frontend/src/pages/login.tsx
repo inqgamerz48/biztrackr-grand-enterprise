@@ -1,33 +1,27 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
-import api from '@/lib/axios';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Loader2, Github, Chrome } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Chrome } from 'lucide-react';
 import { useRouter } from 'next/router';
 
-import { useGoogleLogin } from '@react-oauth/google';
-
 export default function LoginPage() {
-    const { login } = useAuth();
+    const { login, loginWithOAuth } = useAuth();
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const loginGoogle = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
-            // Send access token to backend
-            api.post('/auth/login/google', null, { params: { token: tokenResponse.access_token } })
-                .then((res: any) => {
-                    // Cookie handled by backend
-                    window.location.href = '/dashboard';
-                })
-                .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
-        },
-        onError: () => setError('Google Login Failed'),
-    });
+    const handleGoogleLogin = async () => {
+        setIsLoading(true);
+        setError('');
+        const res = await loginWithOAuth('google');
+        if (!res.success) {
+            setError(res.error);
+            setIsLoading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -127,33 +121,14 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                // MOCK: Simulate GitHub login
-                                const mockCode = "mock_github_code_testuser";
-                                api.post('/auth/login/github', null, { params: { code: mockCode } })
-                                    .then((res: any) => {
-                                        // Cookie handled by backend
-                                        window.location.href = '/dashboard';
-                                    })
-                                    .catch((err: any) => setError(err.response?.data?.detail || 'GitHub Login Failed'));
-                            }}
-                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all group"
-                        >
-                            <Github className="w-5 h-5 group-hover:text-foreground transition-colors" />
-                            <span className="group-hover:text-foreground transition-colors">GitHub</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => loginGoogle()}
-                            className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all group"
-                        >
-                            <Chrome className="w-5 h-5 group-hover:text-foreground transition-colors" />
-                            <span className="group-hover:text-foreground transition-colors">Google</span>
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={handleGoogleLogin}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all group"
+                    >
+                        <Chrome className="w-5 h-5 group-hover:text-foreground transition-colors" />
+                        <span className="group-hover:text-foreground transition-colors font-medium">Continue with Google</span>
+                    </button>
 
                     <div className="text-center mt-6">
                         <p className="text-muted-foreground text-sm">
