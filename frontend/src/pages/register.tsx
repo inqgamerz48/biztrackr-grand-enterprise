@@ -2,14 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import api from '@/lib/axios';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Building2, ArrowRight, Loader2, Check, X, Github, Chrome } from 'lucide-react';
 
-import { useGoogleLogin } from '@react-oauth/google';
-
 export default function RegisterPage() {
-    const { register } = useAuth();
+    const { register, loginWithOAuth } = useAuth();
     const router = useRouter();
     const [formData, setFormData] = useState({
         email: '',
@@ -20,18 +17,21 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const loginGoogle = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
-            // Send access token to backend
-            api.post('/auth/login/google', null, { params: { token: tokenResponse.access_token } })
-                .then((res: any) => {
-                    localStorage.setItem('token', res.data.access_token);
-                    window.location.href = '/dashboard';
-                })
-                .catch((err: any) => setError(err.response?.data?.detail || 'Google Login Failed'));
-        },
-        onError: () => setError('Google Login Failed'),
-    });
+    const handleGoogleLogin = async () => {
+        setError('');
+        const res = await loginWithOAuth('google');
+        if (!res.success) {
+            setError(res.error);
+        }
+    };
+
+    const handleGithubLogin = async () => {
+        setError('');
+        const res = await loginWithOAuth('github');
+        if (!res.success) {
+            setError(res.error);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -154,16 +154,7 @@ export default function RegisterPage() {
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         <button
                             type="button"
-                            onClick={() => {
-                                // MOCK: Simulate GitHub login
-                                const mockCode = "mock_github_code_testuser";
-                                api.post('/auth/login/github', null, { params: { code: mockCode } })
-                                    .then((res: any) => {
-                                        localStorage.setItem('token', res.data.access_token);
-                                        window.location.href = '/dashboard';
-                                    })
-                                    .catch((err: any) => setError(err.response?.data?.detail || 'GitHub Login Failed'));
-                            }}
+                            onClick={handleGithubLogin}
                             className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all group"
                         >
                             <Github className="w-5 h-5 group-hover:text-foreground transition-colors" />
@@ -171,7 +162,7 @@ export default function RegisterPage() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => loginGoogle()}
+                            onClick={handleGoogleLogin}
                             className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all group"
                         >
                             <Chrome className="w-5 h-5 group-hover:text-foreground transition-colors" />

@@ -141,7 +141,7 @@ export function useAuth() {
         }
     };
 
-    const loginWithOAuth = async (provider: 'google') => {
+    const loginWithOAuth = async (provider: 'google' | 'github') => {
         try {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
