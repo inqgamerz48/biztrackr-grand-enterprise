@@ -1,131 +1,106 @@
-import React, { useEffect, useRef } from 'react';
-import anime from 'animejs';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
-const ArcReactorLoader = () => {
-    const reactorRef = useRef<SVGSVGElement>(null);
+const DIAGNOSTICS = [
+    'BOOTING COMMERCE OS OVERLAY...',
+    'RESOLVING TENANT ROW ISOLATION MATRIX...',
+    'ESTABLISHING SUPABASE DB CONNECTION...',
+    'COMPILING SCHEMA TRANSACTIONS...',
+    'VERIFYING CRYPTOGRAPHIC JWT TOKENS...',
+    'INITIALIZING SYSTEM DEPLOYMENT...'
+];
+
+const ConsoleLoader = () => {
+    const [progress, setProgress] = useState(0);
+    const [logs, setLogs] = useState<string[]>([]);
 
     useEffect(() => {
-        if (!reactorRef.current) return;
+        // Increment progress simulating diagnostic load
+        const progressInterval = setInterval(() => {
+            setProgress((prev) => {
+                if (prev >= 100) {
+                    clearInterval(progressInterval);
+                    return 100;
+                }
+                return prev + Math.floor(Math.random() * 8) + 4;
+            });
+        }, 120);
 
-        // Core Pulse - Neon Lime
-        anime({
-            targets: '.reactor-core',
-            opacity: [0.6, 1],
-            boxShadow: [
-                '0 0 10px #ccff00',
-                '0 0 20px #ccff00',
-                '0 0 40px #ccff00',
-                '0 0 20px #ccff00'
-            ],
-            fill: ['#ccff00', '#ffffff'],
-            easing: 'easeInOutSine',
-            duration: 2000,
-            direction: 'alternate',
-            loop: true
-        });
-
-        // Inner Ring Rotation - White
-        anime({
-            targets: '.reactor-inner-ring',
-            rotate: 360,
-            stroke: ['#ffffff', '#ccff00'],
-            duration: 3000,
-            easing: 'linear',
-            loop: true
-        });
-
-        // Outer Ring Rotation (Counter-clockwise) - White
-        anime({
-            targets: '.reactor-outer-ring',
-            rotate: -360,
-            stroke: ['#ffffff', '#ffffff'],
-            duration: 8000,
-            easing: 'linear',
-            loop: true
-        });
-
-        // Mechanical Bits Slide
-        anime({
-            targets: '.mech-bit',
-            translateX: [0, 5, 0],
-            fill: '#ccff00',
-            duration: 2000,
-            delay: anime.stagger(200),
-            easing: 'easeInOutQuad',
-            loop: true
-        });
-
+        return () => clearInterval(progressInterval);
     }, []);
 
+    useEffect(() => {
+        // Stagger logs append based on current progress
+        const logIndex = Math.min(
+            Math.floor((progress / 100) * DIAGNOSTICS.length),
+            DIAGNOSTICS.length - 1
+        );
+        
+        if (DIAGNOSTICS[logIndex] && !logs.includes(DIAGNOSTICS[logIndex])) {
+            setLogs((prev) => [...prev, DIAGNOSTICS[logIndex]]);
+        }
+    }, [progress, logs]);
+
+    // Format progress bar using ASCII characters
+    const getProgressBar = () => {
+        const totalBlocks = 20;
+        const filledBlocks = Math.min(Math.floor((progress / 100) * totalBlocks), totalBlocks);
+        const emptyBlocks = totalBlocks - filledBlocks;
+        return '█'.repeat(filledBlocks) + '░'.repeat(emptyBlocks);
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-            <svg
-                ref={reactorRef}
-                width="200"
-                height="200"
-                viewBox="0 0 200 200"
-                className="overflow-visible text-muted-foreground"
-            >
-                {/* Glow Filter */}
-                <defs>
-                    <filter id="glow">
-                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                        <feMerge>
-                            <feMergeNode in="coloredBlur" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                </defs>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#080808] font-mono text-[#F4F4F0] p-6 selection:bg-[#FF3300] selection:text-white">
+            {/* Blueprint Gridlines Overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1f_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1f_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-20 pointer-events-none" />
 
-                {/* Outer Housing */}
-                <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="4" />
-                <circle cx="100" cy="100" r="85" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="5,5" className="opacity-50" />
+            <div className="relative w-full max-w-xl border-2 border-[#FF3300] bg-[#1C1C1C] p-6 md:p-8 space-y-6 shadow-none rounded-none">
+                {/* Header Tag */}
+                <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                    <span className="text-xs font-bold text-[#FF3300]">
+                        [ DIAGNOSTIC CORE BOOTLOADER ]
+                    </span>
+                    <span className="text-[10px] text-gray-500">
+                        SYS_LEVEL_ACTIVE
+                    </span>
+                </div>
 
-                {/* Outer Ring */}
-                <g className="reactor-outer-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="75" fill="none" stroke="#ffffff" strokeWidth="2" strokeOpacity="0.8" />
-                    {[0, 60, 120, 180, 240, 300].map((angle, i) => (
-                        <rect
-                            key={i}
-                            x="95"
-                            y="20"
-                            width="10"
-                            height="15"
-                            fill="#ccff00"
-                            transform={`rotate(${angle} 100 100)`}
-                            className="mech-bit"
-                        />
+                {/* Progress bar and numeric percentage */}
+                <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold">
+                        <span className="text-[#FF3300]">LOADING LEDGER MODULES</span>
+                        <span>{Math.min(progress, 100)}%</span>
+                    </div>
+                    <div className="text-sm tracking-tighter text-[#FF3300] bg-[#080808] p-3 border border-white/5 font-mono select-none overflow-hidden whitespace-nowrap">
+                        {getProgressBar()}
+                    </div>
+                </div>
+
+                {/* Simulated Diagnostic Logs */}
+                <div className="bg-[#080808] border border-white/5 p-4 h-40 overflow-y-auto space-y-2 text-[10px] leading-relaxed text-gray-400">
+                    {logs.map((log, index) => (
+                        <div key={index} className="flex gap-2 items-start">
+                            <span className="text-[#FF3300] font-bold">»</span>
+                            <span>{log}</span>
+                        </div>
                     ))}
-                </g>
+                    {progress < 100 && (
+                        <motion.div
+                            animate={{ opacity: [0, 1] }}
+                            transition={{ repeat: Infinity, duration: 0.8 }}
+                            className="inline-block w-1.5 h-3 bg-[#FF3300] ml-1"
+                        />
+                    )}
+                </div>
 
-                {/* Inner Ring */}
-                <g className="reactor-inner-ring" style={{ transformOrigin: '100px 100px' }}>
-                    <circle cx="100" cy="100" r="50" fill="none" stroke="#ccff00" strokeWidth="4" strokeDasharray="20,10" filter="url(#glow)" />
-                    <circle cx="100" cy="100" r="45" fill="none" stroke="#fff" strokeWidth="1" />
-                </g>
-
-                {/* Core */}
-                <circle
-                    cx="100"
-                    cy="100"
-                    r="30"
-                    fill="#ccff00"
-                    className="reactor-core"
-                    filter="url(#glow)"
-                />
-                <path
-                    d="M100 75 L115 110 L85 110 Z"
-                    fill="#fff"
-                    opacity="0.8"
-                    className="reactor-core-triangle"
-                    transform="rotate(180 100 100)"
-                />
-            </svg>
-            <div className="absolute mt-64 text-neon-lime font-display text-sm tracking-widest animate-pulse font-bold">
-                SYSTEM INITIALIZATION...
+                {/* Footer specs */}
+                <div className="flex justify-between text-[9px] text-gray-500 border-t border-white/10 pt-4">
+                    <span>SECURITY: TENANT_ISOLATION_ON</span>
+                    <span>v1.4.0</span>
+                </div>
             </div>
         </div>
     );
 };
 
-export default ArcReactorLoader;
+export default ConsoleLoader;
