@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,153 +7,432 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  MANAGER
-  CASHIER
-  USER
+model Tenant {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  plan                String?
+  subscription_status String?
+  created_at          DateTime?            @default(now()) @db.Timestamptz(6)
+  users               User[]
+  categories          Category[]
+  customers           Customer[]
+  suppliers           Supplier[]
+  expenses            Expense[]
+  payment_accounts    PaymentAccount[]
+  settings            Settings[]
+  roles               Role[]
+  branches            Branch[]
+  items               InventoryItem[]
+  sales               Sale[]
+  purchases           Purchase[]
+  payments            Payment[]
+  notifications       Notification[]
+  upgrade_requests    UpgradeRequest[]
+
+  @@map("tenants")
+  @@index([id])
+  @@index([name])
 }
 
-enum PlanType {
-  FREE
-  PRO
-  ENTERPRISE
+model SecurityEvent {
+  id          Int       @id @default(autoincrement())
+  event_type  String?
+  ip_address  String?
+  description String?
+  severity    String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  user_email  String?
+
+  @@map("security_events")
+  @@index([ip_address])
+  @@index([id])
+  @@index([event_type])
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  INCOMPLETE
+model BlockedIp {
+  id         Int       @id @default(autoincrement())
+  ip_address String?   @unique
+  reason     String?
+  blocked_at DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at DateTime? @db.Timestamptz(6)
+  is_active  Boolean?
+
+  @@map("blocked_ips")
+  @@index([id])
 }
 
-model User {
-  id              Int       @id @default(autoincrement())
-  email           String    @unique
-  hashed_password String
-  full_name       String?
-  role            String    @default("tenant_user") // super_admin, company_admin, tenant_user
-  plan            String?   @default("free") // free, basic, pro
-  plan_expiry     DateTime?
-  is_active       Boolean   @default(true)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-
-  // Relations
-  subscription    Subscription?
-  settings        Settings?
-  invoices        Invoice[]
-  expenses        Expense[]
-  activity_logs   ActivityLog[]
-  export_logs     ExportLog[]
-  
-  @@index([email])
-}
-
-model Subscription {
-  id                   Int                @id @default(autoincrement())
-  user_id              Int                @unique
-  user                 User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  plan_type            PlanType           @default(FREE)
-  status               SubscriptionStatus @default(ACTIVE)
-  current_period_start DateTime?
-  current_period_end   DateTime?
-  created_at           DateTime           @default(now())
-  updated_at           DateTime           @updatedAt
-}
-
-model Settings {
-  id                   Int     @id @default(autoincrement())
-  user_id              Int     @unique
-  user                 User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  company_name         String?
-  currency_symbol      String  @default("$")
-  tax_rate             Float   @default(0.0)
-  enable_notifications Boolean @default(true)
-  dark_mode            Boolean @default(false)
-  owner_qr             String? // URL or Base64 string for Owner's QR Code
-  updated_at           DateTime @updatedAt
-}
-
-model Invoice {
+model Permission {
   id          Int      @id @default(autoincrement())
-  user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
-  customer_name String?
-  total_amount Float
-  status      String   @default("PAID") // PAID, PENDING, CANCELED
-  items       Json?    // Store line items as JSON
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  code        String   @unique
+  description String?
+  roles       Role[]   @relation("role_permissions")
 
-  @@index([user_id])
-  @@index([created_at])
+  @@map("permissions")
+  @@index([id])
+}
+
+model Category {
+  id        Int             @id @default(autoincrement())
+  name      String?
+  tenant_id Int?
+  tenant    Tenant?         @relation(fields: [tenant_id], references: [id])
+  items     InventoryItem[]
+
+  @@map("categories")
+  @@index([name])
+  @@index([tenant_id, id], name: "idx_category_tenant_id")
+  @@index([id])
+}
+
+model Customer {
+  id                  Int       @id @default(autoincrement())
+  name                String?
+  phone               String?
+  email               String?
+  address             String?
+  outstanding_balance Float?
+  tenant_id           Int?
+  tenant              Tenant?   @relation(fields: [tenant_id], references: [id])
+  sales               Sale[]
+  payments            Payment[]
+
+  @@map("customers")
+  @@index([id])
+  @@index([name])
+  @@index([phone])
+}
+
+model Supplier {
+  id                  Int             @id @default(autoincrement())
+  name                String?
+  phone               String?
+  email               String?
+  address             String?
+  outstanding_balance Float?
+  tenant_id           Int?
+  tenant              Tenant?         @relation(fields: [tenant_id], references: [id])
+  items               InventoryItem[]
+  purchases           Purchase[]
+  payments            Payment[]
+
+  @@map("suppliers")
+  @@index([id])
+  @@index([name])
 }
 
 model Expense {
   id          Int      @id @default(autoincrement())
-  user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
   category    String
   amount      Float
   description String?
-  date        DateTime @default(now())
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  date        DateTime @db.Timestamptz(6)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  tenant_id   Int
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
 
-  @@index([user_id])
+  @@map("expenses")
+  @@index([date])
+  @@index([id])
   @@index([category])
 }
 
-model ActivityLog {
-  id          Int      @id @default(autoincrement())
-  user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
-  action      String   // LOGIN, EXPORT, CREATE_INVOICE, etc.
-  entity_type String?  // INVOICE, EXPENSE, SETTINGS
-  entity_id   Int?
-  details     Json?
-  ip_address  String?
-  created_at  DateTime @default(now())
+model PaymentAccount {
+  id         Int        @id @default(autoincrement())
+  name       String?
+  type       String?
+  balance    Float?
+  currency   String?
+  tenant_id  Int?
+  tenant     Tenant?    @relation(fields: [tenant_id], references: [id])
+  created_at DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?  @db.Timestamptz(6)
+  sales      Sale[]
+  purchases  Purchase[]
 
-  @@index([user_id])
-  @@index([action])
+  @@map("payment_accounts")
+  @@index([id])
+  @@index([name])
+}
+
+model Settings {
+  id                    Int      @id @default(autoincrement())
+  company_name          String?
+  currency_symbol       String?
+  tax_rate              Float?
+  logo_url              String?
+  terms_and_conditions  String?
+  owner_qr              String?
+  company_address       String?
+  company_phone         String?
+  company_email         String?
+  company_website       String?
+  footer_text           String?
+  enable_notifications  Boolean?
+  save_invoices_locally Boolean?
+  local_invoice_path    String?
+  tenant_id             Int?
+  tenant                Tenant?  @relation(fields: [tenant_id], references: [id])
+
+  @@map("settings")
+  @@index([id])
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String
+  tenant_id   Int
+  tenant      Tenant       @relation(fields: [tenant_id], references: [id])
+  users       User[]
+  permissions Permission[] @relation("role_permissions")
+
+  @@map("roles")
+  @@index([id])
+  @@index([name])
+}
+
+model Branch {
+  id        Int             @id @default(autoincrement())
+  tenant_id Int
+  tenant    Tenant          @relation(fields: [tenant_id], references: [id])
+  name      String?
+  address   String?
+  phone     String?
+  is_main   Boolean?
+  users     User[]
+  items     InventoryItem[]
+  sales     Sale[]
+  purchases Purchase[]
+
+  @@map("branches")
+  @@index([name])
+  @@index([id])
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  hashed_password String?
+  full_name       String?
+  is_active       Boolean?
+  is_superuser    Boolean?
+  supabase_uid    String?          @unique
+  social_provider String?
+  social_id       String?
+  role            String           @default("tenant_user")
+  plan            String?          @default("free")
+  plan_expiry     DateTime?
+  role_id         Int?
+  role_obj        Role?            @relation(fields: [role_id], references: [id])
+  tenant_id       Int?
+  tenant          Tenant?          @relation(fields: [tenant_id], references: [id])
+  branch_id       Int?
+  branch          Branch?          @relation(fields: [branch_id], references: [id])
+  export_logs     ExportLog[]
+  upgrade_requests UpgradeRequest[]
+  notifications   Notification[]
+  payment_requests PaymentRequest[]
+
+  @@map("users")
+  @@index([full_name])
+  @@index([id])
+}
+
+model InventoryItem {
+  id             Int            @id @default(autoincrement())
+  name           String?
+  barcode        String?
+  quantity       Int?
+  min_stock      Int?
+  mrp            Float?
+  purchase_price Float?
+  selling_price  Float?
+  tax_rate       Float?
+  image_url      String?
+  category_id    Int?
+  category       Category?      @relation(fields: [category_id], references: [id])
+  tenant_id      Int?
+  tenant         Tenant?        @relation(fields: [tenant_id], references: [id])
+  branch_id      Int?
+  branch         Branch?        @relation(fields: [branch_id], references: [id])
+  supplier_id    Int?
+  supplier       Supplier?      @relation(fields: [supplier_id], references: [id])
+  sale_items     SaleItem[]
+  purchase_items PurchaseItem[]
+
+  @@map("items")
+  @@index([name])
+  @@index([id])
+  @@index([barcode])
+  @@index([tenant_id, id], name: "idx_items_tenant_id")
+}
+
+model Sale {
+  id                 Int             @id @default(autoincrement())
+  invoice_number     String?
+  date               DateTime?       @default(now()) @db.Timestamptz(6)
+  total_amount       Float?
+  tax_amount         Float?
+  discount           Float?
+  payment_method     String?
+  payment_status     String?
+  due_date           DateTime?       @db.Timestamptz(6)
+  amount_paid        Float?
+  payment_account_id Int?
+  payment_account    PaymentAccount? @relation(fields: [payment_account_id], references: [id])
+  customer_id        Int?
+  customer           Customer?       @relation(fields: [customer_id], references: [id])
+  tenant_id          Int?
+  tenant             Tenant?         @relation(fields: [tenant_id], references: [id])
+  branch_id          Int?
+  branch             Branch?         @relation(fields: [branch_id], references: [id])
+  items              SaleItem[]
+
+  @@map("sales")
+  @@index([invoice_number])
+  @@index([id])
+}
+
+model Purchase {
+  id                 Int             @id @default(autoincrement())
+  invoice_number     String?
+  date               DateTime?       @default(now()) @db.Timestamptz(6)
+  total_amount       Float?
+  tax_amount         Float?
+  transport_charges  Float?
+  status             String?
+  payment_status     String?
+  amount_paid        Float?
+  due_date           DateTime?       @db.Timestamptz(6)
+  payment_method     String?
+  payment_account_id Int?
+  payment_account    PaymentAccount? @relation(fields: [payment_account_id], references: [id])
+  supplier_id        Int?
+  supplier           Supplier?       @relation(fields: [supplier_id], references: [id])
+  tenant_id          Int?
+  tenant             Tenant?         @relation(fields: [tenant_id], references: [id])
+  branch_id          Int?
+  branch             Branch?         @relation(fields: [branch_id], references: [id])
+  items              PurchaseItem[]
+
+  @@map("purchases")
+  @@index([id])
+  @@index([invoice_number])
+}
+
+model Payment {
+  id               Int       @id @default(autoincrement())
+  amount           Float
+  date             DateTime? @default(now()) @db.Timestamptz(6)
+  payment_method   String?
+  reference_number String?
+  notes            String?
+  customer_id      Int?
+  customer         Customer? @relation(fields: [customer_id], references: [id])
+  supplier_id      Int?
+  supplier         Supplier? @relation(fields: [supplier_id], references: [id])
+  tenant_id        Int?
+  tenant           Tenant?   @relation(fields: [tenant_id], references: [id])
+
+  @@map("payments")
+  @@index([id])
+}
+
+model SaleItem {
+  id       Int            @id @default(autoincrement())
+  quantity Int?
+  price    Float?
+  discount Float?
+  total    Float?
+  sale_id  Int?
+  sale     Sale?          @relation(fields: [sale_id], references: [id])
+  item_id  Int?
+  item     InventoryItem? @relation(fields: [item_id], references: [id])
+
+  @@map("sale_items")
+  @@index([id])
+}
+
+model PurchaseItem {
+  id          Int            @id @default(autoincrement())
+  quantity    Int?
+  price       Float?
+  total       Float?
+  purchase_id Int?
+  purchase    Purchase?      @relation(fields: [purchase_id], references: [id])
+  item_id     Int?
+  item        InventoryItem? @relation(fields: [item_id], references: [id])
+
+  @@map("purchase_items")
+  @@index([id])
+}
+
+model Notification {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?
+  user       User?     @relation(fields: [user_id], references: [id])
+  title      String?
+  message    String?
+  type       String?
+  is_read    Boolean?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  tenant_id  Int
+  tenant     Tenant    @relation(fields: [tenant_id], references: [id])
+
+  @@map("notifications")
+  @@index([id])
+  @@index([title])
+}
+
+model PaymentRequest {
+  id               Int       @id @default(autoincrement())
+  tenant_id        Int
+  amount           Decimal   @db.Decimal(10, 2)
+  currency         String?   @db.VarChar(3)
+  plan_type        String?   @db.VarChar(50)
+  payment_method   String?   @db.VarChar(50)
+  status           String?   @db.VarChar(20)
+  reference_number String?   @unique @db.VarChar(100)
+  bank_details     Json?
+  payment_proof_url String?  @db.VarChar(500)
+  notes            String?
+  created_at       DateTime?
+  approved_at      DateTime?
+  approved_by      Int?
+  approver         User?     @relation(fields: [approved_by], references: [id])
+  paid_at          DateTime?
+  updated_at       DateTime?
+
+  @@map("payment_requests")
+  @@index([id])
+  @@index([tenant_id])
 }
 
 model ExportLog {
-  id          Int      @id @default(autoincrement())
-  user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
-  export_type String   // PDF, CSV
-  resource    String   // INVOICES, EXPENSES
-  created_at  DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  user_id     Int?
+  user        User?     @relation(fields: [user_id], references: [id])
+  export_type String?
+  resource    String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
 
-  @@index([user_id])
+  @@map("export_logs")
+  @@index([id])
 }
-
-model Event {
-  id          Int      @id @default(autoincrement())
-  name        String   // PAGE_VIEW, BUTTON_CLICK
-  path        String?
-  metadata    Json?
-  created_at  DateTime @default(now())
-}
-
 
 model UpgradeRequest {
-  id              Int      @id @default(autoincrement())
-  user_id         Int
-  user            User     @relation(fields: [user_id], references: [id])
-  company_id      Int?
-  company         Tenant?  @relation(fields: [company_id], references: [id])
-  plan_requested  String
-  screenshot_url  String?
-  payment_ref     String?
-  status          String   @default("pending") // pending, approved, rejected
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id             Int       @id @default(autoincrement())
+  user_id        Int
+  user           User      @relation(fields: [user_id], references: [id])
+  company_id     Int?
+  company        Tenant?   @relation(fields: [company_id], references: [id])
+  plan_requested String
+  screenshot_url String?
+  payment_ref    String?
+  status         String    @default("pending")
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @db.Timestamptz(6)
 
+  @@map("upgrade_requests")
   @@index([user_id])
   @@index([company_id])
   @@index([status])
