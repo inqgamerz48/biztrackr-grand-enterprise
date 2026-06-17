@@ -124,7 +124,8 @@ from app.core.db_startup import run_pending_migrations
 
 @app.on_event("startup")
 async def startup_event():
-    await run_pending_migrations()
+    if settings.ENVIRONMENT == "development":
+        await run_pending_migrations()
 
 
 # --------------------------------------------------

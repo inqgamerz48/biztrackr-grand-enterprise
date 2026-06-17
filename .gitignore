@@ -84,3 +84,10 @@ test_receipt.pdf
 data/*.db
 
 docs/REAL_TALK_REVIEW.md
+
+# Agent Configs
+.agent/
+backend/venv/
+backend/dump_sql.py
+supabase_schema.sql
+

@@ -27,9 +27,11 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await api.get('/ai/insights');
+                const [res, statsRes] = await Promise.all([
+                    api.get('/ai/insights'),
+                    api.get('/dashboard/stats')
+                ]);
                 setInsights(res.data.insights);
-                const statsRes = await api.get('/dashboard/stats');
                 setStats(statsRes.data);
             } catch (error) {
                 console.error(error);

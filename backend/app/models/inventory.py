@@ -1,9 +1,12 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, Index
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 class Category(Base):
     __tablename__ = "categories"
+    __table_args__ = (
+        Index("idx_category_tenant_id", "tenant_id", "id"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
@@ -14,6 +17,9 @@ class Category(Base):
 
 class InventoryItem(Base):
     __tablename__ = "items"
+    __table_args__ = (
+        Index("idx_items_tenant_id", "tenant_id", "id"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)

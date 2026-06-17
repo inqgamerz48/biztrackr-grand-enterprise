@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     
     # Security
     SECRET_KEY: str
+    SUPABASE_JWT_SECRET: Optional[str] = None
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ENVIRONMENT: str = "development"  # dev, staging, production
     

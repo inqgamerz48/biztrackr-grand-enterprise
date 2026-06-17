@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api from '@/lib/axios';
+import { supabase } from '@/lib/supabase';
 
 interface User {
     id: number;
@@ -21,6 +22,7 @@ export function useAuth() {
     const fetchUserInfo = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
+            setUser(null);
             setLoading(false);
             return;
         }
@@ -39,41 +41,85 @@ export function useAuth() {
         }
     };
 
+    // Listen to Supabase auth state change to sync tokens
     useEffect(() => {
-        fetchUserInfo();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+            if (session) {
+                localStorage.setItem('token', session.access_token);
+                await fetchUserInfo();
+            } else {
+                localStorage.removeItem('token');
+                setUser(null);
+                setLoading(false);
+            }
+        });
+
+        // Initial fetch
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                localStorage.setItem('token', session.access_token);
+                await fetchUserInfo();
+            } else {
+                setLoading(false);
+            }
+        };
+        checkSession();
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const login = async (email: string, password: string) => {
         try {
-            const formData = new FormData();
-            formData.append('username', email);
-            formData.append('password', password);
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-            const res = await api.post('/auth/login/access-token', formData);
-            const { access_token } = res.data;
+            if (error) throw error;
 
-            localStorage.setItem('token', access_token);
-
-            // Fetch user info after login
-            await fetchUserInfo();
+            if (data.session) {
+                localStorage.setItem('token', data.session.access_token);
+                await fetchUserInfo();
+            }
 
             router.push('/dashboard');
             return { success: true };
         } catch (error: any) {
-            return { success: false, error: error.response?.data?.detail || 'Login failed' };
+            return { success: false, error: error.message || 'Login failed' };
         }
     };
 
     const register = async (data: any) => {
         try {
-            await api.post('/auth/register', data);
+            const { data: signUpData, error } = await supabase.auth.signUp({
+                email: data.email,
+                password: data.password,
+                options: {
+                    data: {
+                        full_name: data.full_name,
+                    }
+                }
+            });
+
+            if (error) throw error;
+
+            // Trigger backend auto-provisioning by sending the token immediately if auto-logged in
+            if (signUpData.session) {
+                localStorage.setItem('token', signUpData.session.access_token);
+                await fetchUserInfo();
+            }
+
             return { success: true };
         } catch (error: any) {
-            return { success: false, error: error.response?.data?.detail || 'Registration failed' };
+            return { success: false, error: error.message || 'Registration failed' };
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        await supabase.auth.signOut();
         localStorage.removeItem('token');
         setUser(null);
         router.push('/login');

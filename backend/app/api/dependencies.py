@@ -45,13 +45,12 @@ class OAuth2BearerCookie(OAuth2PasswordBearer):
 
 # OAuth2 scheme for token authentication (Cookie-first)
 oauth2_scheme = OAuth2BearerCookie(tokenUrl=f"{settings.API_V1_STR}/auth/login/access-token")
-
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(database.get_db)
 ) -> User:
     """
-    Dependency to get the current authenticated user from JWT token.
+    Dependency to get the current authenticated user from Supabase JWT token.
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -60,23 +59,55 @@ async def get_current_user(
     )
     
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        # Supabase JWT signature key is SUPABASE_JWT_SECRET (fallback to SECRET_KEY)
+        jwt_key = settings.SUPABASE_JWT_SECRET or settings.SECRET_KEY
+        payload = jwt.decode(token, jwt_key, algorithms=["HS256"], options={"verify_aud": False})
+        supabase_uid: str = payload.get("sub")
+        email: str = payload.get("email")
+        if supabase_uid is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     
-
     result = await db.execute(
         select(User)
         .options(selectinload(User.tenant))
-        .filter(User.id == int(user_id))
+        .filter(User.supabase_uid == supabase_uid)
     )
     user = result.scalars().first()
     
+    # Check by email to link legacy accounts
+    if user is None and email:
+        result = await db.execute(
+            select(User)
+            .options(selectinload(User.tenant))
+            .filter(User.email == email)
+        )
+        user = result.scalars().first()
+        if user:
+            user.supabase_uid = supabase_uid
+            await db.commit()
+            await db.refresh(user)
+            
+    # Auto-provision new user and workspace
     if user is None:
-        raise credentials_exception
+        from app.models.tenant import Tenant
+        tenant_name = f"{email.split('@')[0]}'s Workspace" if email else "My Workspace"
+        new_tenant = Tenant(name=tenant_name)
+        db.add(new_tenant)
+        await db.flush()
+        
+        user = User(
+            email=email or f"user_{supabase_uid[:8]}@supabase.io",
+            supabase_uid=supabase_uid,
+            tenant_id=new_tenant.id,
+            role="admin",
+            is_active=True,
+            is_superuser=False
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
     
     if not user.is_active:
         raise HTTPException(
@@ -85,8 +116,6 @@ async def get_current_user(
         )
     
     return user
-
-
 def require_role(allowed_roles: List[str]):
     """
     Dependency factory to check if user has required role.
