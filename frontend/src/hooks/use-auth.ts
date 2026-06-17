@@ -47,7 +47,7 @@ export function useAuth() {
             if (session) {
                 localStorage.setItem('token', session.access_token);
                 await fetchUserInfo();
-            } else {
+            } else if (event === 'SIGNED_OUT') {
                 localStorage.removeItem('token');
                 setUser(null);
                 setLoading(false);

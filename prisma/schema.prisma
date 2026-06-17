@@ -43,6 +43,7 @@ model SecurityEvent {
   description String?
   severity    String?
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  
   user_email  String?
 
   @@map("security_events")
